@@ -1,0 +1,16 @@
+{
+  "name": "my-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.x",
+    "dotenv": "^16.x",
+    "cors": "^2.x",
+    "@supabase/supabase-js": "^2.x"
+  }
+}

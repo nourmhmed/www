@@ -1,0 +1,1911 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Orders Dashboard</title>
+    <style>
+        :root {
+            --primary: #2d5bff;
+            --primary-light: #e8eeff;
+            --secondary: #ff6b35;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray: #64748b;
+            --gray-light: #e2e8f0;
+            --border-radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f1f5f9;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 1.2rem 1.5rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .live-badge {
+            font-size: 0.7rem;
+            background: var(--danger);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 20px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--primary-light);
+            border-radius: 20px;
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        /* Notification Panel */
+        .notification-panel {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            max-height: 350px;
+            transition: max-height 0.5s ease;
+        }
+
+        .notification-panel.open {
+            max-height: 58px;
+        }
+
+        .notification-header {
+            padding: 1rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .notification-header h3 {
+            margin: 0;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .notification-header .indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .notification-header .badge {
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .notification-content {
+            padding: 0.5rem;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 0.5rem;
+            background: var(--light);
+            animation: notificationFadeIn 0.5s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .notification-item:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .notification-item.new {
+            background: var(--primary-light);
+            border-left: 3px solid var(--primary);
+        }
+
+        .notification-info {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--primary);
+        }
+
+        .notification-details {
+            font-size: 0.85rem;
+            color: var(--gray);
+            display: flex;
+            gap: 1rem;
+        }
+
+        .notification-detail {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .notification-time {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .notification-item:hover .notification-actions {
+            opacity: 1;
+        }
+
+        .notification-actions button {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: var(--transition);
+        }
+
+        .view-order {
+            background: var(--primary);
+            color: white;
+        }
+
+        .view-order:hover {
+            background: #1a46d6;
+        }
+
+        .dismiss {
+            background: var(--gray-light);
+            color: var(--gray);
+        }
+
+        .dismiss:hover {
+            background: #d1d9e6;
+        }
+
+        /* Dashboard Stats */
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-btn {
+            padding: 0.6rem 1.2rem;
+            background: white;
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .filter-btn:hover {
+            background: var(--primary-light);
+            border-color: var(--primary);
+        }
+
+        .search-container {
+            position: relative;
+            flex-grow: 1;
+            max-width: 300px;
+        }
+
+        .search-box {
+            padding: 0.6rem 1rem 0.6rem 2.5rem;
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            width: 100%;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(45, 91, 255, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        /* Table */
+        .table-container {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 1rem;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            cursor: pointer;
+            user-select: none;
+            transition: var(--transition);
+        }
+
+        th:hover {
+            background: #1a46d6;
+        }
+
+        tr {
+            transition: var(--transition);
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        tr:last-child {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: var(--primary-light);
+        }
+
+        /* Status badges */
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-block;
+            text-align: center;
+            min-width: 90px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .status-badge:hover {
+            transform: scale(1.05);
+        }
+
+        .status-pending {
+            background: #ffeed9;
+            color: #e68a00;
+        }
+
+        .status-confirmed {
+            background: #d9f5e8;
+            color: #0c9d58;
+        }
+
+        .status-preparing {
+            background: #e0e7ff;
+            color: #4f46e5;
+        }
+
+        .status-delivering {
+            background: #e0f2fe;
+            color: #0284c7;
+        }
+
+        .status-completed {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        /* Highlight animation */
+        .highlight {
+            animation: highlightFade 3s ease;
+        }
+
+        @keyframes highlightFade {
+            0% {
+                background-color: var(--primary-light);
+            }
+
+            100% {
+                background-color: transparent;
+            }
+        }
+
+        /* Toast notification */
+        #toast {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: var(--primary);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-weight: 500;
+            z-index: 1000;
+            animation: toastFadeIn 0.3s ease;
+        }
+
+        @keyframes toastFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Loading indicator */
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Order detail modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--dark);
+        }
+
+        .order-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .order-detail-item {
+            margin-bottom: 1rem;
+        }
+
+        .order-detail-label {
+            font-weight: 600;
+            color: var(--gray);
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        .order-detail-value {
+            font-size: 1rem;
+        }
+
+        .items-list {
+            margin-top: 1rem;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .item-row:last-child {
+            border-bottom: none;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        .modal-btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1a46d6;
+        }
+
+        .btn-secondary {
+            background: var(--gray-light);
+            color: var(--gray);
+        }
+
+        .btn-secondary:hover {
+            background: #d1d9e6;
+        }
+
+        /* Status update section */
+        .status-update {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: var(--light);
+            border-radius: 8px;
+        }
+
+        .status-update-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .status-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .status-option {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--gray-light);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .status-option:hover {
+            background: var(--gray-light);
+        }
+
+        .status-option.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: var(--gray);
+            font-size: 0.9rem;
+            padding: 1rem;
+        }
+
+        /* Sound button */
+        #enable-sound {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        #enable-sound:hover {
+            background: #1a46d6;
+            transform: translateY(-2px);
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            padding: 10px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background: #1a46d6;
+            transform: translateY(-2px);
+        }
+
+        /* Quick actions menu */
+        .quick-actions {
+            position: fixed;
+            bottom: 120px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 2000;
+        }
+
+        .quick-action-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+        }
+
+        .quick-action-btn:hover {
+            transform: translateY(-3px) scale(1.1);
+            background: #1a46d6;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Order status progress bar */
+        .status-progress {
+            display: flex;
+            justify-content: space-between;
+            margin: 1rem 0;
+            position: relative;
+        }
+
+        .status-step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--gray-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            position: relative;
+        }
+
+        .status-step.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .status-step.completed {
+            background: var(--success);
+            color: white;
+        }
+
+        .status-progress-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            height: 3px;
+            width: 100%;
+            background: var(--gray-light);
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .status-progress-fill {
+            height: 100%;
+            background: var(--success);
+            transition: width 0.5s ease;
+        }
+
+        .status-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+        }
+
+        .status-label {
+            font-size: 0.8rem;
+            color: var(--gray);
+            text-align: center;
+            width: 80px;
+            margin-left: -25px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding: 0.5rem;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            th,
+            td {
+                padding: 0.8rem;
+                font-size: 0.85rem;
+            }
+
+            .dashboard-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-container {
+                max-width: 100%;
+            }
+
+            .notification-details {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+
+            .order-details-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .status-options {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-stats {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .stat-value {
+                font-size: 1.8rem;
+            }
+
+            .notification-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .notification-actions {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Notification Panel at the top -->
+        <div class="notification-panel" id="notification-panel">
+            <div class="notification-header" id="notification-header">
+                <h3>
+                    <span>📋</span>
+                    Recent Orders
+                    <span class="badge" id="notification-count">0</span>
+                </h3>
+                <div class="indicator">
+                    <span id="notification-indicator-text">No new orders</span>
+                    <span class="dropdown-arrow">▼</span>
+                </div>
+            </div>
+            <div class="notification-content" id="notification-list">
+                <!-- Notifications will be added here dynamically -->
+                <div class="notification-item" style="text-align: center; color: #999;">
+                    No orders yet
+                </div>
+            </div>
+        </div>
+
+        <header>
+            <h1>Live Orders Dashboard <span class="live-badge">LIVE</span></h1>
+            <div class="connection-status">
+                <div class="status-indicator"></div>
+                <span>Connected to Real-Time Updates</span>
+            </div>
+        </header>
+
+        <div class="dashboard-stats">
+            <div class="stat-card" id="total-orders-card">
+                <div class="stat-label">TOTAL ORDERS</div>
+                <div class="stat-value" id="total-orders">0</div>
+            </div>
+            <div class="stat-card" id="today-orders-card">
+                <div class="stat-label">TODAY'S ORDERS</div>
+                <div class="stat-value" id="today-orders">0</div>
+            </div>
+            <div class="stat-card" id="pending-orders-card">
+                <div class="stat-label">PENDING ORDERS</div>
+                <div class="stat-value" id="pending-orders">0</div>
+            </div>
+            <div class="stat-card" id="revenue-card">
+                <div class="stat-label">REVENUE</div>
+                <div class="stat-value" id="total-revenue">LE 0</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="filter-btn active" data-filter="all">
+                <span>📋</span> All Orders
+            </button>
+            <button class="filter-btn" data-filter="Pending">
+                <span>⏳</span> Pending
+            </button>
+            <button class="filter-btn" data-filter="confirmed">
+                <span>✅</span> Confirmed
+            </button>
+            <button class="filter-btn" data-filter="preparing">
+                <span>👨‍🍳</span> Preparing
+            </button>
+            <button class="filter-btn" data-filter="delivering">
+                <span>🚚</span> Delivering
+            </button>
+
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-box" placeholder="Search orders..." id="search-input">
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th data-sort="id">Order ID ↕</th>
+                        <th data-sort="customer_name">Name ↕</th>
+                        <th data-sort="phone">Phone ↕</th>
+                        <th data-sort="total">Total (EGP) ↕</th>
+                        <th>Items</th>
+                        <th data-sort="payment_method">Payment Method ↕</th>
+                        <th data-sort="status">Status ↕</th>
+                        <th data-sort="created_at">Time ↕</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-table">
+                    <tr>
+                        <td colspan="8">
+                            <div class="loading">
+                                <div class="loading-spinner"></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <footer>
+            <p>Automatically updates in real-time • No refresh needed</p>
+        </footer>
+    </div>
+
+    <!-- Order detail modal -->
+    <div class="modal" id="order-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Order Details</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div id="modal-body">
+                <!-- Order details will be populated here -->
+            </div>
+
+            <!-- Status update section -->
+            <div class="status-update">
+                <div class="status-update-title">Update Order Status</div>
+                <div class="status-options">
+                    <div class="status-option" data-status="Pending">Pending</div>
+                    <div class="status-option" data-status="confirmed">Confirmed</div>
+                    <div class="status-option" data-status="preparing">Preparing</div>
+                    <div class="status-option" data-status="delivering">Delivering</div>
+                    <div class="status-option" data-status="completed">Completed</div>
+                    <div class="status-option" data-status="cancelled">Cancelled</div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-btn btn-secondary" id="close-modal-btn">Close</button>
+                <button class="modal-btn btn-primary" id="update-status-btn">Update Status</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast">New order received!</div>
+
+    <!-- Sound button -->
+    <button id="enable-sound">
+        <span>🔔</span> Enable Sound
+    </button>
+
+    <!-- Theme toggle -->
+    <button class="theme-toggle" id="theme-toggle">
+        <span>🌙</span>
+    </button>
+
+    <!-- Quick actions menu -->
+    <div class="quick-actions">
+        <button class="quick-action-btn" id="refresh-btn" title="Refresh orders">
+            <span>🔄</span>
+        </button>
+        <button class="quick-action-btn" id="clear-search-btn" title="Clear search">
+            <span>❌</span>
+        </button>
+        <button class="quick-action-btn" id="export-btn" title="Export data">
+            <span>📊</span>
+        </button>
+    </div>
+
+    <!-- Audio notification -->
+    <audio id="notification-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-tone-996.mp3"
+        preload="auto"></audio>
+
+    <script type="module">
+        // The JavaScript code remains exactly the same as in the original
+        // Only the CSS has been modified for the redesign
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const SUPABASE_URL = 'https://kegjyekbrxagrhidvyse.supabase.co'
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZ2p5ZWticnhhZ3JoaWR2eXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxOTYzOTUsImV4cCI6MjA3Mzc3MjM5NX0.Lf_Jz-Q8GUM4XChuNJOJXffA_cGNA2vkgZ-41d08eL8'
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+        const tableBody = document.getElementById('orders-table')
+        const toast = document.getElementById('toast')
+        const sound = document.getElementById('notification-sound')
+        const searchInput = document.getElementById('search-input')
+        const enableSoundBtn = document.getElementById('enable-sound')
+        const notificationPanel = document.getElementById('notification-panel')
+        const notificationHeader = document.getElementById('notification-header')
+        const notificationList = document.getElementById('notification-list')
+        const notificationCount = document.getElementById('notification-count')
+        const notificationIndicatorText = document.getElementById('notification-indicator-text')
+        const themeToggle = document.getElementById('theme-toggle')
+        const orderModal = document.getElementById('order-modal')
+        const modalBody = document.getElementById('modal-body')
+        const closeModalBtn = document.getElementById('close-modal-btn')
+        const updateStatusBtn = document.getElementById('update-status-btn')
+        const refreshBtn = document.getElementById('refresh-btn')
+        const clearSearchBtn = document.getElementById('clear-search-btn')
+        const exportBtn = document.getElementById('export-btn')
+        const statusOptions = document.querySelectorAll('.status-option')
+
+        // Track notifications
+        let notifications = []
+        let unreadCount = 0
+        let panelOpen = false
+        let sortField = 'created_at'
+        let sortDirection = 'desc'
+        let selectedOrder = null
+        let selectedStatus = null
+
+        // Unlock sound on user interaction
+        enableSoundBtn.addEventListener('click', () => {
+            sound.play().then(() => {
+                console.log("Sound enabled")
+                enableSoundBtn.style.display = 'none'
+            }).catch(err => {
+                console.log("Failed to enable sound:", err)
+            })
+        })
+
+        // Toggle notification panel
+        notificationHeader.addEventListener('click', () => {
+            panelOpen = !panelOpen
+            if (panelOpen) {
+                notificationPanel.classList.add('open')
+                unreadCount = 0
+                notificationCount.textContent = '0'
+                notificationCount.style.display = 'none'
+                notificationIndicatorText.textContent = 'Click to collapse'
+
+                // Mark all notifications as read
+                document.querySelectorAll('.notification-item').forEach(item => {
+                    item.classList.remove('new')
+                })
+            } else {
+                notificationPanel.classList.remove('open')
+                notificationIndicatorText.textContent = unreadCount > 0 ? `${unreadCount} new orders` : 'No new orders'
+            }
+        })
+
+        // Theme toggle
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode')
+            themeToggle.innerHTML = document.body.classList.contains('dark-mode') ? '<span>☀️</span>' : '<span>🌙</span>'
+            // Save theme preference to localStorage
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light')
+        })
+
+        // Check for saved theme preference
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode')
+            themeToggle.innerHTML = '<span>☀️</span>'
+        }
+
+        // Status option selection
+        statusOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                statusOptions.forEach(opt => opt.classList.remove('selected'))
+                option.classList.add('selected')
+                selectedStatus = option.getAttribute('data-status')
+            })
+        })
+
+        // Modal handlers
+        closeModalBtn.addEventListener('click', () => {
+            orderModal.style.display = 'none'
+            // Reset status selection
+            statusOptions.forEach(opt => opt.classList.remove('selected'))
+            selectedStatus = null
+        })
+
+        document.querySelector('.close-modal').addEventListener('click', () => {
+            orderModal.style.display = 'none'
+            // Reset status selection
+            statusOptions.forEach(opt => opt.classList.remove('selected'))
+            selectedStatus = null
+        })
+
+        window.addEventListener('click', (e) => {
+            if (e.target === orderModal) {
+                orderModal.style.display = 'none'
+                // Reset status selection
+                statusOptions.forEach(opt => opt.classList.remove('selected'))
+                selectedStatus = null
+            }
+        })
+
+        // Update status button handler
+        updateStatusBtn.addEventListener('click', async () => {
+            if (!selectedOrder || !selectedStatus) {
+                showToast('Please select a status')
+                return
+            }
+
+            try {
+                // Update the order status in the database
+                console.log("selectedOrder")
+                const { error } = await supabase
+                    .from('orders')
+                    .update({ status: selectedStatus })
+                    .eq('id', selectedOrder.id)
+
+                if (error) {
+                    console.error('Error updating order status:', error)
+                    showToast('Error updating status')
+                    return
+                }
+
+                // Update the order in the local array
+                const orderIndex = orders.findIndex(o => o.id === selectedOrder.id)
+                if (orderIndex !== -1) {
+                    orders[orderIndex].status = selectedStatus
+                }
+
+                // Update the UI
+                renderOrders()
+                updateStats()
+
+                // Close the modal and show success message
+                orderModal.style.display = 'none'
+                showToast(`Order #${selectedOrder.id} status updated to ${selectedStatus}`)
+
+                // Reset status selection
+                statusOptions.forEach(opt => opt.classList.remove('selected'))
+                selectedStatus = null
+
+            } catch (err) {
+                console.error('Failed to update order status:', err)
+                showToast('Failed to update status')
+            }
+        })
+
+        // Quick actions
+        refreshBtn.addEventListener('click', () => {
+            loadOrders()
+            showToast('Orders refreshed')
+        })
+
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = ''
+            searchQuery = ''
+            renderOrders()
+        })
+
+        exportBtn.addEventListener('click', () => {
+            exportOrders()
+        })
+
+        // Stats elements
+        const totalOrdersEl = document.getElementById('total-orders')
+        const todayOrdersEl = document.getElementById('today-orders')
+        const pendingOrdersEl = document.getElementById('pending-orders')
+        const totalRevenueEl = document.getElementById('total-revenue')
+
+        // Stats cards
+        const totalOrdersCard = document.getElementById('total-orders-card')
+        const todayOrdersCard = document.getElementById('today-orders-card')
+        const pendingOrdersCard = document.getElementById('pending-orders-card')
+        const revenueCard = document.getElementById('revenue-card')
+
+        // Add click handlers to stats cards
+        totalOrdersCard.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'))
+            document.querySelector('.filter-btn[data-filter="all"]').classList.add('active')
+            currentFilter = 'all'
+            renderOrders()
+        })
+
+        todayOrdersCard.addEventListener('click', () => {
+            // Filter to show only today's orders
+            const today = new Date().toISOString().split('T')[0]
+            const todayOrders = orders.filter(order => {
+                const orderDate = new Date(order.created_at).toISOString().split('T')[0]
+                return orderDate === today
+            })
+            renderFilteredOrders(todayOrders, "Today's Orders")
+        })
+
+        pendingOrdersCard.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'))
+            document.querySelector('.filter-btn[data-filter="Pending"]').classList.add('active')
+            currentFilter = 'Pending'
+            renderOrders()
+        })
+
+        revenueCard.addEventListener('click', () => {
+            // Sort by highest value orders
+            const sortedByRevenue = [...orders].sort((a, b) => b.total - a.total)
+            renderFilteredOrders(sortedByRevenue, "Sorted by Revenue (High to Low)")
+        })
+
+        // Track orders for stats and filtering
+        let orders = []
+        let today = new Date().toISOString().split('T')[0]
+        let currentFilter = 'all'
+        let searchQuery = ''
+
+        // Request permission for browser notifications
+        if (Notification.permission !== 'granted') {
+            Notification.requestPermission()
+        }
+
+        function showToast(message) {
+            toast.textContent = message
+            toast.style.display = 'block'
+            setTimeout(() => toast.style.display = 'none', 4000)
+        }
+
+        function playSound() {
+            sound.currentTime = 0
+            sound.play().catch(e => console.log("Audio play failed:", e))
+        }
+
+        function showBrowserNotification(message) {
+            if (Notification.permission === 'granted') {
+                new Notification('New Order', { body: message })
+            }
+        }
+
+        // Add a new notification
+        function addNotification(order) {
+            const notification = {
+                id: order.id,
+                title: `Order #${order.id}`,
+                customer: order.customer_name,
+                total: order.total,
+                items: order.items ? JSON.parse(order.items).length : 0,
+                time: new Date().toLocaleTimeString(),
+                isNew: true
+            }
+
+            notifications.unshift(notification)
+
+            // Keep only the latest 10 notifications
+            if (notifications.length > 10) {
+                notifications.pop()
+            }
+
+            // Update notification UI
+            renderNotifications()
+
+            // Update badge count
+            unreadCount++
+            notificationCount.textContent = unreadCount
+            notificationCount.style.display = 'flex'
+            notificationIndicatorText.textContent = `${unreadCount} new order${unreadCount !== 1 ? 's' : ''}`
+
+            // Auto-open panel if it's the first notification
+            if (unreadCount === 1 && !panelOpen) {
+                notificationPanel.classList.add('open')
+                panelOpen = true
+            }
+        }
+
+        // Render notifications in the panel
+        function renderNotifications() {
+            if (notifications.length === 0) {
+                notificationList.innerHTML = `
+                    <div class="notification-item" style="text-align: center; color: #999;">
+                        No orders yet
+                    </div>
+                `
+                return
+            }
+
+            notificationList.innerHTML = ''
+
+            notifications.forEach(notification => {
+                const notificationItem = document.createElement('div')
+                notificationItem.className = `notification-item ${notification.isNew ? 'new' : ''}`
+                notificationItem.innerHTML = `
+                    <div class="notification-info">
+                        <div class="notification-title">${notification.title}</div>
+                        <div class="notification-details">
+                            <span class="notification-detail">
+                                <span>👤</span> ${notification.customer}
+                            </span>
+                            <span class="notification-detail">
+                                <span>💰</span> LE ${notification.total}
+                            </span>
+                            <span class="notification-detail">
+                                <span>📦</span> ${notification.items} item${notification.items !== 1 ? 's' : ''}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="notification-time">${notification.time}</div>
+                    <div class="notification-actions">
+                        <button class="view-order" data-id="${notification.id}">View</button>
+                        <button class="dismiss">Dismiss</button>
+                    </div>
+                `
+                notificationList.appendChild(notificationItem)
+            })
+
+            // Add event listeners to notification buttons
+            document.querySelectorAll('.notification-item .view-order').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation()
+                    const orderId = btn.getAttribute('data-id')
+                    const order = orders.find(o => o.id == orderId)
+                    if (order) {
+                        showOrderDetails(order)
+                    }
+                })
+            })
+
+            document.querySelectorAll('.notification-item .dismiss').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation()
+                    const notificationItem = btn.closest('.notification-item')
+                    notificationItem.style.opacity = '0'
+                    setTimeout(() => {
+                        notificationItem.remove()
+                        if (notificationList.children.length === 0) {
+                            notificationList.innerHTML = `
+                                <div class="notification-item" style="text-align: center; color: #999;">
+                                    No notifications
+                                </div>
+                            `
+                        }
+                    }, 300)
+                })
+            })
+
+            // Make entire notification item clickable
+            document.querySelectorAll('.notification-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    if (!e.target.closest('.notification-actions')) {
+                        const orderId = item.querySelector('.view-order')?.getAttribute('data-id')
+                        if (orderId) {
+                            const order = orders.find(o => o.id == orderId)
+                            if (order) {
+                                showOrderDetails(order)
+                            }
+                        }
+                    }
+                })
+            })
+        }
+
+        function updateStats() {
+            // Update total orders
+            totalOrdersEl.textContent = orders.length
+
+            // Update today's orders
+            const todayOrders = orders.filter(order => {
+                const orderDate = new Date(order.created_at).toISOString().split('T')[0]
+                return orderDate === today
+            })
+            todayOrdersEl.textContent = todayOrders.length
+
+            // Update pending orders
+            const pendingOrders = orders.filter(order => order.status === 'Pending')
+            pendingOrdersEl.textContent = pendingOrders.length
+
+            // Update total revenue
+            const revenue = orders.reduce((sum, order) => sum + order.total, 0)
+            totalRevenueEl.textContent = `LE ${revenue.toLocaleString()}`
+        }
+
+        // Format date/time
+        function formatDateTime(dateString) {
+            const date = new Date(dateString)
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+
+        // Get status badge class
+        function getStatusClass(status) {
+            if (!status) return 'status-pending'; // fallback if null or undefined
+
+            switch (status.toLowerCase()) {
+                case 'pending': return 'status-pending';
+                case 'confirmed': return 'status-confirmed';
+                case 'preparing': return 'status-preparing';
+                case 'delivering': return 'status-delivering';
+                case 'completed': return 'status-completed';
+                case 'cancelled': return 'status-cancelled';
+                default: return 'status-pending';
+            }
+        }
+
+
+        // Show order details in modal
+        function showOrderDetails(order) {
+            selectedOrder = order
+            const items = order.items ? JSON.parse(order.items) : []
+
+            // Create status progress bar
+            const statusSteps = ['Pending', 'confirmed', 'preparing', 'delivering', 'completed']
+            const currentStatusIndex = statusSteps.indexOf(order.status.toLowerCase())
+
+            let progressHTML = `
+                <div class="status-progress">
+                    <div class="status-progress-line">
+                        <div class="status-progress-fill" style="width: ${(currentStatusIndex / (statusSteps.length - 1)) * 100}%"></div>
+                    </div>
+            `
+
+            statusSteps.forEach((step, index) => {
+                let statusClass = ''
+                if (index < currentStatusIndex) statusClass = 'completed'
+                else if (index === currentStatusIndex) statusClass = 'active'
+
+                progressHTML += `<div class="status-step ${statusClass}">${index + 1}</div>`
+            })
+
+            progressHTML += `
+                </div>
+                <div class="status-labels">
+                    <div class="status-label">Pending</div>
+                    <div class="status-label">Confirmed</div>
+                    <div class="status-label">Preparing</div>
+                    <div class="status-label">Delivering</div>
+                    <div class="status-label">Completed</div>
+                </div>
+            `
+
+            modalBody.innerHTML = `
+                ${progressHTML}
+                <div class="order-details-grid">
+                    <div class="order-detail-item">
+                        <div class="order-detail-label">Order ID</div>
+                        <div class="order-detail-value">#${order.id}</div>
+                    </div>
+                    <div class="order-detail-item">
+                        <div class="order-detail-label">Customer Name</div>
+                        <div class="order-detail-value">${order.customer_name}</div>
+                    </div>
+                    <div class="order-detail-item">
+                        <div class="order-detail-label">Phone</div>
+                        <div class="order-detail-value">${order.phone}</div>
+                    </div>
+                    <div class="order-detail-item">
+                        <div class="order-detail-label">Total Amount</div>
+                        <div class="order-detail-value">LE ${order.total}</div>
+                    </div>
+                    <div class="order-detail-item">
+                        <div class="order-detail-label">Payment Method</div>
+                        <div class="order-detail-value">${order.payment_method}</div>
+                    </div>
+                    <div class="order-detail-item">
+                        <div class="order-detail-label">Order Time</div>
+                        <div class="order-detail-value">${formatDateTime(order.created_at)}</div>
+                    </div>
+                </div>
+                <div class="order-detail-item">
+                    <div class="order-detail-label">Items</div>
+                    <div class="items-list">
+            `
+
+            items.forEach(item => {
+                modalBody.innerHTML += `
+                    <div class="item-row">
+                        <span>${item.name} x${item.quantity}</span>
+                        <span>LE ${item.price * item.quantity}</span>
+                    </div>
+                `
+            })
+
+            modalBody.innerHTML += `
+                    </div>
+                </div>
+                <div class="order-detail-item">
+                    <div class="order-detail-label">Delivery Address</div>
+                    <div class="order-detail-value">${order.delivery_address || 'N/A'}</div>
+                </div>
+                <div class="order-detail-item">
+                    <div class="order-detail-label">Special Instructions</div>
+                    <div class="order-detail-value">${order.special_instructions || 'None'}</div>
+                </div>
+            `
+
+            // Pre-select the current status
+            statusOptions.forEach(opt => {
+                opt.classList.remove('selected')
+                if (opt.getAttribute('data-status') === order.status) {
+                    opt.classList.add('selected')
+                    selectedStatus = order.status
+                }
+            })
+
+            orderModal.style.display = 'flex'
+        }
+
+        // Filter orders based on current filter and search
+        function filterOrders() {
+            return orders.filter(order => {
+                // Apply status filter
+                if (currentFilter !== 'all' && order.status !== currentFilter) {
+                    return false
+                }
+
+                // Apply search filter
+                if (searchQuery) {
+                    const searchTerm = searchQuery.toLowerCase()
+                    return (
+                        order.id.toString().includes(searchTerm) ||
+                        order.customer_name.toLowerCase().includes(searchTerm) ||
+                        order.phone.includes(searchTerm) ||
+                        order.total.toString().includes(searchTerm)
+                    )
+                }
+
+                return true
+            })
+        }
+
+        // Render all orders based on current filters
+        function renderOrders() {
+            const filteredOrders = filterOrders()
+            renderFilteredOrders(filteredOrders)
+        }
+
+        // Render a custom set of orders
+        function renderFilteredOrders(filteredOrders, message) {
+            if (filteredOrders.length === 0) {
+                tableBody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 2rem;">
+              ${message || 'No orders found matching your criteria'}
+            </td>
+          </tr>
+        `
+                return
+            }
+
+            tableBody.innerHTML = ''
+
+            filteredOrders.forEach(order => {
+                const row = document.createElement('tr')
+                row.innerHTML = `
+          <td>${order.id}</td>
+          <td>${order.customer_name}</td>
+          <td>${order.phone}</td>
+          <td>LE ${order.total}</td>
+          <td>${order.items ? JSON.parse(order.items).map(i => i.name + ' x' + i.quantity).join('<br>') : '-'}</td>
+          <td>${order.payment_method}</td>
+          <td><span class="status-badge ${getStatusClass(order.status)}">${order.status}</span></td>
+          <td>${formatDateTime(order.created_at)}</td>
+        `
+                // Make row clickable to view details
+                row.addEventListener('click', () => {
+                    showOrderDetails(order)
+                })
+
+                // Make status badge clickable to quickly update status
+                const statusBadge = row.querySelector('.status-badge')
+                statusBadge.addEventListener('click', (e) => {
+                    e.stopPropagation()
+                    showOrderDetails(order)
+                })
+
+                tableBody.appendChild(row)
+            })
+        }
+
+        // Function to render a single order (for new orders)
+        function renderNewOrder(order) {
+            const filteredOrders = filterOrders()
+            const row = document.createElement('tr')
+            row.classList.add('highlight')
+            row.innerHTML = `
+        <td>${order.id}</td>
+        <td>${order.customer_name}</td>
+        <td>${order.phone}</td>
+        <td>LE ${order.total}</td>
+        <td>${order.items ? JSON.parse(order.items).map(i => i.name + ' x' + i.quantity).join('<br>') : '-'}</td>
+        <td>${order.payment_method}</td>
+        <td><span class="status-badge ${getStatusClass(order.status)}">${order.status}</span></td>
+        <td>${formatDateTime(order.created_at)}</td>
+      `
+
+            // Make row clickable to view details
+            row.addEventListener('click', () => {
+                showOrderDetails(order)
+            })
+
+            // Make status badge clickable to quickly update status
+            const statusBadge = row.querySelector('.status-badge')
+            statusBadge.addEventListener('click', (e) => {
+                e.stopPropagation()
+                showOrderDetails(order)
+            })
+
+            tableBody.prepend(row)
+
+            // Remove highlight after animation
+            setTimeout(() => row.classList.remove('highlight'), 3000)
+
+            // Add notification for the new order
+            addNotification(order)
+
+            // Trigger notifications for new orders only
+            const message = `Order #${order.id} from ${order.customer_name}, Total: LE ${order.total}`
+            showToast(message)
+            playSound()
+            showBrowserNotification(message)
+        }
+
+        // Sort orders
+        function sortOrders(field) {
+            if (sortField === field) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'
+            } else {
+                sortField = field
+                sortDirection = 'desc'
+            }
+
+            orders.sort((a, b) => {
+                let valueA = a[field]
+                let valueB = b[field]
+
+                // Handle different data types
+                if (field === 'created_at') {
+                    valueA = new Date(valueA)
+                    valueB = new Date(valueB)
+                } else if (field === 'total') {
+                    valueA = Number(valueA)
+                    valueB = Number(valueB)
+                }
+
+                if (valueA < valueB) return sortDirection === 'asc' ? -1 : 1
+                if (valueA > valueB) return sortDirection === 'asc' ? 1 : -1
+                return 0
+            })
+
+            renderOrders()
+
+            // Update sort indicators
+            document.querySelectorAll('th').forEach(th => {
+                th.innerHTML = th.innerHTML.replace(' ↑', '').replace(' ↓', '')
+                if (th.getAttribute('data-sort') === field) {
+                    th.innerHTML += sortDirection === 'asc' ? ' ↑' : ' ↓'
+                }
+            })
+        }
+
+        // Export orders to CSV
+        function exportOrders() {
+            const filteredOrders = filterOrders()
+            if (filteredOrders.length === 0) {
+                showToast('No orders to export')
+                return
+            }
+
+            let csv = 'Order ID,Customer Name,Phone,Total,Payment Method,Status,Time\n'
+
+            filteredOrders.forEach(order => {
+                csv += `"${order.id}","${order.customer_name}","${order.phone}","${order.total}","${order.payment_method}","${order.status}","${formatDateTime(order.created_at)}"\n`
+            })
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+            const url = URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.setAttribute('href', url)
+            link.setAttribute('download', `orders_export_${new Date().toISOString().split('T')[0]}.csv`)
+            link.style.visibility = 'hidden'
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+
+            showToast('Orders exported successfully')
+        }
+
+        // Load existing orders initially
+        async function loadOrders() {
+            try {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8">
+                            <div class="loading">
+                                <div class="loading-spinner"></div>
+                            </div>
+                        </td>
+                    </tr>
+                `
+
+                const { data, error } = await supabase
+                    .from('orders')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(50)
+
+                if (error) {
+                    console.error('Error loading orders:', error)
+                    showToast('Error loading orders')
+                    return
+                }
+
+                // Store orders and update stats
+                orders = data
+                updateStats()
+                renderOrders()
+
+                // Add existing orders to notifications
+                data.slice(0, 5).forEach(order => {
+                    const notification = {
+                        id: order.id,
+                        title: `Order #${order.id}`,
+                        customer: order.customer_name,
+                        total: order.total,
+                        items: order.items ? JSON.parse(order.items).length : 0,
+                        time: new Date(order.created_at).toLocaleTimeString(),
+                        isNew: false
+                    }
+                    notifications.push(notification)
+                })
+
+                renderNotifications()
+
+            } catch (err) {
+                console.error('Failed to load orders:', err)
+                showToast('Failed to load orders')
+            }
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'))
+                    btn.classList.add('active')
+                    currentFilter = btn.dataset.filter
+                    renderOrders()
+                })
+            })
+
+            // Search input
+            searchInput.addEventListener('input', () => {
+                searchQuery = searchInput.value
+                renderOrders()
+            })
+
+            // Table header sorting
+            document.querySelectorAll('th[data-sort]').forEach(th => {
+                th.addEventListener('click', () => {
+                    sortOrders(th.getAttribute('data-sort'))
+                })
+            })
+        }
+
+        // Initialize the dashboard
+        loadOrders()
+        setupEventListeners()
+
+        // Real-time subscription for new orders
+        supabase
+            .channel('orders')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, payload => {
+                console.log('New order received:', payload.new)
+
+                // Add to orders array and update stats
+                orders.unshift(payload.new)
+                updateStats()
+
+                // Render the new order
+                renderNewOrder(payload.new)
+            })
+            .subscribe()
+
+        // Real-time subscription for order updates
+        supabase
+            .channel('order-updates')
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, payload => {
+                console.log('Order updated:', payload.new)
+
+                // Update the order in the local array
+                const orderIndex = orders.findIndex(o => o.id === payload.new.id)
+                if (orderIndex !== -1) {
+                    orders[orderIndex] = payload.new
+
+                    // Update the UI if this order is currently being viewed
+                    if (selectedOrder && selectedOrder.id === payload.new.id) {
+                        showOrderDetails(payload.new)
+                    }
+
+                    // Re-render orders and update stats
+                    renderOrders()
+                    updateStats()
+
+                    // Show notification if status changed
+                    if (payload.old.status !== payload.new.status) {
+                        showToast(`Order #${payload.new.id} status updated to ${payload.new.status}`)
+                    }
+                }
+            })
+            .subscribe()
+    </script>
+</body>
+
+</html>

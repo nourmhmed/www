@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syrine's Crumble | Artisanal Cookies</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <div class="announcement">Next day delivery / Free Shipping for orders over 500 EGP</div>
+
+    <header>
+        <div class="header-left">
+            <nav class="header-tabs">
+                <button class="tab-btn active" data-tab="home">Home</button>
+                <button class="tab-btn" data-tab="cookies">Cookies</button>
+                <button class="tab-btn" data-tab="boxes">Boxes</button>
+                <button class="tab-btn" data-tab="mystery">Mystery</button>
+            </nav>
+        </div>
+
+        <!-- Logo in center -->
+        <div class="logo-container">
+            <img src="images/logo.svg" alt="Logo" class="logo-img">
+        </div>
+
+        <div class="header-right">
+            <button class="mobile-menu-btn" id="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="cart-icon" id="cart-icon">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count" id="cart-count">0</span>
+            </div>
+        </div>
+    </header>
+
+
+    <!-- Tab Content Area -->
+    <div class="tab-content-area">
+        <!-- Home Tab -->
+        <div class="tab-content active" id="home-tab">
+
+            <!-- Hero Section with Cookie Battle -->
+            <section class="hero">
+                <div class="container">
+                    <div class="hero-content">
+                        <h1 class="hero-title">Syrine's Crumble</h1>
+                        <p class="hero-subtitle">Witness the epic battle between crunchy crumble and chewy champions!
+                            Choose your side and indulge in delicious cookies.</p>
+                        <div class="svg-container">
+                            <!-- Crumble -->
+                            <div class="team-container">
+                                <img src="images/crumble.svg" alt="Team Crumble" class="cookie-img crumble-img"
+                                    onclick="switchTab('boxes')">
+                                <div class="team-label">Team Crumble</div>
+                            </div>
+
+
+
+                            <!-- Chewy -->
+                            <div class="team-container">
+                                <img src="images/chewy.svg" alt="Team Chewy" class="cookie-img chewy-img"
+                                    onclick="switchTab('cookies')">
+                                <div class="team-label">Team Chewy</div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <!-- Cookie Battle Scene -->
+
+            </section>
+
+            <!-- Random Cookie Decorations -->
+            <div class="cookie-decorations">
+                <div class="cookie cookie-1">
+                    <div class="cookie-base">
+                        <div class="chocolate-chip"></div>
+                        <div class="chocolate-chip"></div>
+                        <div class="chocolate-chip"></div>
+                        <div class="chocolate-chip"></div>
+                        <div class="chocolate-chip"></div>
+                    </div>
+                </div>
+                <div class="cookie cookie-2">
+                    <div class="cookie-base">
+                        <div class="chocolate-chip"></div>
+                        <div class="chocolate-chip"></div>
+                        <div class="chocolate-chip"></div>
+                    </div>
+                </div>
+                <div class="cookie cookie-3">
+                    <div class="cookie-base">
+                        <div class="sprinkles"></div>
+                        <div class="sprinkles"></div>
+                        <div class="sprinkles"></div>
+                        <div class="sprinkles"></div>
+                    </div>
+                </div>
+                <div class="cookie cookie-4">
+                    <div class="cookie-base">
+                        <div class="chocolate-chip"></div>
+                        <div class="chocolate-chip"></div>
+                        <div class="chocolate-chip"></div>
+                        <div class="chocolate-chip"></div>
+                    </div>
+                </div>
+                <div class="cookie cookie-5">
+                    <div class="cookie-base">
+                        <div class="sprinkles"></div>
+                        <div class="sprinkles"></div>
+                        <div class="sprinkles"></div>
+                    </div>
+                </div>
+                <div class="cookie cookie-6">
+                    <div class="cookie-base">
+                        <div class="chocolate-chip"></div>
+                        <div class="chocolate-chip"></div>
+                        <div class="chocolate-chip"></div>
+                        <div class="chocolate-chip"></div>
+                        <div class="chocolate-chip"></div>
+                        <div class="chocolate-chip"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Section -->
+            <section class="features">
+                <div class="container">
+                    <h2 class="section-title">Why Choose Your Cookie Side</h2>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <h3>Made With Love</h3>
+                            <p>Every cookie is crafted with care and passion, using recipes perfected over time.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-leaf"></i>
+                            </div>
+                            <h3>Premium Ingredients</h3>
+                            <p>We source only the finest ingredients for exceptional flavor and quality.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <h3>Fast Delivery</h3>
+                            <p>Freshly baked cookies delivered to your door, still warm when possible.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <h3>Custom Orders</h3>
+                            <p>Special occasions? We create custom cookie boxes for your events.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Popular Boxes Section -->
+            <section class="popular-boxes">
+                <div class="container">
+                    <h2 class="section-title">Cookie Battalion Boxes</h2>
+                    <div class="boxes-grid">
+                        <div class="box-card">
+                            <div class="box-image">
+                                <img src="https://images.unsplash.com/photo-1623334044303-241021148842?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80"
+                                    alt="The Classic Box">
+                            </div>
+                            <div class="box-details">
+                                <h3>The Classic</h3>
+                                <p>4 cookies—the perfect sweet spot for sharing or indulging yourself.</p>
+                                <div class="box-price">320 LE</div>
+                                <button class="btn btn-primary" onclick="switchTab('boxes')">Customize Box</button>
+                            </div>
+                        </div>
+                        <div class="box-card">
+                            <div class="box-image">
+                                <img src="https://images.unsplash.com/photo-1623334044303-241021148842?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80"
+                                    alt="The Craver Box">
+                            </div>
+                            <div class="box-details">
+                                <h3>The Craver</h3>
+                                <p>6 cookies—when you just can't get enough of our delicious treats.</p>
+                                <div class="box-price">480 LE</div>
+                                <button class="btn btn-primary" onclick="switchTab('boxes')">Customize Box</button>
+                            </div>
+                        </div>
+                        <div class="box-card">
+                            <div class="box-image">
+                                <img src="https://images.unsplash.com/photo-1623334044303-241021148842?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80"
+                                    alt="The Feast Box">
+                            </div>
+                            <div class="box-details">
+                                <h3>The Feast</h3>
+                                <p>9 cookies—for family, friends, or just you... no judgment!</p>
+                                <div class="box-price">675 LE</div>
+                                <button class="btn btn-primary" onclick="switchTab('boxes')">Customize Box</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            
+        </div>
+
+        <!-- Boxes Tab -->
+        <div class="tab-content" id="boxes-tab">
+            <section class="boxes">
+                <div class="container">
+                    <h2 class="section-title">Cookie Boxes</h2>
+
+                    <div class="box-options">
+                        <div class="box-option" data-size="duo" data-chewy="155" data-crumble="155" data-mix="165">
+                            <h4>The Duo</h4>
+                            <p>2 cookies—perfect for a quick fix</p>
+                            <div class="box-prices">
+                                <span class="price-display">155 LE</span>
+                            </div>
+                        </div>
+
+                        <div class="box-option" data-size="trio" data-chewy="245" data-crumble="245" data-mix="255">
+                            <h4>The Trio</h4>
+                            <p>3 cookies—one for now, one later, one to share...maybe</p>
+                            <div class="box-prices">
+                                <span class="price-display">245 LE</span>
+                            </div>
+                        </div>
+
+                        <div class="box-option" data-size="classic" data-chewy="320" data-crumble="320" data-mix="335">
+                            <h4>The Classic</h4>
+                            <p>4 cookies—the sweet spot</p>
+                            <div class="box-prices">
+                                <span class="price-display">320 LE</span>
+                            </div>
+                        </div>
+
+                        <div class="box-option" data-size="craver" data-chewy="480" data-crumble="480" data-mix="505">
+                            <h4>The Craver</h4>
+                            <p>6 cookies—when you can't get enough</p>
+                            <div class="box-prices">
+                                <span class="price-display">480 LE</span>
+                            </div>
+                        </div>
+
+                        <div class="box-option" data-size="feast" data-chewy="675" data-crumble="675" data-mix="700">
+                            <h4>The Feast</h4>
+                            <p>9 cookies—for family, friends, or just you... no judgment!</p>
+                            <div class="box-prices">
+                                <span class="price-display">675 LE</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Updated Flavor Selection Popup -->
+                    <div class="flavor-popup-overlay" id="flavor-popup-overlay"></div>
+                    <div class="flavor-popup" id="flavor-popup">
+                        <div class="flavor-popup-header">
+                            <h3 id="popup-box-title">Customize Your Cookie Box</h3>
+                            <button class="close-popup" id="close-popup">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="flavor-popup-content">
+                            <div class="popup-box-info">
+                                <h4 id="popup-box-name">The Duo</h4>
+                                <p id="popup-box-description">2 cookies—perfect for a quick fix</p>
+                                <div class="popup-box-price" id="popup-box-price">155 LE</div>
+                            </div>
+
+                            <div class="popup-style-selection" id="popup-style-selection">
+                                <button class="popup-style-btn selected" data-style="chewy">
+                                    <i class="fas fa-cookie"></i> Chewy
+                                </button>
+                                <button class="popup-style-btn" data-style="crumble">
+                                    <i class="fas fa-cookie-bite"></i> Crumble
+                                </button>
+                                <button class="popup-style-btn" data-style="mix">
+                                    <i class="fas fa-random"></i> Mix of Both
+                                </button>
+                            </div>
+
+                            <div class="flavor-selection-container">
+                                <p class="flavor-instruction">Choose <span id="flavor-count">2</span> flavors for your
+                                    box:</p>
+                                <div class="selection-counter">
+                                    <span class="selected-count">0</span> / <span id="max-count">2</span> cookies
+                                    selected
+                                </div>
+
+                                <div class="flavor-grid" id="popup-flavor-grid">
+                                    <!-- Flavors will be inserted by JavaScript -->
+                                </div>
+
+                                <div class="selected-flavors-summary" id="selected-flavors-summary">
+                                    <!-- Selected flavors will appear here -->
+                                </div>
+                            </div>
+
+                            <div class="popup-actions">
+                                <button class="btn add-to-cart-popup" id="add-box-from-popup">
+                                    <i class="fas fa-shopping-cart"></i> Add to Cart - <span id="final-price">155</span>
+                                    LE
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Cookies Tab -->
+        <div class="tab-content" id="cookies-tab">
+            <section class="cookies">
+                <div class="container">
+                    <h2 class="section-title">Our Cookie Selection</h2>
+                    <p class="section-subtitle">Choose from our delicious range of artisanal cookies - click any card to
+                        learn more!</p>
+
+                    <div class="cookies-grid">
+                        <!-- Chocolate Chip Cookie -->
+                        <div class="cookie-card" onclick="openPopup('chocolate-chip')">
+                            <div class="click-indicator">
+                                <i class="fas fa-hand-pointer"></i> Click for details
+                            </div>
+                            <div class="cookie-image">
+                                <img src="images/original_chewy_cookie.svg" alt="Chocolate Chip Cookie">
+                                <div class="cookie-tag">Bestseller</div>
+                            </div>
+                            <div class="cookie-details">
+                                <h3>The Original Chocolate Chips</h3>
+                                <p>Classic chocolate chip cookie with premium Belgian chocolate</p>
+                                <div class="cookie-options">
+                                    <div class="cookie-price">80 LE</div>
+                                </div>
+                                <button class="add-to-cart-btn" onclick="openPopup('chocolate-chip')">
+                                    Choose
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Chocolate Crispy Cookie -->
+                        <div class="cookie-card" onclick="openPopup('chocolate-crispy')">
+                            <div class="click-indicator">
+                                <i class="fas fa-hand-pointer"></i> Click for details
+                            </div>
+                            <div class="cookie-image">
+                                <img src="images/chocolate_crispy_affair_chewy.svg" alt="Chocolate Crispy Cookie">
+                                <div class="cookie-tag">New</div>
+                            </div>
+                            <div class="cookie-details">
+                                <h3>Chocolate Crispy Affair</h3>
+                                <p>Chocolate cookie with crispy rice and chocolate chunks</p>
+                                <div class="cookie-options">
+                                    <div class="cookie-price">90 LE</div>
+                                </div>
+                                <button class="add-to-cart-btn" onclick="openPopup('chocolate-crispy')">
+                                    Choose
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Caramel Cookie -->
+                        <div class="cookie-card" onclick="openPopup('caramel')">
+                            <div class="click-indicator">
+                                <i class="fas fa-hand-pointer"></i> Click for details
+                            </div>
+                            <div class="cookie-image">
+                                <img src="images/caramel_chewy_cookie.svg" alt="Caramel Cookie">
+                            </div>
+                            <div class="cookie-details">
+                                <h3>The Caramel Bad Girl</h3>
+                                <p>Buttery cookie with swirls of caramel and sea salt</p>
+                                <div class="cookie-options">
+                                    <div class="cookie-price">85 LE</div>
+                                </div>
+                                <button class="add-to-cart-btn" onclick="openPopup('caramel')">
+                                    Choose
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Hazelnut Cookie -->
+                        <div class="cookie-card" onclick="openPopup('hazelnut')">
+                            <div class="click-indicator">
+                                <i class="fas fa-hand-pointer"></i> Click for details
+                            </div>
+                            <div class="cookie-image">
+                                <img src="images/hazelnuts_chewy_cookie.svg" alt="Hazelnut Cookie">
+                            </div>
+                            <div class="cookie-details">
+                                <h3>The Hazelnut Mommy</h3>
+                                <p>Nutty cookie with roasted hazelnuts and chocolate chunks</p>
+                                <div class="cookie-options">
+                                    <div class="cookie-price">95 LE</div>
+                                </div>
+                                <button class="add-to-cart-btn" onclick="openPopup('hazelnut')">
+                                    Choose
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Lotus Cookie -->
+                        <div class="cookie-card" onclick="openPopup('lotus')">
+                            <div class="click-indicator">
+                                <i class="fas fa-hand-pointer"></i> Click for details
+                            </div>
+                            <div class="cookie-image">
+                                <img src="images/lotus_chewy_cookie.svg" alt="Lotus Cookie">
+                                <div class="cookie-tag">Popular</div>
+                            </div>
+                            <div class="cookie-details">
+                                <h3>Lotus Obsession</h3>
+                                <p>Cookie with lotus biscuit spread and white chocolate</p>
+                                <div class="cookie-options">
+                                    <div class="cookie-price">85 LE</div>
+                                </div>
+                                <button class="add-to-cart-btn" onclick="openPopup('lotus')">
+                                    Choose
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Popup Overlay -->
+                <div class="popup-overlay" id="popupOverlay">
+                    <div class="cookie-popup">
+                        <div class="popup-image" id="popupImage"></div>
+                        <div class="popup-content">
+                            <div class="close-popup" onclick="closePopup()">
+                                <i class="fas fa-times"></i>
+                            </div>
+                            <h2 id="popupTitle">Cookie Name</h2>
+                            <p id="popupDescription">Cookie description will appear here.</p>
+
+                            <div class="popup-style-selector">
+                                <span class="style-label">Select Style:</span>
+                                <div class="popup-style-buttons">
+                                    <button class="popup-style-option active" data-style="chewy"
+                                        onclick="changeStyle('chewy')">
+                                        <i class="fas fa-cookie"></i> Chewy
+                                    </button>
+                                    <button class="popup-style-option" data-style="crumble"
+                                        onclick="changeStyle('crumble')">
+                                        <i class="fas fa-cookie-bite"></i> Crumble
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="popup-details">
+                                <div class="detail-item">
+                                    <div class="detail-icon">
+                                        <i class="fas fa-leaf"></i>
+                                    </div>
+                                    <div class="detail-text">
+                                        <strong>Ingredients:</strong> <span id="popupIngredients">Premium ingredients
+                                            list</span>
+                                    </div>
+                                </div>
+
+                                <div class="detail-item">
+                                    <div class="detail-icon">
+                                        <i class="fas fa-award"></i>
+                                    </div>
+                                    <div class="detail-text">
+                                        <strong>Specialty:</strong> <span id="popupSpecialty">What makes this cookie
+                                            special</span>
+                                    </div>
+                                </div>
+
+                                <div class="detail-item">
+                                    <div class="detail-icon">
+                                        <i class="fas fa-heart"></i>
+                                    </div>
+                                    <div class="detail-text">
+                                        <strong>Perfect For:</strong> <span id="popupPerfectFor">Occasions and
+                                            preferences</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="popup-price" id="popupPrice">00 LE</div>
+
+                            <div class="popup-actions">
+                                <div class="quantity-selector">
+                                    <button class="quantity-btn" onclick="decreaseQuantity()">-</button>
+                                    <div class="quantity-value" id="quantityValue">1</div>
+                                    <button class="quantity-btn" onclick="increaseQuantity()">+</button>
+                                </div>
+
+                                <button class="popup-add-to-cart" onclick="addToCartFromPopup()">
+                                    <i class="fas fa-shopping-cart"></i> Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Mystery Tab -->
+        <div class="tab-content" id="mystery-tab">
+            <section class="mystery">
+                <div class="container">
+                    <h2 class="section-title">Mystery Box</h2>
+                    <div class="mystery-content">
+                        <div class="mystery-image">
+                            <img src="https://images.unsplash.com/photo-1612207515720-2b7c0fa201b7?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600&q=80"
+                                alt="Mystery Cookie Box">
+                            <div class="question-mark">?</div>
+                        </div>
+                        <div class="mystery-details">
+                            <h3>Surprise Yourself!</h3>
+                            <p>Can't decide which cookies to choose? Let us surprise you with our mystery box! Each box
+                                contains:</p>
+                            <ul>
+                                <li>6 assorted cookies (a mix of our bestsellers and seasonal specials)</li>
+                                <li>1 limited edition flavor not available elsewhere</li>
+                                <li>A surprise gift with every order</li>
+                            </ul>
+                            <div class="mystery-price">450 LE</div>
+                            <p class="mystery-note">Note: Contents change weekly based on what's fresh and delicious!
+                            </p>
+                            <button class="btn mystery-btn">Order Mystery Box</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>Syrine's Crumble</h3>
+                    <p>Artisanal cookies made with love and the finest ingredients. Freshly baked daily for your
+                        enjoyment.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-pinterest"></i></a>
+                    </div>
+                </div>
+
+                <!-- <div class="footer-column">
+                    <h3>Contact Us</h3>
+                    <ul>
+                        <li><i class="fas fa-map-marker-alt"></i> Cairo, Egypt</li>
+                        <li><i class="fas fa-phone"></i> +20 123 456 7890</li>
+                        <li><i class="fas fa-envelope"></i> hello@syrinescrumble.com</li>
+                    </ul>
+                </div> -->
+            </div>
+
+            <div class="copyright">
+                © 2023 Syrine's Crumble. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-overlay" id="cart-overlay"></div>
+    <div class="cart-sidebar" id="cart-sidebar">
+        <div class="cart-header">
+            <h2>Your Cart</h2>
+            <button class="close-cart" id="close-cart">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="cart-items" id="cart-items">
+            <!-- Cart items will be inserted by JavaScript -->
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cart-total">LE 0.00 EGP</span>
+            </div>
+            <button class="checkout-btn" id="start-checkout">Proceed to Checkout</button>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+
+</html>
