@@ -15,17 +15,15 @@ app.use(cors());
 // ✅ Parse JSON
 app.use(express.json());
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
-const PORT = process.env.PORT || 3000;
+const SUPABASE_URL = "https://kegjyekbrxagrhidvyse.supabase.co"; // replace with your project URL
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZ2p5ZWticnhhZ3JoaWR2eXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxOTYzOTUsImV4cCI6MjA3Mzc3MjM5NX0.Lf_Jz-Q8GUM4XChuNJOJXffA_cGNA2vkgZ-41d08eL8 "; // replace with your anon/public key
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const PAYMOB_API_KEY = process.env.PAYMOB_API_KEY;
-const PAYMOB_HMAC_SECRET = process.env.PAYMOB_HMAC_SECRET;
-const INTEGRATION_ID_ONLINE = process.env.INTEGRATION_ID_ONLINE;
-const INTEGRATION_ID_CASH = process.env.INTEGRATION_ID_CASH;
-const IFRAME_ID = process.env.IFRAME_ID;
+const PAYMOB_API_KEY = "ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SmpiR0Z6Y3lJNklrMWxjbU5vWVc1MElpd2ljSEp2Wm1sc1pWOXdheUk2TVRBd05qTTNNQ3dpYm1GdFpTSTZJakUzTlRneE5ESXlOVGN1TVRZNU1UYzNJbjAuMHQ4NnM4Q1FuT0pjUUZ4VDZXN0ZjVFdKeEUwZGZ0RW54X1Nyem1hUXJjelhuMFBSQUo5UzJKSkpDSWNhZUFKRVBiNmRxTm94a1A0bTlVUEg0NjdENXc="; // replace with real API key
+const INTEGRATION_ID_ONLINE = "4876720";      // your integration id
+const INTEGRATION_ID_CASH = "5301982";      // your integration id
+const IFRAME_ID = "881382";            // your iframe id
 // ONLINE PAYMENT
 app.post("/create-online-payment", async (req, res) => {
   try {
@@ -156,7 +154,7 @@ app.post("/paymob-callback", express.json(), (req, res) => {
 
     // 3. Generate HMAC using your Paymob HMAC secret
     const generatedHmac = crypto
-      .createHmac("sha512", PAYMOB_HMAC_SECRET)
+      .createHmac("sha512", "278EEE2DDFE0DAB6EBEA2E261F15AFFC")
       .update(concatenated)
       .digest("hex");
 
@@ -256,4 +254,4 @@ app.post("/create-cash-payment", async (req, res) => {
 
 
 
-app.listen(PORT, () => console.log("Server running on http://localhost:3000"));
+app.listen(3000, () => console.log("Server running on http://localhost:3000"));
