@@ -73,9 +73,12 @@
 
   <script>
     // Redirect to index.html after 5 seconds
-    setTimeout(() => {
-      window.location.href = "index.html";
-    }, 3000);
+    const urlParams = new URLSearchParams(window.location.search);
+
+    console.log("urlParamsurlParams", urlParams)
+    // setTimeout(() => {
+    //   window.location.href = "index.html";
+    // }, 3000);
   </script>
 
 </body>
