@@ -780,7 +780,7 @@
           try {
             if (document.getElementById('payment-method').value === "card") {
               // 🔹 Debit/Credit Card via Paymob
-              const res = await fetch("http://localhost:5000/create-online-payment", {
+              const res = await fetch("https://backend-quiet-glitter-4571.fly.dev/create-online-payment", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -855,7 +855,7 @@
             }
             else if (document.getElementById('payment-method').value === "cash") {
               // 🔹 Cash Collection via Paymob
-              const res = await fetch("http://localhost:5000/create-cash-payment", {
+              const res = await fetch("https://backend-quiet-glitter-4571.fly.dev/create-cash-payment", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
