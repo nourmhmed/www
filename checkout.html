@@ -492,6 +492,50 @@
     }
 
 
+    #city {
+      width: 100%;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid var(--primary);
+      outline: none;
+      font-size: 1rem;
+      transition: 0.3s;
+    }
+
+    #city:focus {
+      border-color: var(--primary);
+    }
+
+    .dropdown-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      max-height: 200px;
+      overflow-y: auto;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-top: none;
+      
+      border-radius: 0 0 8px 8px;
+      z-index: 1000;
+      display: none;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .dropdown-list li {
+      padding: 10px 15px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .dropdown-list li:hover {
+      background-color: #ffefeb;
+    }
+
+
     @keyframes spin {
       100% {
         transform: rotate(360deg);
@@ -592,12 +636,43 @@
           <div class="form-grid">
             <div class="form-group">
               <label for="city">City</label>
-              <input type="text" id="city" required>
-            </div>
-            <div class="form-group">
-              <label for="country">Country</label>
-              <input type="text" id="country" value="EG" required>
-            </div>
+              <select id="city" required>
+                <option value="" disabled selected>Select your city</option>
+                <option value="Cairo">Cairo</option>
+                <option value="Giza">Giza</option>
+                <option value="Alexandria">Alexandria</option>
+                <option value="Shubra El-Kheima">Shubra El-Kheima</option>
+                <option value="Port Said">Port Said</option>
+                <option value="Suez">Suez</option>
+                <option value="Mansoura">Mansoura</option>
+                <option value="Tanta">Tanta</option>
+                <option value="Asyut">Asyut</option>
+                <option value="Fayoum">Fayoum</option>
+                <option value="Zagazig">Zagazig</option>
+                <option value="Ismailia">Ismailia</option>
+                <option value="Aswan">Aswan</option>
+                <option value="Damietta">Damietta</option>
+                <option value="Damanhur">Damanhur</option>
+                <option value="Luxor">Luxor</option>
+                <option value="Qena">Qena</option>
+                <option value="Beni Suef">Beni Suef</option>
+                <option value="Minya">Minya</option>
+                <option value="Sohag">Sohag</option>
+                <option value="Hurghada">Hurghada</option>
+                <option value="Sharm El-Sheikh">Sharm El-Sheikh</option>
+                <option value="Kafr El-Sheikh">Kafr El-Sheikh</option>
+                <option value="Marsa Matruh">Marsa Matruh</option>
+                <option value="Arish">Arish</option>
+                <option value="Beheira">Beheira</option>
+                <option value="Monufia">Monufia</option>
+                <option value="Dakahlia">Dakahlia</option>
+                <option value="Qalyubia">Qalyubia</option>
+                <option value="Red Sea">Red Sea</option>
+                <option value="New Valley">New Valley</option>
+                <option value="North Sinai">North Sinai</option>
+                <option value="South Sinai">South Sinai</option>
+              </select>
+            </div> 
           </div>
 
           <div class="checkout-nav">
@@ -768,6 +843,7 @@
         const form = document.getElementById('shipping-form');
         if (form.checkValidity()) {
           const cart = getCart();
+
           if (cart.length === 0) { alert('Your cart is empty!'); return; }
           const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
@@ -776,6 +852,7 @@
           const spinner = document.getElementById('loading-spinner');
 
           spinner.classList.add("active");
+          console.log("cart", cart)
 
           try {
             if (document.getElementById('payment-method').value === "card") {
@@ -795,7 +872,7 @@
                   apartment: document.getElementById('apartment').value,
                   postalCode: document.getElementById('postal-code').value,
                   city: document.getElementById('city').value,
-                  country: document.getElementById('country').value,
+                  country: "EG",
 
                   items: cart.map(item => ({
                     name: item.name,
@@ -816,7 +893,7 @@
                 document.getElementById('paymentIframe').src = result.iframeUrl;
                 document.getElementById('paymentModal').style.display = "flex";
 
-                // localStorage.removeItem(CART_KEY);
+                localStorage.removeItem(CART_KEY);
               } else {
                 alert("Error: " + (result.error || "Failed to start payment"));
               }
@@ -840,12 +917,12 @@
                   apartment: document.getElementById('apartment').value,
                   postalCode: document.getElementById('postal-code').value,
                   city: document.getElementById('city').value,
-                  country: document.getElementById('country').value,
+                  country: "EG",
 
                   // 🔹 Include flavors if available
                   items: cart.map(item => ({
                     name: item.name,
-                    amount_cents: item.price,
+                    amount: item.price,
                     description: item.name,
                     quantity: item.quantity,
                     flavors: item.flavors ? item.flavors.map(f => ({
@@ -861,12 +938,11 @@
               const result = await res.json();
 
               if (result.success) {
-                // ✅ Redirect to Thank You page with success=true
-                // localStorage.removeItem(CART_KEY);
-                window.location.href = "thankyou.html?success=true";
+                // ✅ Redirect to Thank You page
+                localStorage.removeItem(CART_KEY);
+                window.location.href = "thankyou.html";
               } else {
-                // ❌ Redirect with success=false
-                window.location.href = "thankyou.html?success=false";
+                alert("Error: " + (result.error || "Cash payment failed"));
               }
             }
 
