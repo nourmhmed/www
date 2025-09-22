@@ -845,7 +845,7 @@
                   // 🔹 Include flavors if available
                   items: cart.map(item => ({
                     name: item.name,
-                    amount: item.price,
+                    amount_cents: item.price,
                     description: item.name,
                     quantity: item.quantity,
                     flavors: item.flavors ? item.flavors.map(f => ({
