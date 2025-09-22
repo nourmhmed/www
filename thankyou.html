@@ -219,13 +219,6 @@
       <h1>Thank You For Your Order!</h1>
       <p>Your order has been placed successfully.<br>We'll contact you soon.</p>
       
-      <div class="order-details">
-        <h3>Order Details</h3>
-        <div id="orderDetails">
-          <!-- Order details will be inserted here -->
-        </div>
-      </div>
-      
       <div class="redirect-text">You will be redirected in <span id="countdown">5</span> seconds</div>
     </div>
   </div>
@@ -247,59 +240,9 @@
       return params;
     }
     
-    // Function to display order details
-    function displayOrderDetails(params) {
-      const orderDetailsEl = document.getElementById('orderDetails');
-      console.log("params", params);
-      console.log("params", params);
-      console.log("params", params);
-      let html = '';
-      
-      // Check if we have any parameters
-      if (Object.keys(params).length === 0) {
-        html = '<p>No order details available.</p>';
-      } else {
-        // Common Paymob parameters you might receive
-        const orderDetailsMap = {
-          'id': 'Transaction ID',
-          'amount_cents': 'Amount',
-          'created_at': 'Date',
-          'currency': 'Currency',
-          'order': 'Order ID',
-          'success': 'Status'
-        };
-        
-        // Add each parameter to the display
-        for (const key in params) {
-          if (params.hasOwnProperty(key)) {
-            const label = orderDetailsMap[key] || key;
-            let value = params[key];
-            
-            // Format specific values
-            if (key === 'amount_cents') {
-              value = (parseInt(value) / 100).toFixed(2); // Convert cents to currency
-            } else if (key === 'success' && value === 'true') {
-              value = 'Successful';
-            }
-            
-            html += `
-              <div class="detail-row">
-                <span class="detail-label">${label}:</span>
-                <span class="detail-value">${value}</span>
-              </div>
-            `;
-          }
-        }
-      }
-      
-      orderDetailsEl.innerHTML = html;
-    }
-    
     // Get parameters from URL
     const urlParams = getUrlParams();
     
-    // Display order details
-    displayOrderDetails(urlParams);
     
     // Countdown for redirect
     let seconds = 5;
