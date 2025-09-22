@@ -799,7 +799,7 @@
 
                   items: cart.map(item => ({
                     name: item.name,
-                    amount_cents: item.price * 100,
+                    amount_cents: item.price,
                     description: item.name,
                     quantity: item.quantity,
                     flavors: item.flavors ? item.flavors.map(f => ({
@@ -855,6 +855,8 @@
             }
             else if (document.getElementById('payment-method').value === "cash") {
               // 🔹 Cash Collection via Paymob
+              console.log("cart", cart)
+
               const res = await fetch("https://backend-quiet-glitter-4571.fly.dev/create-cash-payment", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -875,7 +877,7 @@
                   // 🔹 Include flavors if available
                   items: cart.map(item => ({
                     name: item.name,
-                    amount_cents: item.price * 100,
+                    amount: item.price,
                     description: item.name,
                     quantity: item.quantity,
                     flavors: item.flavors ? item.flavors.map(f => ({
@@ -901,7 +903,7 @@
 
 
           } catch (e) {
-            alert("Something went wrong. Please try again.");
+            alert(e);
           } finally {
             spinner.classList.remove("active");
           }
