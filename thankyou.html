@@ -295,15 +295,15 @@
     }, 1000);
 
     // Redirect after 5 seconds
-    // setTimeout(() => {
-    //   if (urlParams.success === "true") {
-    //     // ✅ Success → go home
-    //     window.location.href = "index.html";
-    //   } else {
-    //     // ❌ Failure → retry checkout
-    //     window.location.href = "checkout.html";
-    //   }
-    // }, 5000);
+    setTimeout(() => {
+      if (urlParams.success === "true") {
+        // ✅ Success → go home
+        window.location.href = "index.html";
+      } else {
+        // ❌ Failure → retry checkout
+        window.location.href = "checkout.html";
+      }
+    }, 5000);
 
 
     // Create confetti effect
