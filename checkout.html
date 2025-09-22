@@ -943,11 +943,12 @@
               const result = await res.json();
 
               if (result.success) {
-                // ✅ Redirect to Thank You page
-                localStorage.removeItem(CART_KEY);
-                window.location.href = "thankyou.html";
+                // ✅ Redirect to Thank You page with success=true
+                // localStorage.removeItem(CART_KEY);
+                window.location.href = "thankyou.html?success=true";
               } else {
-                alert("Error: " + (result.error || "Cash payment failed"));
+                // ❌ Redirect with success=false
+                window.location.href = "thankyou.html?success=false";
               }
             }
 
