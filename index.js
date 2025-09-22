@@ -9,75 +9,50 @@ const mobileNavOverlay = document.createElement('div');
 
 let selectedFlavors = {};
 
+// Mobile menu functionality
+const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+const mainNav = document.querySelector('.main-nav');
 
-// Create mobile navigation
-function createMobileNav() {
-    // Mobile nav overlay
-    mobileNavOverlay.className = 'mobile-nav-overlay';
-    mobileNavOverlay.id = 'mobile-nav-overlay';
-    document.body.appendChild(mobileNavOverlay);
-    
-    // Mobile nav
-    mobileNav.className = 'mobile-nav';
-    mobileNav.id = 'mobile-nav';
-    
-    mobileNav.innerHTML = `
-        <div class="mobile-nav-header">
-            <img src="images/logo.svg" alt="Syrine's Crumble" class="mobile-nav-logo">
-            <button class="close-mobile-nav" id="close-mobile-nav">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <ul class="mobile-nav-list">
-            <li class="mobile-nav-item">
-                <a href="#" class="mobile-nav-link active" data-tab="home">
-                    <i class="fas fa-home"></i>
-                    <span>Home</span>
-                </a>
-            </li>
-            <li class="mobile-nav-item">
-                <a href="#" class="mobile-nav-link" data-tab="cookies">
-                    <i class="fas fa-cookie"></i>
-                    <span>Cookies</span>
-                </a>
-            </li>
-            <li class="mobile-nav-item">
-                <a href="#" class="mobile-nav-link" data-tab="boxes">
-                    <i class="fas fa-gift"></i>
-                    <span>Boxes</span>
-                </a>
-            </li>
-            <li class="mobile-nav-item">
-                <a href="#" class="mobile-nav-link" data-tab="mystery">
-                    <i class="fas fa-question-circle"></i>
-                    <span>Mystery</span>
-                </a>
-            </li>
-        </ul>
-    `;
-    
-    document.body.appendChild(mobileNav);
-    
-    // Event listeners for mobile nav
-    document.getElementById('close-mobile-nav').addEventListener('click', closeMobileNav);
-    mobileNavOverlay.addEventListener('click', closeMobileNav);
-    
-    // Add click events to mobile nav links
-    mobileNav.querySelectorAll('.mobile-nav-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const tabId = this.getAttribute('data-tab');
-            switchTab(tabId);
-            closeMobileNav();
-        });
-    });
+
+// Toggle mobile menu
+function toggleMobileMenu() {
+    mainNav.classList.toggle('active');
 }
-
 // Open mobile navigation
 function openMobileNav() {
     mobileNav.classList.add('active');
     mobileNavOverlay.classList.add('active');
     document.body.style.overflow = 'hidden';
+}
+
+
+// Close mobile menu when a link is clicked
+function setupMobileMenu() {
+    if (mobileMenuBtn && mainNav) {
+        mobileMenuBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleMobileMenu();
+        });
+
+        // Close mobile menu when nav links are clicked
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    mainNav.classList.remove('active');
+                }
+            });
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (window.innerWidth <= 768 && 
+                mainNav.classList.contains('active') &&
+                !e.target.closest('.main-nav') && 
+                !e.target.closest('.mobile-menu-btn')) {
+                mainNav.classList.remove('active');
+            }
+        });
+    }
 }
 
 // Close mobile navigation
@@ -488,7 +463,6 @@ if (cartIcon && cartSidebar && closeCart && cartOverlay) {
 }
 
 // Mobile menu toggle
-const mobileMenuBtn = document.getElementById('mobile-menu-btn');
 const headerTabs = document.querySelector('.header-tabs');
 
 if (mobileMenuBtn && headerTabs) {
@@ -499,6 +473,8 @@ if (mobileMenuBtn && headerTabs) {
 
 // Tab functionality
 document.addEventListener('DOMContentLoaded', function () {
+
+    setupMobileMenu(); 
     const tabBtns = document.querySelectorAll('.header-tabs .tab-btn');
     const footerTabLinks = document.querySelectorAll('.footer-tab-link');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -513,7 +489,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 2000);
     });
 
-    createMobileNav();
 
     // Event listener for mobile menu button
     mobileMenuBtnn.addEventListener('click', openMobileNav);
@@ -544,16 +519,18 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Update tab switching to work with new navigation
+// Update tab switching to work with new navigation
 function switchTab(tabId) {
     // Remove active class from all nav links
-    document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
+    document.querySelectorAll('.nav-link').forEach(link => {
         link.classList.remove('active');
     });
     
     // Add active class to clicked button
-    document.querySelector(`.nav-link[data-tab="${tabId}"]`).classList.add('active');
-    document.querySelector(`.mobile-nav-link[data-tab="${tabId}"]`).classList.add('active');
+    const activeNavLink = document.querySelector(`.nav-link[data-tab="${tabId}"]`);
+    if (activeNavLink) {
+        activeNavLink.classList.add('active');
+    }
     
     // Remove active class from all tab contents
     document.querySelectorAll('.tab-content').forEach(content => {
@@ -561,10 +538,18 @@ function switchTab(tabId) {
     });
     
     // Show corresponding content
-    document.getElementById(`${tabId}-tab`).classList.add('active');
+    const activeTab = document.getElementById(`${tabId}-tab`);
+    if (activeTab) {
+        activeTab.classList.add('active');
+    }
     
     // Scroll to top
     window.scrollTo(0, 0);
+    
+    // Close mobile menu if open
+    if (window.innerWidth <= 768 && mainNav.classList.contains('active')) {
+        mainNav.classList.remove('active');
+    }
 }
 
     
