@@ -267,11 +267,13 @@
       title.textContent = "Thank You For Your Order!";
       message.innerHTML = "Your order has been placed successfully.<br>We'll contact you soon.";
       localStorage.removeItem(CART_KEY);
+      console.log("ssssssssssss")
 
       // Confetti 🎉
       setTimeout(createConfetti, 500);
     } else {
       // ❌ Failed
+      console.log("wwwwwwwwwwwwwwwwwwwww")
       iconCircle.className = "fas fa-times";
       iconCircle.style.color = "#E53935";
       title.textContent = "Payment Failed";
@@ -293,15 +295,15 @@
     }, 1000);
 
     // Redirect after 5 seconds
-    setTimeout(() => {
-      if (urlParams.success === "true") {
-        // ✅ Success → go home
-        window.location.href = "index.html";
-      } else {
-        // ❌ Failure → retry checkout
-        window.location.href = "checkout.html";
-      }
-    }, 5000);
+    // setTimeout(() => {
+    //   if (urlParams.success === "true") {
+    //     // ✅ Success → go home
+    //     window.location.href = "index.html";
+    //   } else {
+    //     // ❌ Failure → retry checkout
+    //     window.location.href = "checkout.html";
+    //   }
+    // }, 5000);
 
 
     // Create confetti effect
