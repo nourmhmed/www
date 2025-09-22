@@ -503,6 +503,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const footerTabLinks = document.querySelectorAll('.footer-tab-link');
     const tabContents = document.querySelectorAll('.tab-content');
     const cookies = document.querySelectorAll('.cookie-character');
+    const btn = document.querySelector(".mystery-btn");
+
+
+    btn.addEventListener("click", () => {
+        btn.textContent = "🎉 Added to Cart!";
+        setTimeout(() => {
+            btn.textContent = "Order Mystery Box";
+        }, 2000);
+    });
 
     createMobileNav();
 
@@ -867,7 +876,7 @@ document.getElementById('flavor-popup-overlay').addEventListener('click', closeF
             id: Date.now(),
             name: name,
             price: price,
-            img: 'https://images.unsplash.com/photo-1587248720328-4daa08f11b9e?auto=format&fit=crop&w=600&h=400&q=80',
+            img: selectedBox.getAttribute('data-img'),
             quantity: 1,
             flavors: selectedFlavors, // now includes qty per flavor
             size: size,
@@ -880,6 +889,30 @@ document.getElementById('flavor-popup-overlay').addEventListener('click', closeF
 
         closeFlavorPopup();
     });
+
+    // Add Mystery Box
+    document.querySelector('.mystery-btn').addEventListener('click', function () {
+        const name = "Mystery Box";
+        const price = 450; // Fixed price
+        const img = "images/mystery.svg";
+
+        const cart = getCart();
+        cart.push({
+            id: Date.now(),
+            name: name,
+            price: price,
+            img: img,
+            quantity: 1,
+            flavors: [], // no flavor choices
+            size: "mystery",
+            style: "surprise"
+        });
+
+        saveCart(cart);
+        updateCartUI();
+        showNotification(`${name} added to cart!`);
+    });
+
 
 
     // Checkout functionality
