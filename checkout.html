@@ -927,7 +927,7 @@
                   // 🔹 Include flavors if available
                   items: cart.map(item => ({
                     name: item.name,
-                    amount: item.price,
+                    amount_cents: item.price,
                     description: item.name,
                     quantity: item.quantity,
                     flavors: item.flavors ? item.flavors.map(f => ({
@@ -943,12 +943,11 @@
               const result = await res.json();
 
               if (result.success) {
-                // ✅ Redirect to Thank You page with success=true
-                // localStorage.removeItem(CART_KEY);
-                window.location.href = "thankyou.html?success=true";
+                // ✅ Redirect to Thank You page
+                localStorage.removeItem(CART_KEY);
+                window.location.href = "thankyou.html";
               } else {
-                // ❌ Redirect with success=false
-                window.location.href = "thankyou.html?success=false";
+                alert("Error: " + (result.error || "Cash payment failed"));
               }
             }
 
