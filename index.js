@@ -3,8 +3,89 @@ const CART_KEY = 'syrines_crumble_cart';
 let selectedBox = null;
 let selectedStyle = 'chewy';
 
+const mobileMenuBtnn = document.getElementById('mobile-menu-btn');
+const mobileNav = document.createElement('div');
+const mobileNavOverlay = document.createElement('div');
+
 let selectedFlavors = {};
 
+
+// Create mobile navigation
+function createMobileNav() {
+    // Mobile nav overlay
+    mobileNavOverlay.className = 'mobile-nav-overlay';
+    mobileNavOverlay.id = 'mobile-nav-overlay';
+    document.body.appendChild(mobileNavOverlay);
+    
+    // Mobile nav
+    mobileNav.className = 'mobile-nav';
+    mobileNav.id = 'mobile-nav';
+    
+    mobileNav.innerHTML = `
+        <div class="mobile-nav-header">
+            <img src="images/logo.svg" alt="Syrine's Crumble" class="mobile-nav-logo">
+            <button class="close-mobile-nav" id="close-mobile-nav">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <ul class="mobile-nav-list">
+            <li class="mobile-nav-item">
+                <a href="#" class="mobile-nav-link active" data-tab="home">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+            </li>
+            <li class="mobile-nav-item">
+                <a href="#" class="mobile-nav-link" data-tab="cookies">
+                    <i class="fas fa-cookie"></i>
+                    <span>Cookies</span>
+                </a>
+            </li>
+            <li class="mobile-nav-item">
+                <a href="#" class="mobile-nav-link" data-tab="boxes">
+                    <i class="fas fa-gift"></i>
+                    <span>Boxes</span>
+                </a>
+            </li>
+            <li class="mobile-nav-item">
+                <a href="#" class="mobile-nav-link" data-tab="mystery">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Mystery</span>
+                </a>
+            </li>
+        </ul>
+    `;
+    
+    document.body.appendChild(mobileNav);
+    
+    // Event listeners for mobile nav
+    document.getElementById('close-mobile-nav').addEventListener('click', closeMobileNav);
+    mobileNavOverlay.addEventListener('click', closeMobileNav);
+    
+    // Add click events to mobile nav links
+    mobileNav.querySelectorAll('.mobile-nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const tabId = this.getAttribute('data-tab');
+            switchTab(tabId);
+            closeMobileNav();
+        });
+    });
+}
+
+// Open mobile navigation
+function openMobileNav() {
+    mobileNav.classList.add('active');
+    mobileNavOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+// Close mobile navigation
+function closeMobileNav() {
+    mobileNav.classList.remove('active');
+    mobileNavOverlay.classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
 // Cookie data with different images for Chewy and Crumble styles
         const cookieData = {
             'chocolate-chip': {
@@ -220,12 +301,13 @@ function addToCartFromPopup() {
     const addButton = document.querySelector('.popup-add-to-cart');
     addButton.innerHTML = '<i class="fas fa-check"></i> Added!';
     addButton.style.background = '#2e8b57';
-
-    setTimeout(() => {
-        addButton.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
-        addButton.style.background = '#8b5a2b';
         closePopup();
-    }, 1500);
+
+    // setTimeout(() => {
+    //     addButton.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
+    //     addButton.style.background = '#8b5a2b';
+    //     closePopup();
+    // }, 1500);
 
     // Reset quantity
     quantity = 1;
@@ -422,6 +504,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const tabContents = document.querySelectorAll('.tab-content');
     const cookies = document.querySelectorAll('.cookie-character');
 
+    createMobileNav();
+
+    // Event listener for mobile menu button
+    mobileMenuBtnn.addEventListener('click', openMobileNav);
+
     cookies.forEach(cookie => {
                 cookie.addEventListener('mouseenter', () => {
                     const speech = cookie.querySelector('.cookie-speech');
@@ -439,25 +526,37 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             }, 100);
 
-    function switchTab(tabId) {
-        // Remove active class from all buttons and contents
-        tabBtns.forEach(b => b.classList.remove('active'));
-        tabContents.forEach(c => c.classList.remove('active'));
+            // Event listeners for desktop nav links
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const tabId = this.getAttribute('data-tab');
+            switchTab(tabId);
+        });
+    });
 
-        // Add active class to clicked button
-        document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
-
-        // Show corresponding content
-        document.getElementById(`${tabId}-tab`).classList.add('active');
-
-        // Close mobile menu if open
-        if (headerTabs.classList.contains('active')) {
-            headerTabs.classList.remove('active');
-        }
-
-        // Scroll to top
-        window.scrollTo(0, 0);
-    }
+    // Update tab switching to work with new navigation
+function switchTab(tabId) {
+    // Remove active class from all nav links
+    document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    // Add active class to clicked button
+    document.querySelector(`.nav-link[data-tab="${tabId}"]`).classList.add('active');
+    document.querySelector(`.mobile-nav-link[data-tab="${tabId}"]`).classList.add('active');
+    
+    // Remove active class from all tab contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // Show corresponding content
+    document.getElementById(`${tabId}-tab`).classList.add('active');
+    
+    // Scroll to top
+    window.scrollTo(0, 0);
+}
 
     
     tabBtns.forEach(btn => {
