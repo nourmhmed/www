@@ -802,7 +802,11 @@
                     amount_cents: item.price,
                     description: item.name,
                     quantity: item.quantity,
-                    flavors: item.flavors
+                    flavors: item.flavors ? item.flavors.map(f => ({
+                      flavor: f.flavor.trim(),
+                      quantity: f.quantity,
+                      type: f.type
+                    })) : []
                   }))
                 })
               });
