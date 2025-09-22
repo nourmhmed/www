@@ -7,6 +7,21 @@
     <title>Syrine's Crumble | Artisanal Cookies</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="index.css">
+    <!-- ✅ Preload critical images -->
+    <link rel="preload" href="images/logo.svg" as="image" type="image/svg+xml">
+    <link rel="preload" href="images/crumble.svg" as="image" type="image/svg+xml">
+    <link rel="preload" href="images/chewy.svg" as="image" type="image/svg+xml">
+    <link rel="preload" href="images/duo.svg" as="image" type="image/svg+xml">
+    <link rel="preload" href="images/trio.svg" as="image" type="image/svg+xml">
+    <link rel="preload" href="images/four.svg" as="image" type="image/svg+xml">
+    <link rel="preload" href="images/six.svg" as="image" type="image/svg+xml">
+    <link rel="preload" href="images/nine.svg" as="image" type="image/svg+xml">
+    <link rel="preload" href="images/original_chewy_cookie.svg" as="image" type="image/svg+xml">
+    <link rel="preload" href="images/chocolate_crispy_affair_chewy.svg" as="image" type="image/svg+xml">
+    <link rel="preload" href="images/caramel_chewy_cookie.svg" as="image" type="image/svg+xml">
+    <link rel="preload" href="images/hazelnuts_chewy_cookie.svg" as="image" type="image/svg+xml">
+    <link rel="preload" href="images/lotus_chewy_cookie.svg" as="image" type="image/svg+xml">
+    <link rel="preload" href="images/mystery.svg" as="image" type="image/svg+xml">
 </head>
 
 <body>
@@ -23,7 +38,7 @@
             <!-- Logo -->
             <div class="logo-container">
                 <a href="">
-                    <img src="images/logo.svg" alt="Syrine's Crumble" class="logo-img">
+                    <img src="images/logo.svg" alt="Syrine's Crumble" class="logo-img" loading="lazy">
                 </a>
             </div>
 
@@ -84,7 +99,7 @@
                             <!-- Crumble -->
                             <div class="team-container">
                                 <img src="images/crumble.svg" alt="Team Crumble" class="cookie-img crumble-img"
-                                    onclick="switchTab('boxes')">
+                                    onclick="switchTab('boxes')" loading="lazy">
                                 <div class="team-label">Team Crumble</div>
                             </div>
 
@@ -93,7 +108,7 @@
                             <!-- Chewy -->
                             <div class="team-container">
                                 <img src="images/chewy.svg" alt="Team Chewy" class="cookie-img chewy-img"
-                                    onclick="switchTab('cookies')">
+                                    onclick="switchTab('cookies')" loading="lazy">
                                 <div class="team-label">Team Chewy</div>
                             </div>
                         </div>
@@ -154,7 +169,7 @@
                     <div class="box-options">
                         <div class="box-option" data-size="duo" data-chewy="155" data-crumble="155" data-mix="165"
                             data-img="images/duo.svg">
-                            <img src="images/duo.svg" alt="The Duo Box" class="box-img">
+                            <img src="images/duo.svg" alt="The Duo Box" class="box-img" loading="lazy">
                             <h4>The Duo</h4>
                             <p>2 cookies—perfect for a quick fix</p>
                             <div class="box-prices">
@@ -164,7 +179,7 @@
 
                         <div class="box-option" data-size="trio" data-chewy="245" data-crumble="245" data-mix="255"
                             data-img="images/trio.svg">
-                            <img src="images/trio.svg" alt="The Trio Box" class="box-img">
+                            <img src="images/trio.svg" alt="The Trio Box" class="box-img" loading="lazy">
                             <h4>The Trio</h4>
                             <p>3 cookies—one for now, one later, one to share...maybe</p>
                             <div class="box-prices">
@@ -174,7 +189,7 @@
 
                         <div class="box-option" data-size="classic" data-chewy="320" data-crumble="320" data-mix="335"
                             data-img="images/four.svg">
-                            <img src="images/four.svg" alt="The Classic Box" class="box-img">
+                            <img src="images/four.svg" alt="The Classic Box" class="box-img" loading="lazy">
                             <h4>The Classic</h4>
                             <p>4 cookies—the sweet spot</p>
                             <div class="box-prices">
@@ -184,7 +199,7 @@
 
                         <div class="box-option" data-size="craver" data-chewy="480" data-crumble="480" data-mix="505"
                             data-img="images/six.svg">
-                            <img src="images/six.svg" alt="The Craver Box" class="box-img">
+                            <img src="images/six.svg" alt="The Craver Box" class="box-img" loading="lazy">
                             <h4>The Craver</h4>
                             <p>6 cookies—when you can't get enough</p>
                             <div class="box-prices">
@@ -194,7 +209,7 @@
 
                         <div class="box-option" data-size="feast" data-chewy="675" data-crumble="675" data-mix="700"
                             data-img="images/nine.svg">
-                            <img src="images/nine.svg" alt="The Feast Box" class="box-img">
+                            <img src="images/nine.svg" alt="The Feast Box" class="box-img" loading="lazy">
                             <h4>The Feast</h4>
                             <p>9 cookies—for family, friends, or just you... no judgment!</p>
                             <div class="box-prices">
@@ -275,7 +290,7 @@
                                 <i class="fas fa-hand-pointer"></i> Click for details
                             </div>
                             <div class="cookie-image">
-                                <img src="images/original_chewy_cookie.svg" alt="Chocolate Chip Cookie">
+                                 loading="lazy" src="images/original_chewy_cookie.svg" alt="Chocolate Chip Cookie" loading="lazy">
                                 <div class="cookie-tag">Bestseller</div>
                             </div>
                             <div class="cookie-details">
@@ -296,7 +311,7 @@
                                 <i class="fas fa-hand-pointer"></i> Click for details
                             </div>
                             <div class="cookie-image">
-                                <img src="images/chocolate_crispy_affair_chewy.svg" alt="Chocolate Crispy Cookie">
+                                <img src="images/chocolate_crispy_affair_chewy.svg" alt="Chocolate Crispy Cookie" loading="lazy">
                                 <div class="cookie-tag">New</div>
                             </div>
                             <div class="cookie-details">
@@ -317,7 +332,7 @@
                                 <i class="fas fa-hand-pointer"></i> Click for details
                             </div>
                             <div class="cookie-image">
-                                <img src="images/caramel_chewy_cookie.svg" alt="Caramel Cookie">
+                                <img src="images/caramel_chewy_cookie.svg" alt="Caramel Cookie" loading="lazy">
                             </div>
                             <div class="cookie-details">
                                 <h3>The Caramel Bad Girl</h3>
@@ -337,7 +352,7 @@
                                 <i class="fas fa-hand-pointer"></i> Click for details
                             </div>
                             <div class="cookie-image">
-                                <img src="images/hazelnuts_chewy_cookie.svg" alt="Hazelnut Cookie">
+                                <img src="images/hazelnuts_chewy_cookie.svg" alt="Hazelnut Cookie" loading="lazy">
                             </div>
                             <div class="cookie-details">
                                 <h3>The Hazelnut Mommy</h3>
@@ -357,7 +372,7 @@
                                 <i class="fas fa-hand-pointer"></i> Click for details
                             </div>
                             <div class="cookie-image">
-                                <img src="images/lotus_chewy_cookie.svg" alt="Lotus Cookie">
+                                <img src="images/lotus_chewy_cookie.svg" alt="Lotus Cookie" loading="lazy">
                                 <div class="cookie-tag">Popular</div>
                             </div>
                             <div class="cookie-details">
@@ -458,7 +473,7 @@
                     <div class="mystery-content">
                         <!-- Left Image -->
                         <div class="mystery-image">
-                            <img src="images/mystery.svg" alt="Mystery Cookie Box">
+                            <img src="images/mystery.svg" alt="Mystery Cookie Box" loading="lazy">
                             <div class="question-mark">?</div>
                         </div>
 
