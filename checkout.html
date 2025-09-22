@@ -692,7 +692,7 @@
       progressSteps[1].classList.add("active");
     });
     document.addEventListener('DOMContentLoaded', function () {
-      // const CART_KEY = 'syrines_crumble_cart';
+      const CART_KEY = 'syrines_crumble_cart';
       //   const cartCount = document.getElementById('cart-count');
       const summaryItems = document.querySelector('.summary-items');
       const subtotalEl = document.getElementById('subtotal');
@@ -816,39 +816,7 @@
                 document.getElementById('paymentIframe').src = result.iframeUrl;
                 document.getElementById('paymentModal').style.display = "flex";
 
-                // // 🔹 ALSO send to create-cash-payment (for your records / collection)
-                // await fetch("http://localhost:5000/create-cash-payment", {
-                //   method: "POST",
-                //   headers: { "Content-Type": "application/json" },
-                //   body: JSON.stringify({
-                //     amount: total,
-                //     firstName: document.getElementById('first-name').value,
-                //     lastName: document.getElementById('last-name').value,
-                //     email: document.getElementById('email').value,
-                //     phone: document.getElementById('phone').value,
-                //     street: document.getElementById('street').value,
-                //     building: document.getElementById('building').value,
-                //     floor: document.getElementById('floor').value,
-                //     apartment: document.getElementById('apartment').value,
-                //     postalCode: document.getElementById('postal-code').value,
-                //     city: document.getElementById('city').value,
-                //     country: document.getElementById('country').value,
-
-                //     items: cart.map(item => ({
-                //       name: item.name,
-                //       amount_cents: item.price * 100,
-                //       description: item.name,
-                //       quantity: item.quantity,
-                //       flavors: item.flavors ? item.flavors.map(f => ({
-                //         flavor: f.flavor.trim(),
-                //         quantity: f.quantity,
-                //         type: f.type
-                //       })) : []
-                //     }))
-                //   })
-                // });
-
-
+                localStorage.removeItem(CART_KEY);
               } else {
                 alert("Error: " + (result.error || "Failed to start payment"));
               }
@@ -893,12 +861,11 @@
               const result = await res.json();
 
               if (result.success) {
-                // ✅ Redirect to Thank You page with success=true
-                // localStorage.removeItem(CART_KEY);
-                window.location.href = "thankyou.html?success=true";
+                // ✅ Redirect to Thank You page
+                localStorage.removeItem(CART_KEY);
+                window.location.href = "thankyou.html";
               } else {
-                // ❌ Redirect with success=false
-                window.location.href = "thankyou.html?success=false";
+                alert("Error: " + (result.error || "Cash payment failed"));
               }
             }
 
