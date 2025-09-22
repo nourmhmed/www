@@ -12,28 +12,55 @@
 <body>
     <div class="announcement">Next day delivery / Free Shipping for orders over 500 EGP</div>
 
-    <header>
-        <div class="header-left">
-            <nav class="header-tabs">
-                <button class="tab-btn active" data-tab="home">Home</button>
-                <button class="tab-btn" data-tab="cookies">Cookies</button>
-                <button class="tab-btn" data-tab="boxes">Boxes</button>
-                <button class="tab-btn" data-tab="mystery">Mystery</button>
-            </nav>
-        </div>
-
-        <!-- Logo in center -->
-        <div class="logo-container">
-            <img src="images/logo.svg" alt="Logo" class="logo-img">
-        </div>
-
-        <div class="header-right">
+    <!-- Modern Header -->
+    <header class="modern-header">
+        <div class="header-container">
+            <!-- Mobile menu button -->
             <button class="mobile-menu-btn" id="mobile-menu-btn">
                 <i class="fas fa-bars"></i>
             </button>
-            <div class="cart-icon" id="cart-icon">
-                <i class="fas fa-shopping-cart"></i>
-                <span class="cart-count" id="cart-count">0</span>
+
+            <!-- Logo -->
+            <div class="logo-container">
+                <img src="images/logo.svg" alt="Syrine's Crumble" class="logo-img">
+            </div>
+
+            <!-- Navigation -->
+            <nav class="main-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-tab="home">
+                            <i class="fas fa-home"></i>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-tab="cookies">
+                            <i class="fas fa-cookie"></i>
+                            <span>Cookies</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-tab="boxes">
+                            <i class="fas fa-gift"></i>
+                            <span>Boxes</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-tab="mystery">
+                            <i class="fas fa-question-circle"></i>
+                            <span>Mystery</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Cart -->
+            <div class="header-actions">
+                <div class="cart-icon" id="cart-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cart-count">0</span>
+                </div>
             </div>
         </div>
     </header>
@@ -212,7 +239,7 @@
                 </div>
             </section>
 
-            
+
         </div>
 
         <!-- Boxes Tab -->
