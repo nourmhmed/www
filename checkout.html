@@ -816,7 +816,7 @@
                 document.getElementById('paymentIframe').src = result.iframeUrl;
                 document.getElementById('paymentModal').style.display = "flex";
 
-                localStorage.removeItem(CART_KEY);
+                // localStorage.removeItem(CART_KEY);
               } else {
                 alert("Error: " + (result.error || "Failed to start payment"));
               }
