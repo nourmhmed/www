@@ -175,10 +175,28 @@ function openMobileNav() {
     document.body.style.overflow = 'hidden';
 }
 
+// Close all modals on escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    enableBodyScroll();
+    // Add your close functions for all modals here
+    closePopup();
+    closeFlavorPopup();
+    if (cartSidebar) cartSidebar.classList.remove('active');
+    if (cartOverlay) cartOverlay.classList.remove('active');
+    if (mainNav) mainNav.classList.remove('active');
+  }
+});
+
 // Close mobile menu when a link is clicked
 function setupMobileMenu() {
     if (mobileMenuBtn && mainNav) {
         mobileMenuBtn.addEventListener('click', function(e) {
+            if (window.innerWidth <= 768 && mainNav.classList.contains('active')) {
+                enableBodyScroll();
+                } else if (window.innerWidth <= 768) {
+                disableBodyScroll();
+                }
             e.stopPropagation();
             toggleMobileMenu();
         });
@@ -327,6 +345,7 @@ document.querySelectorAll('.tab-btn').forEach(button => {
 
 // Popup functionality
 function openPopup(cookieType) {
+    disableBodyScroll();
     currentCookie = cookieType;
     currentStyle = 'chewy';
     quantity = 1;
@@ -352,6 +371,7 @@ function openPopup(cookieType) {
 }
 
 function closePopup() {
+    enableBodyScroll();
     document.getElementById('popupOverlay').classList.remove('active');
     document.body.style.overflow = 'auto'; // Re-enable scrolling
 }
@@ -633,6 +653,33 @@ const cartSidebar = document.getElementById('cart-sidebar');
 const closeCart = document.getElementById('close-cart');
 const cartOverlay = document.getElementById('cart-overlay');
 
+// Also update cart sidebar functions
+if (cartIcon && cartSidebar) {
+  cartIcon.addEventListener('click', function () {
+    if (window.innerWidth <= 768) {
+      disableBodyScroll();
+    }
+    cartSidebar.classList.add('active');
+    cartOverlay.classList.add('active');
+  });
+
+  closeCart.addEventListener('click', function () {
+    if (window.innerWidth <= 768) {
+      enableBodyScroll();
+    }
+    cartSidebar.classList.remove('active');
+    cartOverlay.classList.remove('active');
+  });
+
+  cartOverlay.addEventListener('click', function () {
+    if (window.innerWidth <= 768) {
+      enableBodyScroll();
+    }
+    cartSidebar.classList.remove('active');
+    cartOverlay.classList.remove('active');
+  });
+}
+
 if (cartIcon && cartSidebar && closeCart && cartOverlay) {
     cartIcon.addEventListener('click', function () {
         cartSidebar.classList.add('active');
@@ -659,6 +706,16 @@ if (mobileMenuBtn && headerTabs) {
     });
 }
 
+
+function disableBodyScroll() {
+  document.body.classList.add('body-no-scroll');
+  document.documentElement.style.overflow = 'hidden';
+}
+
+function enableBodyScroll() {
+  document.body.classList.remove('body-no-scroll');
+  document.documentElement.style.overflow = '';
+}
 // Tab functionality
 document.addEventListener('DOMContentLoaded', async function () {
     // Initialize Supabase first
@@ -714,6 +771,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Update tab switching to work with new navigation
     function switchTab(tabId) {
+        enableBodyScroll()
         // Remove active class from all nav links
         document.querySelectorAll('.nav-link').forEach(link => {
             link.classList.remove('active');
@@ -828,7 +886,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         const selectedCount = document.querySelector('.selected-count');
         const finalPrice = document.getElementById('final-price');
         const selectedFlavorsSummary = document.getElementById('selected-flavors-summary');
-        
+        disableBodyScroll()
         // Reset selected flavors
         selectedFlavors = {};
         
@@ -989,6 +1047,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     document.getElementById('flavor-popup-overlay').addEventListener('click', closeFlavorPopup);
 
     function closeFlavorPopup() {
+        enableBodyScroll()
         document.getElementById('flavor-popup-overlay').classList.remove('active');
         document.getElementById('flavor-popup').classList.remove('active');
     }
