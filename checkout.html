@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Checkout | Doughlicious</title>
+  <title>Checkout | Syrine's Crumble</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     * {
@@ -628,13 +628,6 @@
               <input type="text" id="apartment" required>
             </div>
             <div class="form-group">
-              <label for="postal-code">Postal Code</label>
-              <input type="text" id="postal-code" required>
-            </div>
-          </div>
-
-          <div class="form-grid">
-            <div class="form-group">
               <label for="city">City</label>
               <select id="city" required>
                 <option value="" disabled selected>Select your city</option>
@@ -672,11 +665,6 @@
                 <option value="North Sinai">North Sinai</option>
                 <option value="South Sinai">South Sinai</option>
               </select>
-            </div>
-
-            <div class="form-group">
-              <label for="country">Country</label>
-              <input type="text" id="country" value="EG" required>
             </div>
           </div>
 
@@ -877,7 +865,7 @@
                   apartment: document.getElementById('apartment').value,
                   postalCode: document.getElementById('postal-code').value,
                   city: document.getElementById('city').value,
-                  country: document.getElementById('country').value,
+                  country: "EG",
 
                   items: cart.map(item => ({
                     name: item.name,
@@ -922,7 +910,7 @@
                   apartment: document.getElementById('apartment').value,
                   postalCode: document.getElementById('postal-code').value,
                   city: document.getElementById('city').value,
-                  country: document.getElementById('country').value,
+                  country: "EG",
 
                   // 🔹 Include flavors if available
                   items: cart.map(item => ({
@@ -943,12 +931,11 @@
               const result = await res.json();
 
               if (result.success) {
-                // ✅ Redirect to Thank You page with success=true
-                // localStorage.removeItem(CART_KEY);
-                window.location.href = "thankyou.html?success=true";
+                // ✅ Redirect to Thank You page
+                localStorage.removeItem(CART_KEY);
+                window.location.href = "thankyou.html";
               } else {
-                // ❌ Redirect with success=false
-                window.location.href = "thankyou.html?success=false";
+                alert("Error: " + (result.error || "Cash payment failed"));
               }
             }
 
