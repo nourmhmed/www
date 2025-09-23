@@ -1417,7 +1417,7 @@ footer {
     height: 100vh; /* Prevent height jumping */
 }
 /* Ensure popup content is scrollable */
-.cookie-popup,
+/* .cookie-popup,
 .flavor-popup,
 .cart-sidebar {
     max-height: 90vh;
@@ -1428,7 +1428,7 @@ footer {
 .flavor-popup-content {
     max-height: calc(90vh - 200px);
     overflow-y: auto;
-}
+} */
         
         /* Animations */
         @keyframes float {
@@ -3288,9 +3288,9 @@ footer {
     }
     
     /* Improved scrolling for mobile */
-    /* .tab-content-area {
+    .tab-content-area {
         overflow-x: hidden;
-    } */
+    }
 }
 
 /* Additional small mobile adjustments */
@@ -3373,4 +3373,192 @@ footer {
     .logo-img {
         image-rendering: -webkit-optimize-contrast;
     }
+}
+
+/* === IMPROVED SCROLLING STYLES === */
+
+/* Smooth scrolling for the entire document */
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Improved body scrolling */
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) var(--background);
+}
+
+/* Custom scrollbar for Webkit browsers (Chrome, Safari, Edge) */
+body::-webkit-scrollbar {
+  width: 8px;
+}
+
+body::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+body::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 4px;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-light);
+}
+
+/* Improved scrolling for all scrollable containers */
+.tab-content-area,
+.flavor-popup-content,
+.cart-items,
+.cookie-popup {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) rgba(255, 255, 255, 0.1);
+}
+
+/* Custom scrollbar for popups and modals */
+.flavor-popup-content::-webkit-scrollbar,
+.cart-items::-webkit-scrollbar,
+.cookie-popup::-webkit-scrollbar {
+  width: 6px;
+}
+
+.flavor-popup-content::-webkit-scrollbar-track,
+.cart-items::-webkit-scrollbar-track,
+.cookie-popup::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.flavor-popup-content::-webkit-scrollbar-thumb,
+.cart-items::-webkit-scrollbar-thumb,
+.cookie-popup::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 3px;
+}
+
+.flavor-popup-content::-webkit-scrollbar-thumb:hover,
+.cart-items::-webkit-scrollbar-thumb:hover,
+.cookie-popup::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-light);
+}
+
+/* Mobile-specific scrolling improvements */
+@media (max-width: 768px) {
+  /* Prevent body scroll when modals are open */
+  body.body-no-scroll {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Improved touch scrolling for mobile */
+  .tab-content-area,
+  .flavor-popup-content,
+  .cart-items {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  /* Better scrolling performance */
+  .boxes-grid,
+  .cookies-grid,
+  .flavor-grid {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+  
+  /* Reduced scroll momentum on iOS */
+  .flavor-popup-content,
+  .cart-items {
+    -webkit-overflow-scrolling: auto;
+  }
+}
+
+/* Improved scroll performance with hardware acceleration */
+.scroll-container {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Prevent horizontal scroll on mobile */
+.container {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Smooth scrolling for anchor links */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Accessibility: respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Improved modal scrolling */
+.flavor-popup,
+.cookie-popup {
+  overscroll-behavior: contain;
+}
+
+/* Better scrollbar visibility on light backgrounds */
+.flavor-popup-content,
+.cart-items {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) #f0f0f0;
+}
+
+.flavor-popup-content::-webkit-scrollbar-track,
+.cart-items::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+
+/* Mobile menu scrolling improvements */
+@media (max-width: 768px) {
+  .main-nav.active {
+    max-height: 80vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .main-nav.active::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .main-nav.active::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 2px;
+  }
+}
+
+/* Footer area scrolling fix */
+footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure proper stacking context for smooth scrolling */
+.tab-content {
+  position: relative;
+  z-index: 1;
 }
