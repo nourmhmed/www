@@ -1412,6 +1412,24 @@ footer {
             font-weight: 600;
         }
         
+        .body-no-scroll {
+    overflow: hidden;
+    height: 100vh; /* Prevent height jumping */
+}
+/* Ensure popup content is scrollable */
+.cookie-popup,
+.flavor-popup,
+.cart-sidebar {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.popup-content,
+.flavor-popup-content {
+    max-height: calc(90vh - 200px);
+    overflow-y: auto;
+}
+        
         /* Animations */
         @keyframes float {
             0%, 100% { transform: translateY(0); }
@@ -3088,13 +3106,13 @@ footer {
         gap: 20px;
     }
     
-    .cookie-card {
+    /* .cookie-card {
         padding: 15px;
-    }
+    } */
     
-    .cookie-image img {
+    /* .cookie-image img {
         max-width: 100px;
-    }
+    } */
     
     .click-indicator {
         font-size: 0.8rem;
