@@ -3279,14 +3279,6 @@ footer {
         display: block !important;
     }
     
-    /* Touch-friendly sizes */
-    button, 
-    .nav-link, 
-    .box-option, 
-    .cookie-card {
-        min-height: 44px; /* Minimum touch target size */
-    }
-    
     /* Improved scrolling for mobile */
     .tab-content-area {
         overflow-x: hidden;
