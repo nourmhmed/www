@@ -3734,3 +3734,309 @@ footer {
   position: relative;
   z-index: 1;
 }
+
+
+/* === ENHANCED MOBILE FONT SIZES === */
+@media (max-width: 768px) {
+    /* Base font size adjustment */
+    body {
+        font-size: 16px; /* Optimal base size for mobile readability */
+        line-height: 1.5;
+    }
+    
+    /* Header and navigation fonts */
+    .modern-header {
+        font-size: 14px;
+    }
+    
+    .nav-link {
+        font-size: 1rem;
+        padding: 1rem 1.5rem;
+    }
+    
+    .brand-name {
+        font-size: 1.8rem !important;
+    }
+    
+    .tagline {
+        font-size: 0.7rem;
+    }
+    
+    /* Hero section fonts */
+    .hero-title {
+        font-size: 3.5rem !important;
+        line-height: 1.1;
+        margin-bottom: 1rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem !important;
+        line-height: 1.4;
+        margin-bottom: 2rem;
+        padding: 0 1rem;
+    }
+    
+    /* Section titles */
+    .section-title {
+        font-size: 2.2rem !important;
+        margin-bottom: 2rem;
+        line-height: 1.2;
+    }
+    
+    .section-subtitle {
+        font-size: 1.1rem !important;
+        line-height: 1.4;
+        margin-bottom: 2rem;
+        padding: 0 1rem;
+    }
+    
+    /* Card and content fonts */
+    .feature-card h3 {
+        font-size: 1.3rem;
+    }
+    
+    .feature-card p {
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+    
+    .cookie-card h3 {
+        font-size: 1.2rem;
+        min-height: auto;
+        margin-bottom: 0.5rem;
+    }
+    
+    .cookie-card p {
+        font-size: 0.9rem;
+        line-height: 1.4;
+        margin-bottom: 1rem;
+    }
+    
+    .cookie-price {
+        font-size: 1.3rem;
+    }
+    
+    .add-to-cart-btn {
+        font-size: 1rem;
+        padding: 12px 16px;
+    }
+    
+    /* Box options */
+    .box-option h4 {
+        font-size: 1.2rem;
+    }
+    
+    .box-option p {
+        font-size: 0.9rem;
+    }
+    
+    .box-prices {
+        font-size: 1.3rem;
+    }
+    
+    /* Popup fonts */
+    .flavor-popup-header h3 {
+        font-size: 1.3rem;
+    }
+    
+    .popup-box-info h4 {
+        font-size: 1.3rem;
+    }
+    
+    .popup-box-info p {
+        font-size: 0.95rem;
+    }
+    
+    .popup-box-price {
+        font-size: 1.4rem;
+    }
+    
+    .flavor-instruction {
+        font-size: 1rem;
+    }
+    
+    .flavor-name {
+        font-size: 1rem;
+    }
+    
+    .flavor-type {
+        font-size: 0.8rem;
+    }
+    
+    /* Button fonts */
+    .btn {
+        font-size: 1rem;
+        padding: 14px 20px;
+    }
+    
+    /* Cart fonts */
+    .cart-header h2 {
+        font-size: 1.4rem;
+    }
+    
+    .cart-item-name {
+        font-size: 1rem;
+    }
+    
+    .cart-item-price {
+        font-size: 1.1rem;
+    }
+    
+    .cart-total {
+        font-size: 1.2rem;
+    }
+    
+    .checkout-btn {
+        font-size: 1.1rem;
+    }
+    
+    /* Mystery section */
+    .mystery-details h3 {
+        font-size: 1.5rem;
+    }
+    
+    .mystery-details p {
+        font-size: 0.95rem;
+    }
+    
+    .mystery-details ul li {
+        font-size: 0.9rem;
+    }
+    
+    .mystery-price {
+        font-size: 1.5rem;
+    }
+    
+    .mystery-note {
+        font-size: 0.85rem;
+    }
+    
+    /* Footer fonts */
+    .footer-column h3 {
+        font-size: 1.2rem;
+    }
+    
+    .footer-column p {
+        font-size: 0.9rem;
+    }
+    
+    .copyright {
+        font-size: 0.85rem;
+    }
+    
+    /* Team labels */
+    .team-label {
+        font-size: 1rem;
+        margin-top: 8px;
+    }
+    
+    /* Click indicator */
+    .click-indicator {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+    }
+}
+
+/* Additional adjustments for very small screens */
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 2.8rem !important;
+    }
+    
+    .section-title {
+        font-size: 1.8rem !important;
+    }
+    
+    .section-subtitle {
+        font-size: 1rem !important;
+    }
+    
+    .cookie-card h3 {
+        font-size: 1.1rem;
+    }
+    
+    .box-option h4 {
+        font-size: 1.1rem;
+    }
+    
+    .nav-link {
+        font-size: 0.95rem;
+        padding: 0.9rem 1.2rem;
+    }
+    
+    .brand-name {
+        font-size: 1.5rem !important;
+    }
+}
+
+/* Mobile landscape adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+    .hero-title {
+        font-size: 2.5rem !important;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem !important;
+    }
+    
+    .section-title {
+        font-size: 1.8rem !important;
+    }
+}
+
+/* Improved text rendering for mobile */
+@media (max-width: 768px) {
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+    }
+    
+    /* Ensure good contrast and readability */
+    h1, h2, h3, h4, h5, h6 {
+        font-weight: 600;
+        line-height: 1.2;
+    }
+    
+    p, li, span {
+        line-height: 1.4;
+    }
+}
+
+/* Prevent text size adjustment on orientation change */
+html {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+}
+
+/* Improved touch targets for mobile */
+@media (max-width: 768px) {
+    .nav-link,
+    .btn,
+    .add-to-cart-btn,
+    .box-option,
+    .cookie-card,
+    .popup-style-option,
+    .flavor-option {
+        min-height: 44px; /* Minimum touch target size */
+    }
+    
+    .mobile-menu-btn,
+    .cart-icon,
+    .close-popup {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+/* Enhanced readability for long text */
+@media (max-width: 768px) {
+    .feature-card p,
+    .cookie-card p,
+    .mystery-details p,
+    .footer-column p {
+        max-width: 35ch; /* Optimal line length for readability */
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
