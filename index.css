@@ -1,12 +1,16 @@
 /* === GLOBAL STYLES === */
+@font-face {
+  font-family: 'Stella';
+  src: url('font/stella.ttf') format('truetype');
+}
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Chewy', cursive;
+    font-family: 'Stella', cursive;
     max-width: 100%;
     box-sizing: border-box;
-
+    text-decoration: none;
 }
 
 :root {
@@ -165,7 +169,7 @@ header {
 }
 
 .brand-name {
-    font-family: 'Brush Script MT', cursive;
+    font-family: 'Stella', cursive;
     font-size: 2rem;
     color: var(--primary);
     line-height: 1;
@@ -1119,7 +1123,7 @@ footer {
 
         
         .hero-title {
-            font-family: 'Brush Script MT', cursive;
+            font-family: 'Stella', cursive;
             font-size: 8rem;
             color: var(--primary);
             line-height: 1;
@@ -1212,7 +1216,7 @@ footer {
             background: white;
             padding: 0.8rem 1.2rem;
             border-radius: 20px;
-            font-family: 'Comic Neue', cursive;
+            font-family: 'Stella', cursive;
             font-weight: bold;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             opacity: 0;
@@ -1242,7 +1246,7 @@ footer {
             font-size: 2.8rem;
             margin-bottom: 3rem;
             color: #7b4b2b;
-            font-family: 'Comic Neue', cursive;
+            font-family: 'Stella', cursive;
         }
         
         .features-grid {
@@ -3736,578 +3740,390 @@ footer {
 }
 
 
-/* === ENHANCED MOBILE FONT SIZES === */
+/* ===== MOBILE FONT SIZE UPDATES (max-width: 768px) ===== */
 @media (max-width: 768px) {
-    /* Base font size adjustment */
+    /* Base font size for mobile */
     body {
-        font-size: 16px; /* Optimal base size for mobile readability */
-        line-height: 1.5;
+        font-size: 14px;
     }
     
-    /* Header and navigation fonts */
-    .modern-header {
-        font-size: 14px;
+    /* Header text sizes */
+    .logo-img {
+        height: 40px;
     }
     
     .nav-link {
         font-size: 1rem;
-        padding: 1rem 1.5rem;
+        padding: 12px 15px;
     }
     
-    .brand-name {
-        font-size: 1.8rem !important;
+    .nav-link i {
+        font-size: 1.1rem;
     }
     
-    .tagline {
+    .cart-count {
         font-size: 0.7rem;
     }
     
-    /* Hero section fonts */
+    /* Hero section text */
     .hero-title {
-        font-size: 3.5rem !important;
+        font-size: 2.5rem;
         line-height: 1.1;
-        margin-bottom: 1rem;
+        margin-bottom: 15px;
     }
     
     .hero-subtitle {
-        font-size: 1.1rem !important;
-        line-height: 1.4;
-        margin-bottom: 2rem;
-        padding: 0 1rem;
-    }
-    
-    /* Section titles */
-    .section-title {
-        font-size: 2.2rem !important;
-        margin-bottom: 2rem;
-        line-height: 1.2;
-    }
-    
-    .section-subtitle {
-        font-size: 1.1rem !important;
-        line-height: 1.4;
-        margin-bottom: 2rem;
-        padding: 0 1rem;
-    }
-    
-    /* Card and content fonts */
-    .feature-card h3 {
-        font-size: 1.3rem;
-    }
-    
-    .feature-card p {
-        font-size: 0.95rem;
-        line-height: 1.5;
-    }
-    
-    .cookie-card h3 {
-        font-size: 1.2rem;
-        min-height: auto;
-        margin-bottom: 0.5rem;
-    }
-    
-    .cookie-card p {
-        font-size: 0.9rem;
-        line-height: 1.4;
-        margin-bottom: 1rem;
-    }
-    
-    .cookie-price {
-        font-size: 1.3rem;
-    }
-    
-    .add-to-cart-btn {
-        font-size: 1rem;
-        padding: 12px 16px;
-    }
-    
-    /* Box options */
-    .box-option h4 {
-        font-size: 1.2rem;
-    }
-    
-    .box-option p {
-        font-size: 0.9rem;
-    }
-    
-    .box-prices {
-        font-size: 1.3rem;
-    }
-    
-    /* Popup fonts */
-    .flavor-popup-header h3 {
-        font-size: 1.3rem;
-    }
-    
-    .popup-box-info h4 {
-        font-size: 1.3rem;
-    }
-    
-    .popup-box-info p {
-        font-size: 0.95rem;
-    }
-    
-    .popup-box-price {
-        font-size: 1.4rem;
-    }
-    
-    .flavor-instruction {
-        font-size: 1rem;
-    }
-    
-    .flavor-name {
-        font-size: 1rem;
-    }
-    
-    .flavor-type {
-        font-size: 0.8rem;
-    }
-    
-    /* Button fonts */
-    .btn {
-        font-size: 1rem;
-        padding: 14px 20px;
-    }
-    
-    /* Cart fonts */
-    .cart-header h2 {
-        font-size: 1.4rem;
-    }
-    
-    .cart-item-name {
-        font-size: 1rem;
-    }
-    
-    .cart-item-price {
         font-size: 1.1rem;
+        margin-bottom: 25px;
+        line-height: 1.4;
     }
     
-    .cart-total {
-        font-size: 1.2rem;
-    }
-    
-    .checkout-btn {
-        font-size: 1.1rem;
-    }
-    
-    /* Mystery section */
-    .mystery-details h3 {
-        font-size: 1.5rem;
-    }
-    
-    .mystery-details p {
-        font-size: 0.95rem;
-    }
-    
-    .mystery-details ul li {
-        font-size: 0.9rem;
-    }
-    
-    .mystery-price {
-        font-size: 1.5rem;
-    }
-    
-    .mystery-note {
-        font-size: 0.85rem;
-    }
-    
-    /* Footer fonts */
-    .footer-column h3 {
-        font-size: 1.2rem;
-    }
-    
-    .footer-column p {
-        font-size: 0.9rem;
-    }
-    
-    .copyright {
-        font-size: 0.85rem;
-    }
-    
-    /* Team labels */
     .team-label {
         font-size: 1rem;
         margin-top: 8px;
     }
     
-    /* Click indicator */
-    .click-indicator {
-        font-size: 0.8rem;
-        padding: 4px 8px;
-    }
-}
-
-/* Additional adjustments for very small screens */
-@media (max-width: 480px) {
-    .hero-title {
-        font-size: 2.8rem !important;
+    /* Section titles */
+    .section-title {
+        font-size: 1.8rem;
+        margin-bottom: 25px;
     }
     
-    .section-title {
-        font-size: 1.8rem !important;
+    .section-title::after {
+        width: 60px;
+        height: 3px;
+        bottom: -12px;
     }
     
     .section-subtitle {
-        font-size: 1rem !important;
+        font-size: 1rem;
+        margin-bottom: 30px;
     }
     
-    .cookie-card h3 {
-        font-size: 1.1rem;
-    }
-    
-    .box-option h4 {
-        font-size: 1.1rem;
-    }
-    
-    .nav-link {
-        font-size: 0.95rem;
-        padding: 0.9rem 1.2rem;
-    }
-    
-    .brand-name {
-        font-size: 1.5rem !important;
-    }
-}
-
-/* Mobile landscape adjustments */
-@media (max-width: 768px) and (orientation: landscape) {
-    .hero-title {
-        font-size: 2.5rem !important;
-    }
-    
-    .hero-subtitle {
-        font-size: 1rem !important;
-    }
-    
-    .section-title {
-        font-size: 1.8rem !important;
-    }
-}
-
-/* Improved text rendering for mobile */
-@media (max-width: 768px) {
-    body {
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        text-rendering: optimizeLegibility;
-    }
-    
-    /* Ensure good contrast and readability */
-    h1, h2, h3, h4, h5, h6 {
-        font-weight: 600;
-        line-height: 1.2;
-    }
-    
-    p, li, span {
-        line-height: 1.4;
-    }
-}
-
-/* Prevent text size adjustment on orientation change */
-html {
-    -webkit-text-size-adjust: 100%;
-    -ms-text-size-adjust: 100%;
-}
-
-/* Improved touch targets for mobile */
-@media (max-width: 768px) {
-    .nav-link,
-    .btn,
-    .add-to-cart-btn,
-    .box-option,
-    .cookie-card,
-    .popup-style-option,
-    .flavor-option {
-        min-height: 44px; /* Minimum touch target size */
-    }
-    
-    .mobile-menu-btn,
-    .cart-icon,
-    .close-popup {
-        min-width: 44px;
-        min-height: 44px;
-    }
-}
-
-/* Enhanced readability for long text */
-@media (max-width: 768px) {
-    .feature-card p,
-    .cookie-card p,
-    .mystery-details p,
-    .footer-column p {
-        max-width: 35ch; /* Optimal line length for readability */
-        margin-left: auto;
-        margin-right: auto;
-    }
-}
-
-
-
-
-
-/* === PROPERLY REDUCED MOBILE FONT SIZES === */
-@media (max-width: 768px) {
-    /* Base font size adjustment */
-    body {
-        font-size: 14px; /* Reduced from default */
-        line-height: 1.4;
-    }
-    
-    /* Header and navigation fonts - REDUCED */
-    .modern-header {
-        font-size: 12px;
-    }
-    
-    .nav-link {
-        font-size: 0.9rem; /* Reduced */
-        padding: 0.8rem 1.2rem;
-    }
-    
-    .brand-name {
-        font-size: 1.4rem !important; /* Reduced from 1.8rem */
-    }
-    
-    .tagline {
-        font-size: 0.6rem; /* Reduced */
-    }
-    
-    /* Hero section fonts - REDUCED */
-    .hero-title {
-        font-size: 2.5rem !important; /* Reduced from 3.5rem */
-        line-height: 1.1;
-        margin-bottom: 0.5rem;
-    }
-    
-    .hero-subtitle {
-        font-size: 0.9rem !important; /* Reduced from 1.1rem */
-        line-height: 1.3;
-        margin-bottom: 1.5rem;
-        padding: 0 0.5rem;
-    }
-    
-    /* Section titles - REDUCED */
-    .section-title {
-        font-size: 1.6rem !important; /* Reduced from 2.2rem */
-        margin-bottom: 1.5rem;
-        line-height: 1.2;
-    }
-    
-    .section-subtitle {
-        font-size: 0.9rem !important; /* Reduced from 1.1rem */
-        line-height: 1.3;
-        margin-bottom: 1.5rem;
-        padding: 0 0.5rem;
-    }
-    
-    /* Card and content fonts - REDUCED */
+    /* Feature cards */
     .feature-card h3 {
-        font-size: 1.1rem; /* Reduced */
+        font-size: 1.2rem;
+        margin-bottom: 10px;
     }
     
     .feature-card p {
-        font-size: 0.8rem; /* Reduced */
-        line-height: 1.3;
+        font-size: 0.9rem;
+        line-height: 1.4;
     }
     
-    .cookie-card h3 {
-        font-size: 1rem; /* Reduced */
-        min-height: auto;
-        margin-bottom: 0.3rem;
+    .feature-icon {
+        font-size: 1.8rem;
+        width: 60px;
+        height: 60px;
+        margin-bottom: 15px;
     }
     
-    .cookie-card p {
-        font-size: 0.8rem; /* Reduced */
-        line-height: 1.3;
-        margin-bottom: 0.8rem;
-    }
-    
-    .cookie-price {
-        font-size: 1.1rem; /* Reduced */
-    }
-    
-    .add-to-cart-btn {
-        font-size: 0.9rem; /* Reduced */
-        padding: 10px 14px;
-    }
-    
-    /* Box options - REDUCED */
+    /* Box options */
     .box-option h4 {
-        font-size: 1rem; /* Reduced */
+        font-size: 1.1rem;
+        margin-bottom: 8px;
     }
     
     .box-option p {
-        font-size: 0.8rem; /* Reduced */
+        font-size: 0.85rem;
+        margin-bottom: 12px;
     }
     
-    .box-prices {
-        font-size: 1.1rem; /* Reduced */
+    .price-display {
+        font-size: 1.2rem;
     }
     
-    /* Popup fonts - REDUCED */
-    .flavor-popup-header h3 {
-        font-size: 1.1rem; /* Reduced */
+    /* Cookie cards */
+    .cookie-details h3 {
+        font-size: 1.1rem;
+        min-height: auto;
+        margin-bottom: 8px;
     }
     
-    .popup-box-info h4 {
-        font-size: 1.1rem; /* Reduced */
+    .cookie-details p {
+        font-size: 0.85rem;
+        margin-bottom: 15px;
+        line-height: 1.3;
     }
     
-    .popup-box-info p {
-        font-size: 0.8rem; /* Reduced */
+    .cookie-price {
+        font-size: 1.2rem;
     }
     
-    .popup-box-price {
-        font-size: 1.2rem; /* Reduced */
+    .add-to-cart-btn {
+        font-size: 0.9rem;
+        padding: 10px 15px;
     }
     
-    .flavor-instruction {
-        font-size: 0.9rem; /* Reduced */
+    .click-indicator {
+        font-size: 0.7rem;
+        padding: 4px 8px;
     }
     
-    .flavor-name {
-        font-size: 0.9rem; /* Reduced */
+    .cookie-tag {
+        font-size: 0.75rem;
+        padding: 3px 8px;
     }
     
-    .flavor-type {
-        font-size: 0.7rem; /* Reduced */
-    }
-    
-    /* Button fonts - REDUCED */
-    .btn {
-        font-size: 0.9rem; /* Reduced */
-        padding: 12px 18px;
-    }
-    
-    /* Cart fonts - REDUCED */
-    .cart-header h2 {
-        font-size: 1.2rem; /* Reduced */
-    }
-    
-    .cart-item-name {
-        font-size: 0.9rem; /* Reduced */
-    }
-    
-    .cart-item-price {
-        font-size: 1rem; /* Reduced */
-    }
-    
-    .cart-total {
-        font-size: 1.1rem; /* Reduced */
-    }
-    
-    .checkout-btn {
-        font-size: 1rem; /* Reduced */
-    }
-    
-    /* Mystery section - REDUCED */
+    /* Mystery section */
     .mystery-details h3 {
-        font-size: 1.3rem; /* Reduced */
+        font-size: 1.4rem;
+        margin-bottom: 12px;
     }
     
     .mystery-details p {
-        font-size: 0.85rem; /* Reduced */
+        font-size: 0.9rem;
+        margin-bottom: 12px;
+        line-height: 1.4;
     }
     
     .mystery-details ul li {
-        font-size: 0.8rem; /* Reduced */
+        font-size: 0.85rem;
+        margin-bottom: 8px;
     }
     
     .mystery-price {
-        font-size: 1.3rem; /* Reduced */
+        font-size: 1.5rem;
+        margin: 15px 0;
     }
     
     .mystery-note {
-        font-size: 0.75rem; /* Reduced */
+        font-size: 0.8rem;
+        margin-bottom: 15px;
     }
     
-    /* Footer fonts - REDUCED */
+    .mystery-btn {
+        font-size: 1rem;
+        padding: 10px 15px;
+    }
+    
+    /* Popup text sizes */
+    .flavor-popup-header h3 {
+        font-size: 1.3rem;
+    }
+    
+    .popup-box-info h4 {
+        font-size: 1.2rem;
+    }
+    
+    .popup-box-info p {
+        font-size: 0.9rem;
+    }
+    
+    .popup-box-price {
+        font-size: 1.3rem;
+    }
+    
+    .flavor-instruction {
+        font-size: 1rem;
+    }
+    
+    .selection-counter {
+        font-size: 0.9rem;
+    }
+    
+    .flavor-label {
+        font-size: 0.9rem;
+    }
+    
+    .flavor-name {
+        font-size: 0.95rem;
+    }
+    
+    .flavor-type {
+        font-size: 0.8rem;
+    }
+    
+    .popup-style-btn {
+        font-size: 0.85rem;
+        padding: 10px 15px;
+    }
+    
+    .add-to-cart-popup {
+        font-size: 1rem;
+        padding: 12px;
+    }
+    
+    /* Cookie detail popup */
+    .popup-content h2 {
+        font-size: 1.5rem;
+        margin-bottom: 12px;
+    }
+    
+    .popup-content p {
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+    }
+    
+    .popup-style-option {
+        font-size: 0.85rem;
+        padding: 10px 12px;
+    }
+    
+    .detail-text {
+        font-size: 0.9rem;
+    }
+    
+    .popup-price {
+        font-size: 1.4rem;
+        margin: 15px 0;
+    }
+    
+    .quantity-value {
+        font-size: 1rem;
+    }
+    
+    .popup-add-to-cart {
+        font-size: 1rem;
+        padding: 10px 15px;
+    }
+    
+    /* Cart sidebar */
+    .cart-header h2 {
+        font-size: 1.3rem;
+    }
+    
+    .cart-item-name {
+        font-size: 0.95rem;
+    }
+    
+    .cart-item-price {
+        font-size: 0.9rem;
+    }
+    
+    .cart-total {
+        font-size: 1.1rem;
+    }
+    
+    .checkout-btn {
+        font-size: 1rem;
+        padding: 12px;
+    }
+    
+    /* Footer */
     .footer-column h3 {
-        font-size: 1rem; /* Reduced */
+        font-size: 1.2rem;
+        margin-bottom: 12px;
     }
     
     .footer-column p {
-        font-size: 0.8rem; /* Reduced */
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+    
+    .social-icons {
+        font-size: 1.3rem;
+        gap: 1rem;
     }
     
     .copyright {
-        font-size: 0.75rem; /* Reduced */
+        font-size: 0.85rem;
+        margin-top: 2rem;
     }
     
-    /* Team labels - REDUCED */
-    .team-label {
-        font-size: 0.9rem; /* Reduced */
-        margin-top: 5px;
-    }
-    
-    /* Click indicator - REDUCED */
-    .click-indicator {
-        font-size: 0.7rem; /* Reduced */
-        padding: 3px 6px;
+    /* Buttons */
+    .btn {
+        font-size: 0.9rem;
+        padding: 10px 20px;
     }
 }
 
-/* Additional reductions for very small screens */
+/* ===== SMALL MOBILE ADJUSTMENTS (max-width: 480px) ===== */
 @media (max-width: 480px) {
-    .hero-title {
-        font-size: 2rem !important; /* Further reduced */
-    }
-    
-    .section-title {
-        font-size: 1.4rem !important; /* Further reduced */
-    }
-    
-    .section-subtitle {
-        font-size: 0.8rem !important; /* Further reduced */
-    }
-    
-    .cookie-card h3 {
-        font-size: 0.9rem; /* Further reduced */
-    }
-    
-    .box-option h4 {
-        font-size: 0.9rem; /* Further reduced */
-    }
-    
-    .nav-link {
-        font-size: 0.85rem; /* Further reduced */
-        padding: 0.7rem 1rem;
-    }
-    
-    .brand-name {
-        font-size: 1.2rem !important; /* Further reduced */
-    }
-    
-    /* Even smaller for very compact screens */
     body {
         font-size: 13px;
     }
-}
-
-/* Mobile landscape - keep fonts compact */
-@media (max-width: 768px) and (orientation: landscape) {
+    
     .hero-title {
-        font-size: 2rem !important; /* Compact for landscape */
+        font-size: 2rem;
     }
     
     .hero-subtitle {
-        font-size: 0.8rem !important; /* Compact for landscape */
+        font-size: 1rem;
     }
     
     .section-title {
-        font-size: 1.4rem !important; /* Compact for landscape */
+        font-size: 1.5rem;
+    }
+    
+    .feature-card h3 {
+        font-size: 1.1rem;
+    }
+    
+    .feature-card p {
+        font-size: 0.85rem;
+    }
+    
+    .box-option h4 {
+        font-size: 1rem;
+    }
+    
+    .box-option p {
+        font-size: 0.8rem;
+    }
+    
+    .cookie-details h3 {
+        font-size: 1rem;
+    }
+    
+    .cookie-details p {
+        font-size: 0.8rem;
+    }
+    
+    .mystery-details h3 {
+        font-size: 1.2rem;
+    }
+    
+    .mystery-details p {
+        font-size: 0.85rem;
+    }
+    
+    .flavor-popup-header h3 {
+        font-size: 1.1rem;
     }
 }
 
-/* Ensure text doesn't overflow on mobile */
-@media (max-width: 768px) {
-    h1, h2, h3, h4, h5, h6 {
-        word-wrap: break-word;
-        overflow-wrap: break-word;
+/* ===== LANDSCAPE ORIENTATION ADJUSTMENTS ===== */
+@media (max-width: 768px) and (orientation: landscape) {
+    .hero-title {
+        font-size: 2rem;
     }
     
-    /* Prevent text from causing horizontal scroll */
-    .container, .tab-content, .cookie-card, .box-option {
-        max-width: 100%;
-        overflow-x: hidden;
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .section-title {
+        font-size: 1.6rem;
+    }
+}
+
+/* ===== ACCESSIBILITY: RESPECT USER FONT SIZE PREFERENCES ===== */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Ensure good contrast and readability */
+@media (max-width: 768px) {
+    .nav-link {
+        font-weight: 500;
+    }
+    
+    .feature-card h3,
+    .box-option h4,
+    .cookie-details h3 {
+        font-weight: 600;
+    }
+    
+    .price-display,
+    .cookie-price,
+    .mystery-price,
+    .popup-box-price,
+    .popup-price {
+        font-weight: 700;
     }
 }
