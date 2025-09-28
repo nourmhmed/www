@@ -251,6 +251,39 @@
         box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
       }
     }
+
+    .order-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .info-item {
+      padding: 8px;
+      background: white;
+      border-radius: 8px;
+    }
+
+    .order-items {
+      margin-top: 20px;
+    }
+
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .status-badge {
+      background: #4CAF50;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 15px;
+      font-size: 12px;
+      font-weight: bold;
+    }
   </style>
 </head>
 
@@ -317,10 +350,17 @@
       }
     }
 
-    // In your thankyou.html script section - ADD THIS CODE
-    if (urlParams.order && urlParams.success === "true") {
-      await fetchOrderFromSupabase(urlParams.order);
+    initOrderDetails();
+
+    // In your thankyou.html script section - FIXED VERSION
+    async function initOrderDetails() {
+      if (urlParams.order && urlParams.success === "true") {
+        await fetchOrderFromSupabase(urlParams.order);
+      }
     }
+
+    // Call the async function
+    initOrderDetails();
 
     // Function to fetch order details from Supabase
     async function fetchOrderFromSupabase(orderId) {
