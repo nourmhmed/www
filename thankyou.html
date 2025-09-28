@@ -329,7 +329,7 @@
         // Initialize Supabase
         const supabaseUrl = 'https://kegjyekbrxagrhidvyse.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZ2p5ZWticnhhZ3JoaWR2eXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxOTYzOTUsImV4cCI6MjA3Mzc3MjM5NX0.Lf_Jz-Q8GUM4XChuNJOJXffA_cGNA2vkgZ-41d08eL8';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        const supabase = createClient(supabaseUrl, supabaseKey);
 
         // Fetch order from Supabase
         const { data: order, error } = await supabase
