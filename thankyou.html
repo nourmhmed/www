@@ -251,39 +251,6 @@
         box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
       }
     }
-
-    .order-info-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin: 15px 0;
-    }
-
-    .info-item {
-      padding: 8px;
-      background: white;
-      border-radius: 8px;
-    }
-
-    .order-items {
-      margin-top: 20px;
-    }
-
-    .order-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px;
-      border-bottom: 1px solid #eee;
-    }
-
-    .status-badge {
-      background: #4CAF50;
-      color: white;
-      padding: 4px 12px;
-      border-radius: 15px;
-      font-size: 12px;
-      font-weight: bold;
-    }
   </style>
 </head>
 
@@ -350,17 +317,10 @@
       }
     }
 
-    initOrderDetails();
-
-    // In your thankyou.html script section - FIXED VERSION
-    async function initOrderDetails() {
-      if (urlParams.order && urlParams.success === "true") {
-        await fetchOrderFromSupabase(urlParams.order);
-      }
+    // In your thankyou.html script section - ADD THIS CODE
+    if (urlParams.order && urlParams.success === "true") {
+      await fetchOrderFromSupabase(urlParams.order);
     }
-
-    // Call the async function
-    initOrderDetails();
 
     // Function to fetch order details from Supabase
     async function fetchOrderFromSupabase(orderId) {
@@ -383,7 +343,7 @@
         }
 
         if (order) {
-          displayOrderDetails(order);
+          console.log("orderorderorder", order)
         } else {
           console.log('Order not found in database');
         }
@@ -393,69 +353,6 @@
       }
     }
 
-    // Function to display order details on the page
-    function displayOrderDetails(order) {
-      // Create order details section
-      const orderDetailsHTML = `
-        <div class="order-details" style="margin-top: 20px; padding: 20px; background: #f9f9f9; border-radius: 10px; text-align: left;">
-            <h3 style="margin-bottom: 15px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">Order Details</h3>
-            
-            <div class="detail-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <span class="detail-label" style="font-weight: 500; color: #666;">Order ID:</span>
-                <span class="detail-value" style="font-weight: 600; color: #333;">${order.order_id}</span>
-            </div>
-            
-            <div class="detail-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <span class="detail-label" style="font-weight: 500; color: #666;">Status:</span>
-                <span class="detail-value" style="font-weight: 600; color: #4CAF50;">${order.status || 'Confirmed'}</span>
-            </div>
-            
-            <div class="detail-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <span class="detail-label" style="font-weight: 500; color: #666;">Total Amount:</span>
-                <span class="detail-value" style="font-weight: 600; color: #333;">EGP ${order.total_amount}</span>
-            </div>
-            
-            <div class="detail-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <span class="detail-label" style="font-weight: 500; color: #666;">Customer:</span>
-                <span class="detail-value" style="font-weight: 600; color: #333;">${order.customer_name}</span>
-            </div>
-            
-            <div class="detail-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <span class="detail-label" style="font-weight: 500; color: #666;">Email:</span>
-                <span class="detail-value" style="font-weight: 600; color: #333;">${order.customer_email}</span>
-            </div>
-            
-            <div class="detail-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <span class="detail-label" style="font-weight: 500; color: #666;">Phone:</span>
-                <span class="detail-value" style="font-weight: 600; color: #333;">${order.customer_phone}</span>
-            </div>
-            
-            ${order.items ? `
-            <div style="margin-top: 15px;">
-                <h4 style="margin-bottom: 10px; color: #333;">Order Items:</h4>
-                ${order.items.map(item => `
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px; padding: 5px 0; border-bottom: 1px solid #eee;">
-                        <span>${item.name} x${item.quantity}</span>
-                        <span>EGP ${item.price}</span>
-                    </div>
-                `).join('')}
-            </div>
-            ` : ''}
-        </div>
-    `;
-
-      // Insert the order details before the redirect text
-      const redirectText = document.querySelector('.redirect-text');
-      const card = document.querySelector('.thankyou-card');
-      card.insertBefore(createElementFromHTML(orderDetailsHTML), redirectText);
-    }
-
-    // Helper function to create element from HTML string
-    function createElementFromHTML(htmlString) {
-      const div = document.createElement('div');
-      div.innerHTML = htmlString.trim();
-      return div.firstChild;
-    }
 
     // Function to show order confirmation
     function showOrderConfirmation() {
