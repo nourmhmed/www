@@ -893,7 +893,7 @@ Thank you for choosing Syrine's Crumble!
       localStorage.removeItem(CART_KEY);
 
       // Confetti 🎉
-      // setTimeout(createConfetti, 500);
+      setTimeout(createConfetti, 500);
     } else {
       // ❌ Failed
       iconCircle.className = "fas fa-times";
@@ -917,15 +917,15 @@ Thank you for choosing Syrine's Crumble!
     }, 1000);
 
     // Redirect after 5 seconds
-    // setTimeout(() => {
-    //   if (urlParams.success === "true") {
-    //     // ✅ Success → go home
-    //     window.location.href = "index.html";
-    //   } else {
-    //     // ❌ Failure → retry checkout
-    //     window.location.href = "checkout.html";
-    //   }
-    // }, 5000);
+    setTimeout(() => {
+      if (urlParams.success === "true") {
+        // ✅ Success → go home
+        window.location.href = "index.html";
+      } else {
+        // ❌ Failure → retry checkout
+        window.location.href = "checkout.html";
+      }
+    }, 5000);
 
 
     // Create confetti effect
