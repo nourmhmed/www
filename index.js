@@ -3,6 +3,7 @@
 const CART_KEY = 'syrines_crumble_cart';
 let selectedBox = null;
 let selectedStyle = 'chewy';
+let cookiesData = {};
 
 const mobileMenuBtnn = document.getElementById('mobile-menu-btn');
 const mobileNav = document.createElement('div');
@@ -43,6 +44,9 @@ async function initializeSupabase() {
 // Initialize Supabase when the script loads
 let supabaseInitialized = false;
 
+
+
+
 async function ensureSupabaseInitialized() {
     if (!supabaseInitialized) {
         supabaseInitialized = await initializeSupabase();
@@ -52,6 +56,131 @@ async function ensureSupabaseInitialized() {
 
 let selectedFlavors = {};
 
+
+
+// Function to fetch cookies from Supabase
+// Update the fetchCookiesData function to match your table columns
+async function fetchCookiesData() {
+    try {
+        const initialized = await ensureSupabaseInitialized();
+        if (!initialized) {
+            console.warn('Supabase not initialized, using fallback data');
+            return getFallbackCookiesData();
+        }
+
+        const { data, error } = await supabase
+            .from('cookies')
+            .select('*')
+            .eq('is_active', true)
+            .order('created_at');
+
+        if (error) {
+            console.error('Error fetching cookies:', error);
+            return getFallbackCookiesData();
+        }
+
+        // Transform the data to match your expected format
+        const transformedData = {};
+        data.forEach(cookie => {
+            transformedData[cookie.slug] = {
+                title: cookie.name,
+                description: cookie.description,
+                images: {
+                    chewy: cookie.image_url_chewy,
+                    crumble: cookie.image_url_crumble
+                },
+                price: `${cookie.chewy_price} LE`,
+                ingredients: cookie.ingredients,
+                specialty: cookie.specialty,
+                perfectFor: cookie.perfect_for,
+                tags: cookie.tags || [],
+                chewy_price: cookie.chewy_price,
+                crumble_price: cookie.crumble_price
+            };
+        });
+
+        return transformedData;
+    } catch (error) {
+        console.error('Error in fetchCookiesData:', error);
+        return getFallbackCookiesData();
+    }
+}
+
+// Keep your fallback function as backup
+function getFallbackCookiesData() {
+    return {
+        'chocolate-chip': {
+            title: 'The Original Chocolate Chips',
+            description: 'Classic chocolate chip cookie with premium Belgian chocolate',
+            images: {
+                chewy: 'images/original_chewy_cookie.svg',
+                crumble: 'images/original_crumble_cookie.svg'
+            },
+            price: '80 LE',
+            ingredients: 'Flour, Belgian chocolate chunks, butter, brown sugar, eggs, vanilla extract, baking soda, salt',
+            specialty: 'Made with premium Belgian chocolate for a rich, authentic flavor',
+            perfectFor: 'Chocolate lovers, classic cookie enthusiasts, and family gatherings',
+            tags: ['popular'],
+            chewy_price: 80,
+            crumble_price: 80
+        },
+        // ... include all other cookies
+    };
+}
+
+
+// Function to render cookies grid dynamically
+async function renderCookiesGrid() {
+    const cookiesGrid = document.querySelector('.cookies-grid');
+    if (!cookiesGrid) return;
+
+    // Show loading state
+    cookiesGrid.innerHTML = '<div class="loading-cookies">Loading cookies...</div>';
+
+    // Fetch cookies data
+    cookiesData = await fetchCookiesData();
+
+    // Clear loading state and render cookies
+    cookiesGrid.innerHTML = '';
+
+    Object.keys(cookiesData).forEach(slug => {
+        const cookie = cookiesData[slug];
+        const cookieCard = document.createElement('div');
+        cookieCard.className = 'cookie-card';
+        cookieCard.onclick = () => openPopup(slug);
+
+        let tagsHTML = '';
+        if (cookie.tags && cookie.tags.length > 0) {
+            cookie.tags.forEach(tag => {
+                tagsHTML += `<div class="cookie-tag">${tag.charAt(0).toUpperCase() + tag.slice(1)}</div>`;
+            });
+        }
+
+        cookieCard.innerHTML = `
+            <div class="click-indicator">
+                <i class="fas fa-hand-pointer"></i> Click for details
+            </div>
+            <div class="cookie-image">
+                <img src="${cookie.images.chewy}" alt="${cookie.title}" loading="lazy">
+                ${tagsHTML}
+            </div>
+            <div class="cookie-details">
+                <h3>${cookie.title}</h3>
+                <p>${cookie.description}</p>
+                <div class="cookie-options">
+                    <div class="cookie-price">${cookie.chewy_price} LE</div>
+                </div>
+                <button class="add-to-cart-btn" onclick="event.stopPropagation(); openPopup('${slug}')">
+                    Choose
+                </button>
+            </div>
+        `;
+
+        cookiesGrid.appendChild(cookieCard);
+    });
+}
+
+
 // Mobile menu functionality
 const mobileMenuBtn = document.getElementById('mobile-menu-btn');
 const mainNav = document.querySelector('.main-nav');
@@ -59,36 +188,34 @@ const mainNav = document.querySelector('.main-nav');
 // Price service to handle database operations
 const priceService = {
     // Get all current prices from database
-    async getCurrentPrices() {
-        // Ensure Supabase is initialized
-        const initialized = await ensureSupabaseInitialized();
-        if (!initialized) {
-            console.warn('Supabase not initialized, using fallback prices');
-            return this.getFallbackPrices();
-        }
+    // In your priceService.getCurrentPrices() function, update the cookies part:
+async getCurrentPrices() {
+    const initialized = await ensureSupabaseInitialized();
+    if (!initialized) {
+        return this.getFallbackPrices();
+    }
 
-        try {
-            const [cookiesResponse, boxesResponse, mysteryResponse] = await Promise.all([
-                supabase.from('cookies').select('slug, chewy_price, crumble_price').eq('is_active', true),
-                supabase.from('boxes').select('size, chewy_price, crumble_price, mix_price, cookie_count').eq('is_active', true),
-                supabase.from('mystery_boxes').select('price').eq('is_active', true).single()
-            ]);
+    try {
+        const [cookiesResponse, boxesResponse, mysteryResponse] = await Promise.all([
+            supabase.from('cookies').select('slug, chewy_price, crumble_price').eq('is_active', true),
+            supabase.from('boxes').select('size, chewy_price, crumble_price, mix_price, cookie_count').eq('is_active', true),
+            supabase.from('mystery_boxes').select('price').eq('is_active', true).single()
+        ]);
 
-            // Check for errors
-            if (cookiesResponse.error) throw cookiesResponse.error;
-            if (boxesResponse.error) throw boxesResponse.error;
-            if (mysteryResponse.error) throw mysteryResponse.error;
+        if (cookiesResponse.error) throw cookiesResponse.error;
+        if (boxesResponse.error) throw boxesResponse.error;
+        if (mysteryResponse.error) throw mysteryResponse.error;
 
-            return {
-                cookies: cookiesResponse.data || [],
-                boxes: boxesResponse.data || [],
-                mystery: mysteryResponse.data?.price || 450
-            };
-        } catch (error) {
-            console.error('Error fetching prices:', error);
-            return this.getFallbackPrices();
-        }
-    },
+        return {
+            cookies: cookiesResponse.data || [],
+            boxes: boxesResponse.data || [],
+            mystery: mysteryResponse.data?.price || 450
+        };
+    } catch (error) {
+        console.error('Error fetching prices:', error);
+        return this.getFallbackPrices();
+    }
+},
 
     // Fallback prices in case database is unavailable
     getFallbackPrices() {
@@ -344,31 +471,35 @@ document.querySelectorAll('.tab-btn').forEach(button => {
     });
 });
 
-// Popup functionality
+// Update the openPopup function to use dynamic data
 function openPopup(cookieType) {
     disableBodyScroll();
     currentCookie = cookieType;
     currentStyle = 'chewy';
     quantity = 1;
     
-    const cookie = cookieData[cookieType];
+    const cookie = cookiesData[cookieType];
+    if (!cookie) {
+        console.error('Cookie not found:', cookieType);
+        return;
+    }
+    
     document.getElementById('popupTitle').textContent = cookie.title;
     document.getElementById('popupDescription').textContent = cookie.description;
     document.getElementById('popupImage').style.backgroundImage = `url(${cookie.images.chewy})`;
-    document.getElementById('popupPrice').textContent = cookie.price;
+    document.getElementById('popupPrice').textContent = `${cookie.chewy_price} LE`;
     document.getElementById('popupIngredients').textContent = cookie.ingredients;
     document.getElementById('popupSpecialty').textContent = cookie.specialty;
     document.getElementById('popupPerfectFor').textContent = cookie.perfectFor;
     document.getElementById('quantityValue').textContent = quantity;
     
-    // Set active style button
     document.querySelectorAll('.popup-style-option').forEach(btn => {
         btn.classList.remove('active');
     });
     document.querySelector('.popup-style-option[data-style="chewy"]').classList.add('active');
     
     document.getElementById('popupOverlay').classList.add('active');
-    document.body.style.overflow = 'hidden'; // Prevent scrolling when popup is open
+    document.body.style.overflow = 'hidden';
 }
 
 function closePopup() {
@@ -769,6 +900,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Initialize prices
     currentPrices = await priceService.getCurrentPrices();
     console.log('Prices loaded successfully:', currentPrices);
+    await renderCookiesGrid(); // Add this line
     
     setupMobileMenu(); 
     
