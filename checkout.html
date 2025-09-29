@@ -4,9 +4,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Checkout | Syrines</title>
+  <title>Checkout | Syrine's Crumble</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    @font-face {
+      font-family: 'Stella';
+      src: url('font/stella.ttf') format('truetype');
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -45,7 +50,7 @@
     }
 
     .brand-name {
-      font-family: 'Brush Script MT', cursive;
+      font-family: 'stella', cursive;
       font-size: 2rem;
       color: var(--primary);
       line-height: 1;
@@ -2175,6 +2180,110 @@
         padding: 10px 20px;
       }
     }
+
+    /* Voucher Code Section */
+    .voucher-section {
+      margin: 1.5rem 0;
+      padding: 1.5rem;
+      background: var(--background);
+      border-radius: 12px;
+      border: 1px solid var(--secondary);
+      box-sizing: border-box;
+      /* Ensure padding is included in width */
+    }
+
+    .voucher-input-group {
+      display: flex;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+      width: 100%;
+      /* Ensure it doesn't exceed container */
+      box-sizing: border-box;
+      /* Include padding in width calculation */
+    }
+
+    .voucher-input {
+      flex: 1;
+      padding: 0.8rem 1rem;
+      border: 1px solid var(--primary);
+      border-radius: 10px;
+      font-size: 1rem;
+      box-sizing: border-box;
+      /* Include padding in width */
+      min-width: 0;
+      /* Prevent flex item from overflowing */
+    }
+
+    .apply-voucher-btn {
+      padding: 0.8rem 1.5rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--transition);
+      flex-shrink: 0;
+      /* Prevent button from shrinking */
+      white-space: nowrap;
+      /* Prevent text wrapping */
+    }
+
+    .apply-voucher-btn:hover {
+      background: var(--accent);
+    }
+
+    .voucher-message {
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      min-height: 1.2rem;
+      word-wrap: break-word;
+      /* Prevent long text from overflowing */
+    }
+
+    .voucher-success {
+      color: var(--success);
+    }
+
+    .voucher-error {
+      color: #e74c3c;
+    }
+
+    .breakdown-item.discount {
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      .voucher-input-group {
+        flex-direction: column;
+      }
+
+      .apply-voucher-btn {
+        width: 100%;
+      }
+
+      .voucher-section {
+        padding: 1rem;
+        /* Reduce padding on mobile */
+      }
+    }
+
+    /* For very small screens */
+    @media (max-width: 480px) {
+      .voucher-section {
+        padding: 0.8rem;
+        margin: 1rem 0;
+      }
+
+      .voucher-input {
+        padding: 0.7rem 0.8rem;
+      }
+
+      .apply-voucher-btn {
+        padding: 0.7rem 1rem;
+      }
+    }
   </style>
 </head>
 
@@ -2271,7 +2380,7 @@
                 <option value="" disabled selected>Select your city</option>
                 <option value="Cairo">Cairo</option>
                 <option value="Giza">Giza</option>
-                <option value="Alexandria">Alexandria</option>
+                <!-- <option value="Alexandria">Alexandria</option>
                 <option value="Shubra El-Kheima">Shubra El-Kheima</option>
                 <option value="Port Said">Port Said</option>
                 <option value="Suez">Suez</option>
@@ -2301,7 +2410,7 @@
                 <option value="Red Sea">Red Sea</option>
                 <option value="New Valley">New Valley</option>
                 <option value="North Sinai">North Sinai</option>
-                <option value="South Sinai">South Sinai</option>
+                <option value="South Sinai">South Sinai</option> -->
               </select>
             </div>
           </div>
@@ -2347,9 +2456,24 @@
     <div class="order-summary">
       <h3 class="summary-title">Order Summary</h3>
       <div class="summary-items"></div>
+
+      <!-- Voucher Code Section -->
+      <div class="voucher-section">
+        <div class="voucher-input-group">
+          <input type="text" class="voucher-input" id="voucher-code" placeholder="Enter voucher code">
+          <button class="apply-voucher-btn" id="apply-voucher">
+            <i class="fas fa-tag"></i> Apply
+          </button>
+        </div>
+        <div class="voucher-message" id="voucher-message">Enter your voucher</div>
+      </div>
+
       <div class="summary-item"><span>Subtotal</span><span id="subtotal">LE 0.00</span></div>
-      <div class="summary-item"><span>Shipping</span><span>FREE</span></div>
-      <div class="summary-total"><span>Total</span><span class="total-amount">LE 0.00</span></div>
+      <div class="summary-item"><span>Shipping</span><span id="shipping-cost">LE 0.00</span></div>
+      <div class="summary-item discount" id="discount-row" style="display: none;">
+        <span>Discount</span><span id="discount-amount">-LE 0.00</span>
+      </div>
+      <div class="summary-total"><span>Total</span><span class="total-amount" id="total-amount">LE 0.00</span></div>
     </div>
   </div>
 
@@ -2365,11 +2489,116 @@
     <div class="spinner"></div>
   </div>
 
-  <script>
+  <script type="module">
 
     const shippingStep = document.getElementById('step-shipping');
     const paymentStep = document.getElementById('step-payment');
     const progressSteps = document.querySelectorAll('.progress-step');
+
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    const CART_KEY = 'syrines_crumble_cart';
+
+    let shippingPrices = null;
+
+
+
+    const SUPABASE_URL = 'https://kegjyekbrxagrhidvyse.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZ2p5ZWticnhhZ3JoaWR2eXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxOTYzOTUsImV4cCI6MjA3Mzc3MjM5NX0.Lf_Jz-Q8GUM4XChuNJOJXffA_cGNA2vkgZ-41d08eL8';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let appliedVoucher = null;
+
+    let allVouchers = null;
+
+
+    // Function to fetch shipping prices
+    async function fetchShippingPrices() {
+      try {
+        const { data: shippingData, error } = await supabase
+          .from('shipping_prices')
+          .select('*');
+
+        if (error) {
+          console.error('Error fetching shipping prices:', error);
+          return;
+        }
+
+        shippingPrices = shippingData;
+        console.log('Shipping prices loaded:', shippingPrices);
+
+      } catch (error) {
+        console.error('Error fetching shipping prices:', error);
+      }
+    }
+    // Add this function after your supabase client initialization
+    async function fetchAllVouchers() {
+      try {
+        const { data: vouchers, error } = await supabase
+          .from('vouchers')
+          .select('*')
+          .eq('is_active', true);
+
+        if (error) {
+          console.error('Error fetching vouchers:', error);
+          return;
+        }
+
+        console.log('Available vouchers:', vouchers);
+
+        // You can store them in a variable for later use
+        allVouchers = vouchers;
+
+        // Or display them in console for debugging
+        if (vouchers && vouchers.length > 0) {
+          console.log('Active vouchers loaded:');
+          vouchers.forEach(voucher => {
+            console.log(`- ${voucher.code}: ${voucher.discount_value}% ${voucher.discount_type}`);
+          });
+        } else {
+          console.log('No active vouchers found');
+        }
+
+      } catch (error) {
+        console.error('Error fetching vouchers:', error);
+      }
+    }
+
+    // Also update the initial page load to handle city selection better
+    document.addEventListener('DOMContentLoaded', function () {
+      fetchAllVouchers();
+      fetchShippingPrices();
+
+      // Add validation to require city selection
+      const citySelect = document.getElementById('city');
+      citySelect.required = true;
+
+      // Set initial shipping display
+      setTimeout(() => {
+        const initialCity = citySelect.value;
+        const initialShippingCost = getShippingPrice(initialCity);
+        const shippingEl = document.getElementById('shipping-cost');
+
+        if (!initialCity) {
+          shippingEl.textContent = '-';
+          shippingEl.style.color = '#999';
+        } else if (initialShippingCost === 0) {
+          shippingEl.textContent = '-';
+          shippingEl.style.color = 'var(--success)';
+        } else {
+          shippingEl.textContent = `LE ${initialShippingCost}.00`;
+          shippingEl.style.color = '';
+        }
+      }, 50);
+    });
+
+    // Function to get shipping price for a city
+    function getShippingPrice(city) {
+      if (!shippingPrices) return 0;
+
+      const shippingInfo = shippingPrices.find(item => item.city === city);
+      return shippingInfo ? shippingInfo.price : 0;
+    }
 
     // Move from Shipping → Payment
     document.getElementById('to-payment-step').addEventListener('click', () => {
@@ -2387,6 +2616,220 @@
       }
     });
 
+    // Update the voucher application button to check for city first
+    document.getElementById('apply-voucher').addEventListener('click', function () {
+      const voucherCode = document.getElementById('voucher-code').value.toUpperCase();
+      const messageEl = document.getElementById('voucher-message');
+      const selectedCity = document.getElementById('city').value;
+
+      // Check if city is selected first
+      if (!selectedCity) {
+        messageEl.textContent = 'Please enter your data first';
+        messageEl.className = 'voucher-message voucher-error';
+        // Highlight the city field
+        document.getElementById('city').style.borderColor = '#e74c3c';
+        return;
+      }
+
+      console.log('Voucher code entered (converted to uppercase):', voucherCode);
+
+      if (voucherCode.trim() === '') {
+        messageEl.textContent = 'Please enter a voucher code';
+        messageEl.className = 'voucher-message voucher-error';
+        console.log('Empty voucher code entered');
+        return;
+      }
+
+      // Check if code exists (case-insensitive)
+      const matched = allVouchers.find(v => v.code.toLowerCase() === voucherCode.toLowerCase());
+
+      if (matched) {
+        if (matched.is_active !== false) { // Check if voucher is active
+          applyVoucherLogic(matched);
+          messageEl.textContent = `Voucher "${voucherCode}" applied successfully!`;
+          messageEl.className = 'voucher-message voucher-success';
+          appliedVoucher = matched;
+          console.log('Voucher applied:', matched);
+        } else {
+          messageEl.textContent = `Voucher "${voucherCode}" is no longer active`;
+          messageEl.className = 'voucher-message voucher-error';
+          console.log('Inactive voucher entered:', voucherCode);
+        }
+      } else {
+        messageEl.textContent = `Voucher "${voucherCode}" is invalid`;
+        messageEl.className = 'voucher-message voucher-error';
+        console.log('Invalid voucher entered:', voucherCode);
+      }
+    });
+
+    // Reset city field border when user selects a city
+    document.getElementById('city').addEventListener('change', function () {
+      this.style.borderColor = ''; // Reset to default
+    });
+
+    // Update the voucher application function to handle missing city
+    function applyVoucherLogic(voucher) {
+      const cart = getCart();
+      const selectedCity = document.getElementById('city').value;
+
+      // Check if city is selected
+      if (!selectedCity) {
+        const messageEl = document.getElementById('voucher-message');
+        messageEl.textContent = 'Please select a city first to calculate shipping';
+        messageEl.className = 'voucher-message voucher-error';
+        return;
+      }
+
+      let subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      let discount = 0;
+      let shippingCost = getShippingPrice(selectedCity);
+      let freeShipping = false;
+
+      console.log('Applying voucher logic:', voucher);
+      console.log('Initial subtotal:', subtotal);
+      console.log('Shipping cost for', selectedCity + ':', shippingCost);
+
+      // Condition 1: Free Shipping
+      if (voucher.free_shipping) {
+        console.log('Applying free shipping');
+        freeShipping = true;
+        shippingCost = 0;
+      }
+
+      // Condition 2: Item-specific discount
+      if (voucher.is_item && voucher.items && Array.isArray(voucher.items)) {
+        console.log('Applying item-specific discount');
+        console.log('Applicable items:', voucher.items);
+
+        cart.forEach(item => {
+          // Check if this item is in the voucher's applicable items list
+          if (voucher.items.includes(item.cookieType) || voucher.items.includes(item.size)) {
+            const itemTotal = item.price * item.quantity;
+            let itemDiscount = 0;
+
+            // Apply discount based on discount_number or discount_rate
+            if (voucher.discount_number) {
+              itemDiscount = Math.min(voucher.discount_number * item.quantity, itemTotal);
+            } else if (voucher.discount_rate) {
+              itemDiscount = (itemTotal * voucher.discount_rate) / 100;
+            }
+
+            discount += itemDiscount;
+            console.log(`Discount for ${item.name}: ${itemDiscount}`);
+          }
+        });
+      }
+
+      // Condition 3: Total order discount
+      if (voucher.total) {
+        console.log('Applying total order discount');
+        if (voucher.discount_number) {
+          discount = Math.min(voucher.discount_number, subtotal);
+        } else if (voucher.discount_rate) {
+          discount = (subtotal * voucher.discount_rate) / 100;
+        }
+        console.log('Total discount:', discount);
+      }
+
+      // Update UI
+      updateOrderSummary(subtotal, discount, shippingCost, freeShipping);
+    }
+
+    // Also update the updateOrderSummary function to handle "Select city" state
+    function updateOrderSummary(subtotal, discount, shippingCost, freeShipping = false) {
+      const subtotalEl = document.getElementById('subtotal');
+      const shippingEl = document.getElementById('shipping-cost');
+      const discountRow = document.getElementById('discount-row');
+      const discountAmountEl = document.getElementById('discount-amount');
+      const totalAmountEl = document.getElementById('total-amount');
+
+      // Update subtotal
+      subtotalEl.textContent = `LE ${subtotal}.00`;
+
+      // Update shipping
+      const selectedCity = document.getElementById('city').value;
+      if (!selectedCity) {
+        shippingEl.textContent = '-';
+        shippingEl.style.color = '#999';
+      } else if (freeShipping || shippingCost === 0) {
+        shippingEl.textContent = '-';
+        shippingEl.style.color = 'var(--success)';
+      } else {
+        shippingEl.textContent = `LE ${shippingCost}.00`;
+        shippingEl.style.color = '';
+      }
+
+      // Show/hide discount row
+      if (discount > 0) {
+        discountRow.style.display = 'flex';
+        discountAmountEl.textContent = `-LE ${discount.toFixed(2)}`;
+      } else {
+        discountRow.style.display = 'none';
+      }
+
+      // Calculate and update total (only if city is selected)
+      let total = subtotal - discount;
+      if (selectedCity) {
+        total += shippingCost;
+      }
+      total = Math.max(0, total);
+      totalAmountEl.textContent = `LE ${total.toFixed(2)}`;
+
+      console.log('Updated order summary - Subtotal:', subtotal, 'Discount:', discount, 'Shipping:', shippingCost, 'Total:', total);
+    }
+    
+    // Also update the input field to show uppercase as user types
+    document.getElementById('voucher-code').addEventListener('input', function (e) {
+      // Convert input to uppercase in real-time
+      e.target.value = e.target.value.toUpperCase();
+      console.log('Voucher input changed (uppercase):', e.target.value);
+    });
+
+    // Allow pressing Enter to apply voucher
+    document.getElementById('voucher-code').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        console.log('Enter key pressed for voucher');
+        document.getElementById('apply-voucher').click();
+      }
+    });
+
+    // Add remove voucher functionality
+    document.getElementById('voucher-code').addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && appliedVoucher) {
+        removeVoucher();
+      }
+    });
+
+    // Update the city change event to re-apply voucher if one is active
+    document.getElementById('city').addEventListener('change', function () {
+      const cart = getCart();
+      const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const shippingCost = getShippingPrice(this.value);
+
+      if (appliedVoucher) {
+        // Re-apply voucher with new shipping cost
+        applyVoucherLogic(appliedVoucher);
+      } else {
+        // No voucher applied, show regular totals with shipping
+        updateOrderSummary(subtotal, 0, shippingCost);
+      }
+    });
+
+    // Log when voucher input changes
+    document.getElementById('voucher-code').addEventListener('input', function (e) {
+      console.log('Voucher input changed:', e.target.value);
+    });
+
+    // Log when voucher input is focused
+    document.getElementById('voucher-code').addEventListener('focus', function () {
+      console.log('Voucher input focused');
+    });
+
+    // Log when voucher input loses focus
+    document.getElementById('voucher-code').addEventListener('blur', function () {
+      console.log('Voucher input blurred');
+    });
+
     // Back from Payment → Shipping
     document.getElementById('back-to-shipping').addEventListener('click', () => {
       paymentStep.style.display = "none";
@@ -2397,6 +2840,10 @@
       progressSteps[1].classList.remove("completed");
       progressSteps[1].classList.add("active");
     });
+    function getCart() {
+      const cartJSON = localStorage.getItem(CART_KEY);
+      return cartJSON ? JSON.parse(cartJSON) : [];
+    }
     document.addEventListener('DOMContentLoaded', function () {
       const CART_KEY = 'syrines_crumble_cart';
       //   const cartCount = document.getElementById('cart-count');
@@ -2409,10 +2856,14 @@
         return cartJSON ? JSON.parse(cartJSON) : [];
       }
 
+      // Update the renderSummary function to include shipping
+      // Update the initial renderSummary to show correct shipping
       function renderSummary() {
         const cart = getCart();
+        const selectedCity = document.getElementById('city').value;
         summaryItems.innerHTML = '';
         let subtotal = 0;
+        console.log("cartcart", cart);
 
         cart.forEach(item => {
           const itemTotal = item.price * item.quantity;
@@ -2439,23 +2890,33 @@
           const div = document.createElement('div');
           div.className = 'summary-item';
           div.innerHTML = `
-  <div class="item-details">
-    <div class="item-image"><img src="${item.img}" alt="${item.name}"></div>
-    <div class="item-info">
-      <div class="item-name">${item.name}</div>
-      <div class="item-quantity">Qty: ${item.quantity}</div>
-      ${flavorHTML}
-    </div>
-  </div>
-  <div class="item-price">LE ${itemTotal}.00</div>
-`;
+      <div class="item-details">
+        <div class="item-image"><img src="${item.img}" alt="${item.name}"></div>
+        <div class="item-info">
+          <div class="item-name">${item.name}</div>
+          <div class="item-quantity">Qty: ${item.quantity}</div>
+          ${flavorHTML}
+        </div>
+      </div>
+      <div class="item-price">LE ${itemTotal}.00</div>
+    `;
 
           summaryItems.appendChild(div);
         });
 
-        subtotalEl.textContent = `LE ${subtotal}.00`;
-        totalAmountEl.textContent = `LE ${subtotal}.00`;
+        // Get shipping cost
+        const shippingCost = getShippingPrice(selectedCity);
+
+        // Apply voucher if one is active
+        if (appliedVoucher) {
+          applyVoucherLogic(appliedVoucher);
+        } else {
+          // No voucher applied, show regular totals with shipping
+          updateOrderSummary(subtotal, 0, shippingCost);
+        }
       }
+
+
 
       renderSummary();
 
@@ -2470,52 +2931,124 @@
         });
       });
 
+
+      // Add function to remove voucher
+      function removeVoucher() {
+        appliedVoucher = null;
+        document.getElementById('voucher-code').value = '';
+        document.getElementById('voucher-message').textContent = 'Enter your voucher';
+        document.getElementById('voucher-message').className = 'voucher-message';
+        renderSummary();
+      }
+
+      // Update the payment function with shipping integration
       document.getElementById('to-payment').addEventListener('click', async function () {
         const form = document.getElementById('shipping-form');
         if (form.checkValidity()) {
           const cart = getCart();
+          const selectedCity = document.getElementById('city').value;
 
-          if (cart.length === 0) { alert('Your cart is empty!'); return; }
-          const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+          if (cart.length === 0) {
+            alert('Your cart is empty!');
+            return;
+          }
 
-          // const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+          let subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+          let discount = 0;
+          let shippingCost = getShippingPrice(selectedCity);
+          let freeShipping = false;
+
+          // Calculate discount and shipping if voucher is applied
+          if (appliedVoucher) {
+            console.log('Applying voucher in payment:', appliedVoucher);
+
+            // Check for free shipping
+            if (appliedVoucher.free_shipping) {
+              freeShipping = true;
+              shippingCost = 0;
+              console.log('Free shipping applied');
+            }
+
+            // Calculate discount based on voucher type
+            if (appliedVoucher.is_item && appliedVoucher.items && Array.isArray(appliedVoucher.items)) {
+              // Item-specific discount
+              cart.forEach(item => {
+                if (appliedVoucher.items.includes(item.slug) || appliedVoucher.items.includes(item.size)) {
+                  const itemTotal = item.price * item.quantity;
+                  let itemDiscount = 0;
+
+                  if (appliedVoucher.discount_number) {
+                    itemDiscount = Math.min(appliedVoucher.discount_number * item.quantity, itemTotal);
+                  } else if (appliedVoucher.discount_rate) {
+                    itemDiscount = (itemTotal * appliedVoucher.discount_rate) / 100;
+                  }
+
+                  discount += itemDiscount;
+                  console.log(`Discount for ${item.name}: ${itemDiscount}`);
+                }
+              });
+            } else if (appliedVoucher.total) {
+              // Total order discount
+              if (appliedVoucher.discount_number) {
+                discount = Math.min(appliedVoucher.discount_number, subtotal);
+              } else if (appliedVoucher.discount_rate) {
+                discount = (subtotal * appliedVoucher.discount_rate) / 100;
+              }
+              console.log('Total discount applied:', discount);
+            }
+          }
+
+          const total = Math.max(0, subtotal - discount + shippingCost);
+          console.log('Final amount for payment - Subtotal:', subtotal, 'Discount:', discount, 'Shipping:', shippingCost, 'Total:', total);
 
           const spinner = document.getElementById('loading-spinner');
-
           spinner.classList.add("active");
-          console.log("cart", cart)
+          console.log("cart", cart);
 
           try {
             if (document.getElementById('payment-method').value === "card") {
               // 🔹 Debit/Credit Card via Paymob
+              const paymentData = {
+                amount: total,
+                subtotal: subtotal,
+                discount: discount,
+                shipping_cost: shippingCost,
+                free_shipping: freeShipping,
+                firstName: document.getElementById('first-name').value,
+                lastName: document.getElementById('last-name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                street: document.getElementById('street').value,
+                building: document.getElementById('building').value,
+                floor: document.getElementById('floor').value,
+                apartment: document.getElementById('apartment').value,
+                city: document.getElementById('city').value,
+                country: "EG",
+                voucher: appliedVoucher ? {
+                  code: appliedVoucher.code,
+                  discount_amount: discount,
+                  free_shipping: freeShipping,
+                  voucher_id: appliedVoucher.id
+                } : null,
+                items: cart.map(item => ({
+                  name: item.name,
+                  amount_cents: item.price * 100, // Convert to cents for payment gateway
+                  description: item.name,
+                  quantity: item.quantity,
+                  flavors: item.flavors ? item.flavors.map(f => ({
+                    flavor: f.flavor.trim(),
+                    quantity: f.quantity,
+                    type: f.type
+                  })) : []
+                }))
+              };
+
+              console.log('Sending payment data:', paymentData);
+
               const res = await fetch("https://backend-quiet-glitter-4571.fly.dev/create-online-payment", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  amount: total,
-                  firstName: document.getElementById('first-name').value,
-                  lastName: document.getElementById('last-name').value,
-                  email: document.getElementById('email').value,
-                  phone: document.getElementById('phone').value,
-                  street: document.getElementById('street').value,
-                  building: document.getElementById('building').value,
-                  floor: document.getElementById('floor').value,
-                  apartment: document.getElementById('apartment').value,
-                  city: document.getElementById('city').value,
-                  country: "EG",
-
-                  items: cart.map(item => ({
-                    name: item.name,
-                    amount_cents: item.price,
-                    description: item.name,
-                    quantity: item.quantity,
-                    flavors: item.flavors ? item.flavors.map(f => ({
-                      flavor: f.flavor.trim(),
-                      quantity: f.quantity,
-                      type: f.type
-                    })) : []
-                  }))
-                })
+                body: JSON.stringify(paymentData)
               });
 
               const result = await res.json();
@@ -2523,20 +3056,71 @@
                 document.getElementById('paymentIframe').src = result.iframeUrl;
                 document.getElementById('paymentModal').style.display = "flex";
 
-                localStorage.removeItem(CART_KEY);
+                appliedVoucher = null;
               } else {
                 alert("Error: " + (result.error || "Failed to start payment"));
               }
             }
             else if (document.getElementById('payment-method').value === "cash") {
-              // 🔹 Cash Collection via Paymob
-              console.log("cart", cart)
+              const paymentData = {
+                amount: total,
+                subtotal: subtotal,
+                discount: discount,
+                shipping_cost: shippingCost,
+                free_shipping: freeShipping,
+                firstName: document.getElementById('first-name').value,
+                lastName: document.getElementById('last-name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                street: document.getElementById('street').value,
+                building: document.getElementById('building').value,
+                floor: document.getElementById('floor').value,
+                apartment: document.getElementById('apartment').value,
+                city: document.getElementById('city').value,
+                country: "EG",
+                voucher: appliedVoucher ? {
+                  code: appliedVoucher.code,
+                  voucher_id: appliedVoucher.id,
+                  discount_amount: discount,
+                  free_shipping: freeShipping
+                } : null,
+                items: cart.map(item => ({
+                  name: item.name,
+                  amount_cents: Math.round(item.price * 100), // Convert to cents
+                  description: item.name,
+                  quantity: item.quantity,
+                  flavors: item.flavors ? item.flavors.map(f => ({
+                    flavor: f.flavor.trim(),
+                    quantity: f.quantity,
+                    type: f.type
+                  })) : []
+                }))
+              };
+
+              console.log('Sending cash payment data:', paymentData);
 
               const res = await fetch("https://backend-quiet-glitter-4571.fly.dev/create-cash-payment", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
+                body: JSON.stringify(paymentData)
+              });
+
+              const result = await res.json();
+
+              if (result.success) {
+                const orderData = {
+                  orderId: result.orderId,
                   amount: total,
+                  subtotal: subtotal,
+                  discount: discount,
+                  shipping_cost: shippingCost,
+                  free_shipping: freeShipping,
+                  voucher: appliedVoucher ? {
+                    code: appliedVoucher.code,
+                    voucher_id: appliedVoucher.id,
+                    discount_amount: discount,
+                    free_shipping: freeShipping
+                  } : null,
                   firstName: document.getElementById('first-name').value,
                   lastName: document.getElementById('last-name').value,
                   email: document.getElementById('email').value,
@@ -2547,8 +3131,7 @@
                   apartment: document.getElementById('apartment').value,
                   city: document.getElementById('city').value,
                   country: "EG",
-
-                  // 🔹 Include flavors if available
+                  paymentMethod: "cash",
                   items: cart.map(item => ({
                     name: item.name,
                     amount_cents: item.price,
@@ -2560,26 +3143,20 @@
                       type: f.type
                     })) : []
                   }))
-                })
-              });
+                };
 
+                appliedVoucher = null;
 
-              const result = await res.json();
-
-              if (result.success) {
-                // ✅ Redirect to Thank You page with success=true
-                // localStorage.removeItem(CART_KEY);
-                window.location.href = "thankyou.html?success=true";
+                const encodedData = btoa(JSON.stringify(orderData));
+                window.location.href = `thankyou.html?success=true&payment=cash&data=${encodedData}`;
               } else {
-                // ❌ Redirect with success=false
                 window.location.href = "thankyou.html?success=false";
               }
-
             }
 
-
           } catch (e) {
-            alert(e);
+            console.error('Payment error:', e);
+            alert('Payment failed: ' + e.message);
           } finally {
             spinner.classList.remove("active");
           }
@@ -2587,7 +3164,6 @@
           form.reportValidity();
         }
       });
-
       // Close modal
       document.getElementById('closeModal').addEventListener('click', function () {
         document.getElementById('paymentModal').style.display = "none";
@@ -2595,6 +3171,7 @@
       });
 
     });
+
   </script>
   <!-- Payment Iframe Modal -->
   <div id="paymentModal" class="payment-modal">
