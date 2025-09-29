@@ -6,44 +6,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Syrine's Crumble | Artisanal Cookies</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="index.css">
-    <!-- ✅ Preload critical images -->
+    <!-- <link rel="stylesheet" href="index.css"> -->
+
+    <!-- Non-critical CSS deferred -->
+    <link rel="preload" href="index.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="index.css">
+    </noscript>
+
+    <!-- Optimized preload for critical images only -->
     <link rel="preload" href="images/logo.svg" as="image" type="image/svg+xml">
     <link rel="preload" href="images/crumble.svg" as="image" type="image/svg+xml">
     <link rel="preload" href="images/chewy.svg" as="image" type="image/svg+xml">
-    <link rel="preload" href="images/duo.svg" as="image" type="image/svg+xml">
-    <link rel="preload" href="images/trio.svg" as="image" type="image/svg+xml">
-    <link rel="preload" href="images/four.svg" as="image" type="image/svg+xml">
-    <link rel="preload" href="images/six.svg" as="image" type="image/svg+xml">
-    <link rel="preload" href="images/nine.svg" as="image" type="image/svg+xml">
-    <link rel="preload" href="images/original_chewy_cookie.svg" as="image" type="image/svg+xml">
-    <link rel="preload" href="images/chocolate_crispy_affair_chewy.svg" as="image" type="image/svg+xml">
-    <link rel="preload" href="images/caramel_chewy_cookie.svg" as="image" type="image/svg+xml">
-    <link rel="preload" href="images/hazelnuts_chewy_cookie.svg" as="image" type="image/svg+xml">
-    <link rel="preload" href="images/lotus_chewy_cookie.svg" as="image" type="image/svg+xml">
-    <link rel="preload" href="images/mystery.svg" as="image" type="image/svg+xml">
-</head>
+
+    <!-- Font Awesome with performance optimization -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        media="print" onload="this.media='all'">
 
 <body>
     <!-- <div class="announcement">Next day delivery / Free Shipping for orders over 500 EGP</div> -->
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-spinner"></div>
+    </div>
 
     <!-- Modern Header -->
     <header class="modern-header">
         <div class="header-container">
             <!-- Mobile menu button -->
-            <button class="mobile-menu-btn" id="mobile-menu-btn">
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
                 <i class="fas fa-bars"></i>
             </button>
 
             <!-- Logo -->
             <div class="logo-container">
                 <a href="">
-                    <img src="images/logo.svg" alt="Syrine's Crumble" class="logo-img" loading="lazy">
+                    <img src="images/logo.svg" alt="Syrine's Crumble" class="logo-img" width="150" height="50">
                 </a>
             </div>
 
             <!-- Navigation -->
-            <nav class="main-nav">
+            <nav class="main-nav" id="main-nav">
                 <ul class="nav-list">
                     <li class="nav-item">
                         <a href="#" class="nav-link active" data-tab="home">
@@ -74,7 +79,7 @@
 
             <!-- Cart -->
             <div class="header-actions">
-                <div class="cart-icon" id="cart-icon">
+                <div class="cart-icon" id="cart-icon" aria-label="Shopping cart">
                     <i class="fas fa-shopping-cart"></i>
                     <span class="cart-count" id="cart-count">0</span>
                 </div>
@@ -99,26 +104,56 @@
                             <!-- Crumble -->
                             <div class="team-container">
                                 <img src="images/crumble.svg" alt="Team Crumble" class="cookie-img crumble-img"
-                                    onclick="switchTab('boxes')" loading="lazy">
+                                    width="150" height="150" onclick="switchTab('boxes')">
                                 <div class="team-label">Team Crumble</div>
                             </div>
 
-
-
                             <!-- Chewy -->
                             <div class="team-container">
-                                <img src="images/chewy.svg" alt="Team Chewy" class="cookie-img chewy-img"
-                                    onclick="switchTab('cookies')" loading="lazy">
+                                <img src="images/chewy.svg" alt="Team Chewy" class="cookie-img chewy-img" width="150"
+                                    height="150" onclick="switchTab('cookies')">
                                 <div class="team-label">Team Chewy</div>
                             </div>
                         </div>
-
-
                     </div>
                 </div>
+            </section>
 
-                <!-- Cookie Battle Scene -->
-
+            <!-- Features Section -->
+            <section class="features">
+                <div class="container">
+                    <h2 class="section-title">Why Choose Your Cookie Side</h2>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <h3>Made With Love</h3>
+                            <p>Every cookie is crafted with care and passion, using recipes perfected over time.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-leaf"></i>
+                            </div>
+                            <h3>Premium Ingredients</h3>
+                            <p>We source only the finest ingredients for exceptional flavor and quality.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <h3>Fast Delivery</h3>
+                            <p>Freshly baked cookies delivered to your door, still warm when possible.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <h3>Custom Orders</h3>
+                            <p>Special occasions? We create custom cookie boxes for your events.</p>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <!-- Features Section -->
@@ -508,25 +543,22 @@
                     <p>Artisanal cookies made with love and the finest ingredients. Freshly baked daily for your
                         enjoyment.</p>
                     <div class="social-icons">
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-facebook"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-pinterest"></i></a>
+                        <a href="https://www.instagram.com/syrinescrumble/"><i class="fab fa-instagram"></i></a>
                     </div>
                 </div>
 
-                <!-- <div class="footer-column">
+                <div class="footer-column">
                     <h3>Contact Us</h3>
                     <ul>
-                        <li><i class="fas fa-map-marker-alt"></i> Cairo, Egypt</li>
-                        <li><i class="fas fa-phone"></i> +20 123 456 7890</li>
-                        <li><i class="fas fa-envelope"></i> hello@syrinescrumble.com</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Maadi, Cairo</li>
+                        <li><i class="fas fa-phone"></i> +20 104 493 0284</li>
+                        <li><i class="fas fa-envelope"></i> syrinescrumble@gmail.com</li>
                     </ul>
-                </div> -->
+                </div>
             </div>
 
             <div class="copyright">
-                © 2023 Syrine's Crumble. All rights reserved.
+                © 2025 Syrine's Crumble. All rights reserved.
             </div>
         </div>
     </footer>
