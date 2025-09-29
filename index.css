@@ -7,7 +7,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Stella', cursive;
+    font-family: 'Chewy', cursive;
     max-width: 100%;
     box-sizing: border-box;
     text-decoration: none;
@@ -169,7 +169,7 @@ header {
 }
 
 .brand-name {
-    font-family: 'Stella', cursive;
+    font-family: 'Chewy', cursive;
     font-size: 2rem;
     color: var(--primary);
     line-height: 1;
@@ -1123,7 +1123,7 @@ footer {
 
         
         .hero-title {
-            font-family: 'Stella', cursive;
+            font-family: 'stella', cursive;
             font-size: 8rem;
             color: var(--primary);
             line-height: 1;
@@ -1216,7 +1216,7 @@ footer {
             background: white;
             padding: 0.8rem 1.2rem;
             border-radius: 20px;
-            font-family: 'Stella', cursive;
+            font-family: 'Chewy', cursive;
             font-weight: bold;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             opacity: 0;
@@ -1246,7 +1246,7 @@ footer {
             font-size: 2.8rem;
             margin-bottom: 3rem;
             color: #7b4b2b;
-            font-family: 'Stella', cursive;
+            font-family: 'Chewy', cursive;
         }
         
         .features-grid {
@@ -1535,8 +1535,8 @@ footer {
             position: absolute;
             top: 15px;
             right: 15px;
-            background: #e9c46a;
-            color: #5a3921;
+            background: var(--primary);
+            color: var(--light);
             padding: 5px 12px;
             border-radius: 20px;
             font-weight: bold;
@@ -4127,3 +4127,5 @@ footer {
         font-weight: 700;
     }
 }
+
+
