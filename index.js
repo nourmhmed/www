@@ -111,6 +111,7 @@ const priceService = {
         };
     },
 
+
     // Validate cart items against current prices
     async validateCart(cartItems) {
         const currentPrices = await this.getCurrentPrices();
@@ -712,6 +713,30 @@ function disableBodyScroll() {
   document.body.classList.add('body-no-scroll');
   document.documentElement.style.overflow = 'hidden';
 }
+
+
+// Performance optimization: Load non-critical scripts after page load
+        window.addEventListener('load', function() {
+            // Hide loading screen
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }
+            
+            // Load non-critical scripts
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+            script.onload = function() {
+                // Load main script after Supabase
+                const mainScript = document.createElement('script');
+                mainScript.src = 'index.js';
+                document.body.appendChild(mainScript);
+            };
+            document.body.appendChild(script);
+        });
 
 function enableBodyScroll() {
   document.body.classList.remove('body-no-scroll');
