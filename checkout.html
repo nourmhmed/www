@@ -513,6 +513,20 @@
       border-color: var(--primary);
     }
 
+    #district {
+      width: 100%;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid var(--primary);
+      outline: none;
+      font-size: 1rem;
+      transition: 0.3s;
+    }
+
+    #district:focus {
+      border-color: var(--primary);
+    }
+
     .dropdown-list {
       position: absolute;
       top: 100%;
@@ -2284,6 +2298,36 @@
         padding: 0.7rem 1rem;
       }
     }
+
+    /* District/Zone Loading Styles */
+    .district-loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .district-loading::after {
+      content: " (Loading...)";
+      font-style: italic;
+      color: var(--gray);
+    }
+
+    .loading-districts {
+      position: relative;
+    }
+
+    .loading-districts::after {
+      content: "";
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
   </style>
 </head>
 
@@ -2374,43 +2418,24 @@
               <label for="apartment">Apartment</label>
               <input type="text" id="apartment" required>
             </div>
+
             <div class="form-group">
               <label for="city">City</label>
               <select id="city" required>
                 <option value="" disabled selected>Select your city</option>
-                <option value="Cairo">Cairo</option>
-                <option value="Giza">Giza</option>
-                <!-- <option value="Alexandria">Alexandria</option>
-                <option value="Shubra El-Kheima">Shubra El-Kheima</option>
-                <option value="Port Said">Port Said</option>
-                <option value="Suez">Suez</option>
-                <option value="Mansoura">Mansoura</option>
-                <option value="Tanta">Tanta</option>
-                <option value="Asyut">Asyut</option>
-                <option value="Fayoum">Fayoum</option>
-                <option value="Zagazig">Zagazig</option>
-                <option value="Ismailia">Ismailia</option>
-                <option value="Aswan">Aswan</option>
-                <option value="Damietta">Damietta</option>
-                <option value="Damanhur">Damanhur</option>
-                <option value="Luxor">Luxor</option>
-                <option value="Qena">Qena</option>
-                <option value="Beni Suef">Beni Suef</option>
-                <option value="Minya">Minya</option>
-                <option value="Sohag">Sohag</option>
-                <option value="Hurghada">Hurghada</option>
-                <option value="Sharm El-Sheikh">Sharm El-Sheikh</option>
-                <option value="Kafr El-Sheikh">Kafr El-Sheikh</option>
-                <option value="Marsa Matruh">Marsa Matruh</option>
-                <option value="Arish">Arish</option>
-                <option value="Beheira">Beheira</option>
-                <option value="Monufia">Monufia</option>
-                <option value="Dakahlia">Dakahlia</option>
-                <option value="Qalyubia">Qalyubia</option>
-                <option value="Red Sea">Red Sea</option>
-                <option value="New Valley">New Valley</option>
-                <option value="North Sinai">North Sinai</option>
-                <option value="South Sinai">South Sinai</option> -->
+                <!-- Cities will be loaded dynamically -->
+              </select>
+            </div>
+          </div>
+
+          <!-- Replace the existing city section with this -->
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label for="district">District/Zone</label>
+              <select id="district" required disabled>
+                <option value="" disabled selected>Select city first</option>
+                <!-- Districts will be loaded dynamically based on city -->
               </select>
             </div>
           </div>
@@ -2495,6 +2520,11 @@
     const paymentStep = document.getElementById('step-payment');
     const progressSteps = document.querySelectorAll('.progress-step');
 
+
+    let shippingCities = [];
+    let shippingZones = [];
+
+
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
     const CART_KEY = 'syrines_crumble_cart';
@@ -2511,6 +2541,126 @@
 
     let allVouchers = null;
 
+
+    // Function to fetch shipping data
+    async function fetchShippingData() {
+      try {
+        console.log('Fetching shipping data...');
+
+        // Fetch cities
+        const { data: citiesData, error: citiesError } = await supabase
+          .from('shipping_prices')
+          .select('*')
+          .order('city', { ascending: true });
+
+        if (citiesError) {
+          console.error('Error fetching cities:', citiesError);
+          return;
+        }
+
+        // Fetch zones
+        const { data: zonesData, error: zonesError } = await supabase
+          .from('shipping_zones')
+          .select('*')
+          .order('zone_name', { ascending: true });
+
+        if (zonesError) {
+          console.error('Error fetching zones:', zonesError);
+          // Continue with cities even if zones fail
+        }
+
+        shippingCities = citiesData || [];
+        shippingZones = zonesData || [];
+
+        console.log('Shipping data loaded:', {
+          cities: shippingCities.length,
+          zones: shippingZones.length
+        });
+
+        // Populate cities dropdown
+        populateCitiesDropdown();
+
+      } catch (error) {
+        console.error('Error fetching shipping data:', error);
+      }
+    }
+
+    // Function to populate cities dropdown
+    function populateCitiesDropdown() {
+      const citySelect = document.getElementById('city');
+
+      // Clear existing options except the first one
+      while (citySelect.options.length > 1) {
+        citySelect.remove(1);
+      }
+
+      // Add cities to dropdown
+      shippingCities.forEach(city => {
+        const option = document.createElement('option');
+        option.value = city.city;
+        option.textContent = city.city;
+        citySelect.appendChild(option);
+      });
+
+      console.log('Cities dropdown populated with', shippingCities.length, 'cities');
+    }
+
+    // Function to load districts for selected city
+    async function loadDistrictsForCity(cityName) {
+      const districtSelect = document.getElementById('district');
+
+      // Clear existing districts
+      districtSelect.innerHTML = '<option value="" disabled selected>Select your district/zone</option>';
+      districtSelect.disabled = true;
+
+      // Show loading state
+      districtSelect.classList.add('loading-districts');
+
+      try {
+        console.log('Loading districts for city:', cityName);
+
+        // Find the city in our data
+        const city = shippingCities.find(c => c.city === cityName);
+        if (!city) {
+          console.error('City not found:', cityName);
+          return;
+        }
+
+        // Get zones for this city
+        const cityZones = shippingZones.filter(zone => zone.city_id === city.id);
+
+        console.log(`Found ${cityZones.length} zones for ${cityName}`);
+
+        if (cityZones.length === 0) {
+          // If no specific zones, create a default option
+          const defaultOption = document.createElement('option');
+          defaultOption.value = 'default';
+          defaultOption.textContent = 'General Area';
+          districtSelect.appendChild(defaultOption);
+        } else {
+          // Add zones to dropdown
+          cityZones.forEach(zone => {
+            const option = document.createElement('option');
+            option.value = zone.zone_name;
+            option.textContent = `${zone.zone_name} (LE ${zone.price})`;
+            option.dataset.price = zone.price;
+            districtSelect.appendChild(option);
+          });
+        }
+
+        // Enable district selection
+        districtSelect.disabled = false;
+        districtSelect.classList.remove('loading-districts');
+
+        // Trigger district change to update shipping cost
+        districtSelect.dispatchEvent(new Event('change'));
+
+      } catch (error) {
+        console.error('Error loading districts:', error);
+        districtSelect.classList.remove('loading-districts');
+        districtSelect.innerHTML = '<option value="" disabled selected>Error loading districts</option>';
+      }
+    }
 
     // Function to fetch shipping prices
     async function fetchShippingPrices() {
@@ -2564,42 +2714,99 @@
       }
     }
 
+    // Update the shipping display function
+    function updateShippingDisplay() {
+      const shippingCost = getShippingPrice();
+      const shippingEl = document.getElementById('shipping-cost');
+      const selectedCity = document.getElementById('city').value;
+      const selectedDistrict = document.getElementById('district').value;
+
+      if (!selectedCity) {
+        shippingEl.textContent = '-';
+        shippingEl.style.color = '#999';
+      } else if (shippingCost === 0) {
+        shippingEl.textContent = 'FREE';
+        shippingEl.style.color = 'var(--success)';
+      } else {
+        shippingEl.textContent = `LE ${shippingCost.toFixed(2)}`;
+        shippingEl.style.color = '';
+      }
+
+      console.log('Shipping updated - City:', selectedCity, 'District:', selectedDistrict, 'Cost:', shippingCost);
+    }
+
     // Also update the initial page load to handle city selection better
     document.addEventListener('DOMContentLoaded', function () {
       fetchAllVouchers();
-      fetchShippingPrices();
+      fetchShippingData();
 
       // Add validation to require city selection
       const citySelect = document.getElementById('city');
       citySelect.required = true;
 
-      // Set initial shipping display
+      // Set initial shipping display and render summary after a short delay
       setTimeout(() => {
-        const initialCity = citySelect.value;
-        const initialShippingCost = getShippingPrice(initialCity);
-        const shippingEl = document.getElementById('shipping-cost');
-
-        if (!initialCity) {
-          shippingEl.textContent = '-';
-          shippingEl.style.color = '#999';
-        } else if (initialShippingCost === 0) {
-          shippingEl.textContent = '-';
-          shippingEl.style.color = 'var(--success)';
-        } else {
-          shippingEl.textContent = `LE ${initialShippingCost}.00`;
-          shippingEl.style.color = '';
-        }
-      }, 50);
+        console.log('Initial page load - rendering summary');
+        renderSummary();
+        updateShippingDisplay();
+      }, 100);
     });
 
-    // Function to get shipping price for a city
-    function getShippingPrice(city) {
-      if (!shippingPrices) return 0;
+    // Function to get shipping price for selected city and district - ENHANCED
+    function getShippingPrice() {
+      const selectedCity = document.getElementById('city').value;
+      const selectedDistrict = document.getElementById('district').value;
 
-      const shippingInfo = shippingPrices.find(item => item.city === city);
-      return shippingInfo ? shippingInfo.price : 0;
+      console.log('Getting shipping price for:', {
+        city: selectedCity,
+        district: selectedDistrict
+      });
+
+      if (!selectedCity) {
+        console.log('No city selected, returning 0');
+        return 0;
+      }
+
+      // If district is selected and has a specific price
+      if (selectedDistrict && selectedDistrict !== 'default') {
+        const districtSelect = document.getElementById('district');
+        const selectedOption = districtSelect.options[districtSelect.selectedIndex];
+        const districtPrice = parseFloat(selectedOption.dataset.price);
+
+        if (!isNaN(districtPrice)) {
+          console.log('Using district price:', districtPrice);
+          return districtPrice;
+        } else {
+          console.log('District price not found or invalid, falling back to city price');
+        }
+      }
+
+      // Fallback to city price
+      const city = shippingCities.find(c => c.city === selectedCity);
+      const cityPrice = city ? city.price : 0;
+      console.log('Using city price:', cityPrice);
+      return cityPrice;
     }
 
+    // Enhanced form validation
+    document.getElementById('shipping-form').addEventListener('submit', function (e) {
+      const city = document.getElementById('city').value;
+      const district = document.getElementById('district').value;
+
+      if (!city) {
+        e.preventDefault();
+        alert('Please select your city');
+        document.getElementById('city').focus();
+        return;
+      }
+
+      if (!district) {
+        e.preventDefault();
+        alert('Please select your district/zone');
+        document.getElementById('district').focus();
+        return;
+      }
+    });
     // Move from Shipping → Payment
     document.getElementById('to-payment-step').addEventListener('click', () => {
       const form = document.getElementById('shipping-form');
@@ -2667,7 +2874,7 @@
       this.style.borderColor = ''; // Reset to default
     });
 
-    // Update the voucher application function to handle missing city
+    // Update the applyVoucherLogic function to use new shipping system
     function applyVoucherLogic(voucher) {
       const cart = getCart();
       const selectedCity = document.getElementById('city').value;
@@ -2682,12 +2889,12 @@
 
       let subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       let discount = 0;
-      let shippingCost = getShippingPrice(selectedCity);
+      let shippingCost = getShippingPrice();
       let freeShipping = false;
 
       console.log('Applying voucher logic:', voucher);
       console.log('Initial subtotal:', subtotal);
-      console.log('Shipping cost for', selectedCity + ':', shippingCost);
+      console.log('Shipping cost:', shippingCost);
 
       // Condition 1: Free Shipping
       if (voucher.free_shipping) {
@@ -2735,7 +2942,71 @@
       updateOrderSummary(subtotal, discount, shippingCost, freeShipping);
     }
 
-    // Also update the updateOrderSummary function to handle "Select city" state
+    function renderSummary() {
+      console.log('renderSummary called - updating order summary');
+      const cart = getCart();
+      const selectedCity = document.getElementById('city').value;
+      const selectedDistrict = document.getElementById('district').value;
+
+      summaryItems.innerHTML = '';
+      let subtotal = 0;
+
+      console.log('Current selection - City:', selectedCity, 'District:', selectedDistrict);
+
+      cart.forEach(item => {
+        const itemTotal = item.price * item.quantity;
+        subtotal += itemTotal;
+
+        // Build flavors block
+        let flavorHTML = "";
+        if (item.flavors && Array.isArray(item.flavors)) {
+          flavorHTML = `
+                <div class="item-flavors">
+                    ${item.flavors.map(f => `
+                        <div class="item-flavor">
+                            <span class="flavor-details">
+                                ${f.flavor.trim()}
+                                <span style="font-weight:bold; font-size:1.2em;"> - </span>
+                                x${f.quantity} - ${f.type}
+                            </span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        const div = document.createElement('div');
+        div.className = 'summary-item';
+        div.innerHTML = `
+            <div class="item-details">
+                <div class="item-image"><img src="${item.img}" alt="${item.name}"></div>
+                <div class="item-info">
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-quantity">Qty: ${item.quantity}</div>
+                    ${flavorHTML}
+                </div>
+            </div>
+            <div class="item-price">LE ${itemTotal.toFixed(2)}</div>
+        `;
+
+        summaryItems.appendChild(div);
+      });
+
+      // Get shipping cost
+      const shippingCost = getShippingPrice();
+      console.log('Calculated shipping cost:', shippingCost);
+
+      // Apply voucher if one is active
+      if (appliedVoucher) {
+        console.log('Voucher active, applying voucher logic');
+        applyVoucherLogic(appliedVoucher);
+      } else {
+        // No voucher applied, show regular totals with shipping
+        console.log('No voucher, updating regular totals');
+        updateOrderSummary(subtotal, 0, shippingCost);
+      }
+    }
+
     function updateOrderSummary(subtotal, discount, shippingCost, freeShipping = false) {
       const subtotalEl = document.getElementById('subtotal');
       const shippingEl = document.getElementById('shipping-cost');
@@ -2744,19 +3015,28 @@
       const totalAmountEl = document.getElementById('total-amount');
 
       // Update subtotal
-      subtotalEl.textContent = `LE ${subtotal}.00`;
+      subtotalEl.textContent = `LE ${subtotal.toFixed(2)}`;
 
-      // Update shipping
+      // Update shipping - use the actual shipping cost from getShippingPrice()
       const selectedCity = document.getElementById('city').value;
+      const selectedDistrict = document.getElementById('district').value;
+
+      // Get the actual current shipping cost (this handles district pricing)
+      const currentShippingCost = getShippingPrice();
+
+      console.log('Updating order summary - District:', selectedDistrict, 'Shipping Cost:', currentShippingCost);
+
       if (!selectedCity) {
         shippingEl.textContent = '-';
         shippingEl.style.color = '#999';
-      } else if (freeShipping || shippingCost === 0) {
-        shippingEl.textContent = '-';
+      } else if (freeShipping || currentShippingCost === 0) {
+        shippingEl.textContent = 'FREE';
         shippingEl.style.color = 'var(--success)';
+        shippingCost = 0; // Ensure shipping cost is 0 for free shipping
       } else {
-        shippingEl.textContent = `LE ${shippingCost}.00`;
+        shippingEl.textContent = `LE ${currentShippingCost.toFixed(2)}`;
         shippingEl.style.color = '';
+        shippingCost = currentShippingCost; // Use the district-based shipping cost
       }
 
       // Show/hide discount row
@@ -2767,17 +3047,14 @@
         discountRow.style.display = 'none';
       }
 
-      // Calculate and update total (only if city is selected)
-      let total = subtotal - discount;
-      if (selectedCity) {
-        total += shippingCost;
-      }
+      // Calculate and update total
+      let total = subtotal - discount + shippingCost;
       total = Math.max(0, total);
       totalAmountEl.textContent = `LE ${total.toFixed(2)}`;
 
       console.log('Updated order summary - Subtotal:', subtotal, 'Discount:', discount, 'Shipping:', shippingCost, 'Total:', total);
     }
-    
+
     // Also update the input field to show uppercase as user types
     document.getElementById('voucher-code').addEventListener('input', function (e) {
       // Convert input to uppercase in real-time
@@ -2800,17 +3077,32 @@
       }
     });
 
-    // Update the city change event to re-apply voucher if one is active
+    // City change event - UPDATED
     document.getElementById('city').addEventListener('change', function () {
+      const selectedCity = this.value;
+      const districtSelect = document.getElementById('district');
+
+      console.log('City changed to:', selectedCity);
+
+      // Reset district
+      districtSelect.innerHTML = '<option value="" disabled selected>Select your district/zone</option>';
+      districtSelect.disabled = true;
+
+      if (selectedCity) {
+        loadDistrictsForCity(selectedCity);
+      }
+
+      // Update shipping cost immediately
+      updateShippingDisplay();
+
+      // Update the summary with new city (even before district is selected)
       const cart = getCart();
       const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      const shippingCost = getShippingPrice(this.value);
+      const shippingCost = getShippingPrice();
 
       if (appliedVoucher) {
-        // Re-apply voucher with new shipping cost
         applyVoucherLogic(appliedVoucher);
       } else {
-        // No voucher applied, show regular totals with shipping
         updateOrderSummary(subtotal, 0, shippingCost);
       }
     });
@@ -2856,6 +3148,43 @@
         return cartJSON ? JSON.parse(cartJSON) : [];
       }
 
+      // City change event
+      document.getElementById('city').addEventListener('change', function () {
+        const selectedCity = this.value;
+        const districtSelect = document.getElementById('district');
+
+        // Reset district
+        districtSelect.innerHTML = '<option value="" disabled selected>Select your district/zone</option>';
+        districtSelect.disabled = true;
+
+        if (selectedCity) {
+          loadDistrictsForCity(selectedCity);
+        }
+
+        // Update shipping cost
+        updateShippingDisplay();
+      });
+
+      // District change event - UPDATED
+      document.getElementById('district').addEventListener('change', function () {
+        console.log('District changed to:', this.value);
+        updateShippingDisplay();
+
+        // Re-render the entire summary to update totals
+        renderSummary();
+
+        // Re-apply voucher if one is active (to recalculate shipping)
+        if (appliedVoucher) {
+          console.log('Re-applying voucher after district change');
+          applyVoucherLogic(appliedVoucher);
+        } else {
+          // No voucher, just update with new shipping cost
+          const cart = getCart();
+          const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+          const shippingCost = getShippingPrice();
+          updateOrderSummary(subtotal, 0, shippingCost);
+        }
+      });
       // Update the renderSummary function to include shipping
       // Update the initial renderSummary to show correct shipping
       function renderSummary() {
@@ -2941,12 +3270,22 @@
         renderSummary();
       }
 
-      // Update the payment function with shipping integration
       document.getElementById('to-payment').addEventListener('click', async function () {
         const form = document.getElementById('shipping-form');
+
+        // Validate form
         if (form.checkValidity()) {
-          const cart = getCart();
+          // Additional validation for district
           const selectedCity = document.getElementById('city').value;
+          const selectedDistrict = document.getElementById('district').value;
+
+          if (!selectedDistrict) {
+            alert('Please select your district/zone');
+            document.getElementById('district').focus();
+            return;
+          }
+
+          const cart = getCart();
 
           if (cart.length === 0) {
             alert('Your cart is empty!');
@@ -2955,7 +3294,7 @@
 
           let subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
           let discount = 0;
-          let shippingCost = getShippingPrice(selectedCity);
+          let shippingCost = getShippingPrice();
           let freeShipping = false;
 
           // Calculate discount and shipping if voucher is applied
@@ -2973,7 +3312,7 @@
             if (appliedVoucher.is_item && appliedVoucher.items && Array.isArray(appliedVoucher.items)) {
               // Item-specific discount
               cart.forEach(item => {
-                if (appliedVoucher.items.includes(item.slug) || appliedVoucher.items.includes(item.size)) {
+                if (appliedVoucher.items.includes(item.cookieType) || appliedVoucher.items.includes(item.size)) {
                   const itemTotal = item.price * item.quantity;
                   let itemDiscount = 0;
 
@@ -3003,7 +3342,6 @@
 
           const spinner = document.getElementById('loading-spinner');
           spinner.classList.add("active");
-          console.log("cart", cart);
 
           try {
             if (document.getElementById('payment-method').value === "card") {
@@ -3023,6 +3361,7 @@
                 floor: document.getElementById('floor').value,
                 apartment: document.getElementById('apartment').value,
                 city: document.getElementById('city').value,
+                district: document.getElementById('district').value,
                 country: "EG",
                 voucher: appliedVoucher ? {
                   code: appliedVoucher.code,
@@ -3043,7 +3382,7 @@
                 }))
               };
 
-              console.log('Sending payment data:', paymentData);
+              console.log('Sending payment data for card:', paymentData);
 
               const res = await fetch("https://backend-quiet-glitter-4571.fly.dev/create-online-payment", {
                 method: "POST",
@@ -3056,12 +3395,14 @@
                 document.getElementById('paymentIframe').src = result.iframeUrl;
                 document.getElementById('paymentModal').style.display = "flex";
 
+                // Clear voucher after successful payment initiation
                 appliedVoucher = null;
               } else {
                 alert("Error: " + (result.error || "Failed to start payment"));
               }
             }
             else if (document.getElementById('payment-method').value === "cash") {
+              // 🔹 Cash on Delivery
               const paymentData = {
                 amount: total,
                 subtotal: subtotal,
@@ -3077,6 +3418,7 @@
                 floor: document.getElementById('floor').value,
                 apartment: document.getElementById('apartment').value,
                 city: document.getElementById('city').value,
+                district: document.getElementById('district').value,
                 country: "EG",
                 voucher: appliedVoucher ? {
                   code: appliedVoucher.code,
@@ -3130,6 +3472,7 @@
                   floor: document.getElementById('floor').value,
                   apartment: document.getElementById('apartment').value,
                   city: document.getElementById('city').value,
+                  district: document.getElementById('district').value,
                   country: "EG",
                   paymentMethod: "cash",
                   items: cart.map(item => ({
@@ -3145,10 +3488,13 @@
                   }))
                 };
 
+                // Clear voucher and cart after successful order
                 appliedVoucher = null;
+                localStorage.removeItem(CART_KEY);
 
-                const encodedData = btoa(JSON.stringify(orderData));
+                const encodedData = encodeURIComponent(JSON.stringify(orderData));
                 window.location.href = `thankyou.html?success=true&payment=cash&data=${encodedData}`;
+
               } else {
                 window.location.href = "thankyou.html?success=false";
               }
@@ -3164,6 +3510,7 @@
           form.reportValidity();
         }
       });
+
       // Close modal
       document.getElementById('closeModal').addEventListener('click', function () {
         document.getElementById('paymentModal').style.display = "none";
