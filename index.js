@@ -625,6 +625,7 @@ async function updateCartUI() {
     }
 }
 
+
 // Show notification when item is added to cart
 function showNotification(message) {
     const notification = document.createElement('div');
@@ -716,9 +717,28 @@ function enableBodyScroll() {
   document.body.classList.remove('body-no-scroll');
   document.documentElement.style.overflow = '';
 }
+
+async function initializeSupabaseWithTimeout() {
+    const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), 5000)
+    );
+    
+    try {
+        await Promise.race([initializeSupabase(), timeoutPromise]);
+        console.log('Supabase initialized successfully');
+    } catch (error) {
+        console.warn('Supabase initialization timed out, using fallback prices');
+        // Use fallback prices immediately
+        currentPrices = priceService.getFallbackPrices();
+        supabaseInitialized = true;
+    }
+}
+
 // Tab functionality
 document.addEventListener('DOMContentLoaded', async function () {
     // Initialize Supabase first
+
+    await initializeSupabaseWithTimeout();
     await ensureSupabaseInitialized();
 
     // Initialize prices
