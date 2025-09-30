@@ -5,6 +5,10 @@ let selectedBox = null;
 let selectedStyle = 'chewy';
 let cookiesData = {};
 
+// Add these with your other global variables
+let boxesData = [];
+let mysteryBoxData = null;
+
 const mobileMenuBtnn = document.getElementById('mobile-menu-btn');
 const mobileNav = document.createElement('div');
 const mobileNavOverlay = document.createElement('div');
@@ -57,9 +61,91 @@ async function ensureSupabaseInitialized() {
 let selectedFlavors = {};
 
 
+// Function to fetch boxes data
+async function fetchBoxesData() {
+    try {
+        const initialized = await ensureSupabaseInitialized();
+        if (!initialized) {
+            console.warn('Supabase not initialized, using fallback boxes data');
+            return getFallbackBoxesData();
+        }
+
+        const { data, error } = await supabase
+            .from('boxes')
+            .select('*')
+            .eq('is_active', true)
+            .order('cookie_count');
+
+        if (error) {
+            console.error('Error fetching boxes:', error);
+            return getFallbackBoxesData();
+        }
+
+        return data || [];
+    } catch (error) {
+        console.error('Error in fetchBoxesData:', error);
+        return getFallbackBoxesData();
+    }
+}
+
+// Function to fetch mystery box data
+async function fetchMysteryBoxData() {
+    try {
+        const initialized = await ensureSupabaseInitialized();
+        if (!initialized) {
+            console.warn('Supabase not initialized, using fallback mystery box data');
+            return getFallbackMysteryBoxData();
+        }
+
+        const { data, error } = await supabase
+            .from('mystery_boxes')
+            .select('*')
+            .eq('is_active', true)
+            .single();
+
+        if (error) {
+            console.error('Error fetching mystery box:', error);
+            return getFallbackMysteryBoxData();
+        }
+
+        return data;
+    } catch (error) {
+        console.error('Error in fetchMysteryBoxData:', error);
+        return getFallbackMysteryBoxData();
+    }
+}
+
+// Fallback data for boxes
+function getFallbackBoxesData() {
+    return [
+        {
+            size: 'duo',
+            name: 'The Duo',
+            description: '2 cookies—perfect for a quick fix',
+            chewy_price: 155,
+            crumble_price: 155,
+            mix_price: 165,
+            cookie_count: 2,
+            image_url: 'images/duo.svg'
+        },
+        // ... include all other boxes from your static data
+    ];
+}
+
+// Fallback data for mystery box
+function getFallbackMysteryBoxData() {
+    return {
+        name: 'Mystery Box',
+        price: 450,
+        description: "Can't decide which cookies to choose? Let us surprise you with our mystery box! Each box contains 6 assorted cookies (bestsellers + seasonal specials), 1 limited edition flavor not available elsewhere, and a surprise gift with every order.",
+        image_url: 'images/mystery.svg',
+        contents: '6 assorted cookies (bestsellers + seasonal specials), 1 limited edition flavor not available elsewhere, A surprise gift with every order',
+        special_features: ['limited-edition', 'surprise-gift', 'assorted']
+    };
+}
+
 
 // Function to fetch cookies from Supabase
-// Update the fetchCookiesData function to match your table columns
 async function fetchCookiesData() {
     try {
         const initialized = await ensureSupabaseInitialized();
@@ -128,6 +214,140 @@ function getFallbackCookiesData() {
     };
 }
 
+// Function to render boxes dynamically
+async function renderBoxes() {
+    const boxOptions = document.querySelector('.box-options');
+    if (!boxOptions) return;
+
+    // Show loading state
+    boxOptions.innerHTML = '<div class="loading-boxes">Loading boxes...</div>';
+
+    // Fetch boxes data
+    boxesData = await fetchBoxesData();
+
+    // Clear loading state and render boxes
+    boxOptions.innerHTML = '';
+
+    boxesData.forEach(box => {
+        const boxOption = document.createElement('div');
+        boxOption.className = 'box-option';
+        boxOption.setAttribute('data-size', box.size);
+        boxOption.setAttribute('data-chewy', box.chewy_price);
+        boxOption.setAttribute('data-crumble', box.crumble_price);
+        boxOption.setAttribute('data-mix', box.mix_price);
+        boxOption.setAttribute('data-img', box.image_url);
+
+        // Determine price display
+        let priceDisplay = '';
+        if (box.chewy_price === box.crumble_price) {
+            // Same price - show single price
+            priceDisplay = `${box.chewy_price} LE`;
+        } else {
+            // Different prices - show range
+            const minPrice = Math.min(box.chewy_price, box.crumble_price);
+            const maxPrice = Math.max(box.chewy_price, box.crumble_price);
+            priceDisplay = `${minPrice} - ${maxPrice} LE`;
+        }
+
+        boxOption.innerHTML = `
+            <div class="image-loading-container">
+                <div class="image-loading"></div>
+                <img src="${box.image_url}" alt="${box.name}" class="box-img" loading="lazy" >
+            </div>
+            <h4>${box.name}</h4>
+            <p>${box.description}</p>
+            <div class="box-prices">
+                <span class="price-display">${priceDisplay}</span>
+            </div>
+        `;
+
+        // Add click event
+        boxOption.addEventListener('click', function() {
+            selectedBox = this;
+            showFlavorPopup(box.size, box.cookie_count, this);
+        });
+
+        boxOptions.appendChild(boxOption);
+    });
+}
+
+// Function to render mystery box dynamically
+async function renderMysteryBox() {
+    const mysterySection = document.querySelector('.mystery-content');
+    if (!mysterySection) return;
+
+    // Fetch mystery box data
+    mysteryBoxData = await fetchMysteryBoxData();
+
+    if (!mysteryBoxData) return;
+
+    mysterySection.innerHTML = `
+        <!-- Left Image -->
+        <div class="mystery-image">
+            <div class="image-loading-container">
+                <div class="image-loading"></div>
+                <img src="${mysteryBoxData.image_url}" alt="${mysteryBoxData.name}" loading="lazy" >
+            </div>
+            <div class="question-mark">?</div>
+        </div>
+
+        <!-- Right Details -->
+        <div class="mystery-details">
+            <h3>🎁 ${mysteryBoxData.name}</h3>
+            <p>${mysteryBoxData.description}</p>
+            <ul>
+                ${mysteryBoxData.contents ? mysteryBoxData.contents.split(',').map(item => 
+                    `<li>${item.trim()}</li>`
+                ).join('') : `
+                    <li>🍪 6 assorted cookies (bestsellers + seasonal specials)</li>
+                    <li>🌟 1 limited edition flavor not available elsewhere</li>
+                    <li>🎉 A surprise gift with every order</li>
+                `}
+            </ul>
+            <div class="mystery-price">${mysteryBoxData.price} LE</div>
+            <p class="mystery-note">✨ Contents change daily based on what's fresh and delicious!</p>
+            <button class="btn mystery-btn">Order Mystery Box</button>
+        </div>
+    `;
+
+    // Add event listener to the mystery button
+    const mysteryBtn = mysterySection.querySelector('.mystery-btn');
+    if (mysteryBtn) {
+        mysteryBtn.addEventListener('click', async function() {
+            if (!mysteryBoxData) {
+                showNotification('Mystery box data not available');
+                return;
+            }
+
+            const name = mysteryBoxData.name;
+            const unitPrice = mysteryBoxData.price;
+            const img = mysteryBoxData.image_url;
+
+            const cart = getCart();
+            cart.push({
+                id: Date.now(),
+                name: name,
+                unitPrice: unitPrice,
+                price: unitPrice,
+                img: img,
+                quantity: 1,
+                flavors: [],
+                size: "mystery",
+                style: "surprise"
+            });
+
+            saveCart(cart);
+            updateCartUI();
+            showNotification(`${name} added to cart!`);
+
+            // Visual feedback
+            this.textContent = "🎉 Added to Cart!";
+            setTimeout(() => {
+                this.textContent = "Order Mystery Box";
+            }, 2000);
+        });
+    }
+}
 
 // Function to render cookies grid dynamically
 async function renderCookiesGrid() {
@@ -187,8 +407,7 @@ const mainNav = document.querySelector('.main-nav');
 
 // Price service to handle database operations
 const priceService = {
-    // Get all current prices from database
-    // In your priceService.getCurrentPrices() function, update the cookies part:
+    
 async getCurrentPrices() {
     const initialized = await ensureSupabaseInitialized();
     if (!initialized) {
@@ -471,7 +690,6 @@ document.querySelectorAll('.tab-btn').forEach(button => {
     });
 });
 
-// Update the openPopup function to use dynamic data
 function openPopup(cookieType) {
     disableBodyScroll();
     currentCookie = cookieType;
@@ -481,18 +699,27 @@ function openPopup(cookieType) {
     const cookie = cookiesData[cookieType];
     if (!cookie) {
         console.error('Cookie not found:', cookieType);
+        showNotification('Cookie information not available');
         return;
     }
     
+    // Update all popup content with dynamic data
     document.getElementById('popupTitle').textContent = cookie.title;
     document.getElementById('popupDescription').textContent = cookie.description;
     document.getElementById('popupImage').style.backgroundImage = `url(${cookie.images.chewy})`;
-    document.getElementById('popupPrice').textContent = `${cookie.chewy_price} LE`;
-    document.getElementById('popupIngredients').textContent = cookie.ingredients;
-    document.getElementById('popupSpecialty').textContent = cookie.specialty;
-    document.getElementById('popupPerfectFor').textContent = cookie.perfectFor;
+    
+    // Update price based on current style
+    const currentPrice = currentStyle === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
+    document.getElementById('popupPrice').textContent = `${currentPrice} LE`;
+    
+    // Update dynamic content - use fallback if data is missing
+    document.getElementById('popupIngredients').textContent = cookie.ingredients || 'Premium ingredients carefully selected for the best flavor';
+    document.getElementById('popupSpecialty').textContent = cookie.specialty || 'Handcrafted with care for exceptional taste and texture';
+    document.getElementById('popupPerfectFor').textContent = cookie.perfectFor || 'Any occasion that calls for delicious homemade cookies';
+    
     document.getElementById('quantityValue').textContent = quantity;
     
+    // Set active style button
     document.querySelectorAll('.popup-style-option').forEach(btn => {
         btn.classList.remove('active');
     });
@@ -515,7 +742,6 @@ document.getElementById('popupOverlay').addEventListener('click', function(e) {
     }
 });
 
-// Change style function
 function changeStyle(style) {
     currentStyle = style;
     
@@ -526,8 +752,13 @@ function changeStyle(style) {
     document.querySelector(`.popup-style-option[data-style="${style}"]`).classList.add('active');
     
     // Update image based on style
-    if (currentCookie && cookieData[currentCookie]) {
-        document.getElementById('popupImage').style.backgroundImage = `url(${cookieData[currentCookie].images[style]})`;
+    if (currentCookie && cookiesData[currentCookie]) {
+        const cookie = cookiesData[currentCookie];
+        document.getElementById('popupImage').style.backgroundImage = `url(${cookie.images[style]})`;
+        
+        // Update price based on style
+        const currentPrice = style === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
+        document.getElementById('popupPrice').textContent = `${currentPrice} LE`;
     }
 }
 
@@ -551,7 +782,13 @@ async function addToCartFromPopup() {
         return;
     }
 
-    // Get price from database instead of DOM
+    const cookie = cookiesData[currentCookie];
+    if (!cookie) {
+        showNotification('Error: Cookie data not available');
+        return;
+    }
+
+    // Get price from database instead of static data
     const cookiePrice = await getCookiePrice(currentCookie, currentStyle);
     if (!cookiePrice) {
         showNotification('Error: Could not verify price. Please try again.');
@@ -560,31 +797,27 @@ async function addToCartFromPopup() {
 
     const unitPrice = cookiePrice;
     const qty = quantity || 1;
-    const cookieName = document.getElementById('popupTitle').textContent;
+    const cookieName = cookie.title;
     
     const name = `${cookieName} (${currentStyle.charAt(0).toUpperCase() + currentStyle.slice(1)})`;
 
-    // Build cart object with secure prices
+    // Build cart object with dynamic data
     const cart = getCart();
     cart.push({
         id: Date.now(),
         name: name,
-        unitPrice: unitPrice, // Store unit price from database
-        price: unitPrice * qty, // Calculate total
-        img: cookieData[currentCookie]?.images[currentStyle] || 'images/default_cookie.svg',
+        unitPrice: unitPrice,
+        price: unitPrice * qty,
+        img: cookie.images[currentStyle] || 'images/default_cookie.svg',
         quantity: qty,
         style: currentStyle,
-        cookieType: currentCookie // Store for validation
+        cookieType: currentCookie
     });
 
     saveCart(cart);
     updateCartUI();
     showNotification(`${name} added to cart!`);
 
-    // Visual feedback
-    // const addButton = document.querySelector('.popup-add-to-cart');
-    // addButton.innerHTML = '<i class="fas fa-check"></i> Added!';
-    // addButton.style.background = '#2e8b57';
     closePopup();
 
     // Reset quantity
@@ -609,7 +842,13 @@ async function getBoxPrice(boxSize, style) {
     }
     
     const box = currentPrices.boxes.find(b => b.size === boxSize);
-    if (!box) return null;
+    if (!box) {
+        // Fallback to boxesData if not in currentPrices
+        const boxData = boxesData.find(b => b.size === boxSize);
+        if (!boxData) return null;
+        
+        return style === 'mix' ? boxData.mix_price : boxData[`${style}_price`];
+    }
     
     return style === 'mix' ? box.mix_price : box[`${style}_price`];
 }
@@ -901,6 +1140,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     currentPrices = await priceService.getCurrentPrices();
     console.log('Prices loaded successfully:', currentPrices);
     await renderCookiesGrid(); // Add this line
+    await renderBoxes();
+    await renderMysteryBox();
     
     setupMobileMenu(); 
     
@@ -1000,224 +1241,299 @@ document.addEventListener('DOMContentLoaded', async function () {
     const boxOptions = document.querySelectorAll('.box-option');
     const popupStyleBtns = document.querySelectorAll('.popup-style-btn');
 
-    // Update the style selection to store the selected style
-    styleBtns.forEach(btn => {
-        btn.addEventListener('click', function () {
-            document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('selected'));
-            this.classList.add('selected');
+    // In your DOMContentLoaded event, update the style selection to show dynamic prices
+styleBtns.forEach(btn => {
+    btn.addEventListener('click', function () {
+        document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('selected'));
+        this.classList.add('selected');
 
-            selectedStyle = this.getAttribute('data-style');
+        selectedStyle = this.getAttribute('data-style');
 
-            // Update box prices
-            boxOptions.forEach(box => {
-                const price = box.getAttribute(`data-${selectedStyle}`);
-                box.querySelector('.price-display').textContent = `${price} LE`;
-            });
+        // Update box prices with ranges
+        boxesData.forEach(box => {
+            const boxElement = document.querySelector(`.box-option[data-size="${box.size}"]`);
+            if (boxElement) {
+                const priceDisplay = boxElement.querySelector('.price-display');
+                
+                if (selectedStyle === 'mix') {
+                    // For mix, show the mix price
+                    priceDisplay.textContent = `${box.mix_price} LE`;
+                } else {
+                    // For chewy/crumble, show range if prices are different
+                    if (box.chewy_price === box.crumble_price) {
+                        priceDisplay.textContent = `${box[`${selectedStyle}_price`]} LE`;
+                    } else {
+                        const minPrice = Math.min(box.chewy_price, box.crumble_price);
+                        const maxPrice = Math.max(box.chewy_price, box.crumble_price);
+                        priceDisplay.textContent = `${minPrice} - ${maxPrice} LE`;
+                    }
+                }
+            }
         });
     });
+});
     
     // Update popup style selection
-    popupStyleBtns.forEach(btn => {
-        btn.addEventListener('click', function () {
-            document.querySelectorAll('#popup-style-selection .popup-style-btn').forEach(b => b.classList.remove('selected'));
-            this.classList.add('selected');
+popupStyleBtns.forEach(btn => {
+    btn.addEventListener('click', function () {
+        document.querySelectorAll('#popup-style-selection .popup-style-btn').forEach(b => b.classList.remove('selected'));
+        this.classList.add('selected');
 
-            selectedStyle = this.getAttribute('data-style');
+        selectedStyle = this.getAttribute('data-style');
 
-            // Update price in popup
-            if (selectedBox) {
-                const price = selectedBox.getAttribute(`data-${selectedStyle}`);
+        // Update price in popup
+        if (selectedBox) {
+            const size = selectedBox.getAttribute('data-size');
+            const box = boxesData.find(b => b.size === size);
+            
+            if (box) {
+                let price = 0;
+                if (selectedStyle === 'mix') {
+                    price = box.mix_price;
+                } else {
+                    price = box[`${selectedStyle}_price`];
+                }
+                
                 document.getElementById('popup-box-price').textContent = `${price} LE`;
+                document.getElementById('final-price').textContent = price;
 
                 // Refresh flavor grid based on newly selected style
-                const size = selectedBox.getAttribute('data-size');
-                const cookieCount = getCookieCount(size);
-                showFlavorPopup(size, cookieCount, selectedBox);
+                showFlavorPopup(size, box.cookie_count, selectedBox);
             }
-        });
+        }
     });
+});
 
     // Get number of cookies based on box size
-    function getCookieCount(size) {
-        const counts = {
-            'duo': 2,
-            'trio': 3,
-            'classic': 4,
-            'craver': 6,
-            'feast': 9
-        };
-        return counts[size] || 2;
-    }
+    // Replace the static getCookieCount function with dynamic version
+function getCookieCount(size) {
+    const box = boxesData.find(b => b.size === size);
+    return box ? box.cookie_count : 2; // Default to 2 if not found
+}
 
     // Show flavor selection popup
-    function showFlavorPopup(size, cookieCount, boxElement) {
-        const popupOverlay = document.getElementById('flavor-popup-overlay');
-        const popup = document.getElementById('flavor-popup');
-        const popupTitle = document.getElementById('popup-box-title');
-        const popupBoxName = document.getElementById('popup-box-name');
-        const popupBoxDesc = document.getElementById('popup-box-description');
-        const popupBoxPrice = document.getElementById('popup-box-price');
-        const flavorCount = document.getElementById('flavor-count');
-        const maxCount = document.getElementById('max-count');
-        const flavorGrid = document.getElementById('popup-flavor-grid');
-        const selectedCount = document.querySelector('.selected-count');
-        const finalPrice = document.getElementById('final-price');
-        const selectedFlavorsSummary = document.getElementById('selected-flavors-summary');
-        disableBodyScroll()
-        // Reset selected flavors
-        selectedFlavors = {};
-        
-        // Get box details
-        const sizeName = size.charAt(0).toUpperCase() + size.slice(1);
-        const description = boxElement.querySelector('p').textContent;
-        const price = boxElement.getAttribute(`data-${selectedStyle}`);
-        
-        // Update popup content
-        popupTitle.textContent = `Customize Your ${sizeName} Box`;
-        popupBoxName.textContent = `The ${sizeName}`;
-        popupBoxDesc.textContent = description;
-        popupBoxPrice.textContent = `${price} LE`;
-        finalPrice.textContent = price;
-        flavorCount.textContent = cookieCount;
-        maxCount.textContent = cookieCount;
-        selectedCount.textContent = '0';
-        
-        // Reset style selection in popup
-        document.querySelectorAll('#popup-style-selection .popup-style-btn').forEach(btn => {
-            btn.classList.remove('selected');
-            if (btn.getAttribute('data-style') === selectedStyle) {
-                btn.classList.add('selected');
-            }
-        });
-        
-        // Create flavor options
-        const flavors = [
-            { id: 'flavor-chocolate-chewy', name: 'The Original Chocolate Chips', type: 'chewy', price: 80 },
-            { id: 'flavor-chocolate-crumble', name: 'The Original Chocolate Chips', type: 'crumble', price: 80 },
-            { id: 'flavor-crispy-chewy', name: 'Chocolate Crispy Affair', type: 'chewy', price: 90 },
-            { id: 'flavor-crispy-crumble', name: 'Chocolate Crispy Affair', type: 'crumble', price: 90 },
-            { id: 'flavor-caramel-chewy', name: 'The Caramel Bad Girl', type: 'chewy', price: 85 },
-            { id: 'flavor-caramel-crumble', name: 'The Caramel Bad Girl', type: 'crumble', price: 85 },
-            { id: 'flavor-hazelnut-chewy', name: 'The Hazelnut Mommy', type: 'chewy', price: 95 },
-            { id: 'flavor-hazelnut-crumble', name: 'The Hazelnut Mommy', type: 'crumble', price: 95 },
-            { id: 'flavor-lotus-chewy', name: 'Lotus Obsession', type: 'chewy', price: 85 },
-            { id: 'flavor-lotus-crumble', name: 'Lotus Obsession', type: 'crumble', price: 85 }
-        ];
+function showFlavorPopup(size, cookieCount, boxElement) {
+    const popupOverlay = document.getElementById('flavor-popup-overlay');
+    const popup = document.getElementById('flavor-popup');
+    const popupTitle = document.getElementById('popup-box-title');
+    const popupBoxName = document.getElementById('popup-box-name');
+    const popupBoxDesc = document.getElementById('popup-box-description');
+    const popupBoxPrice = document.getElementById('popup-box-price');
+    const flavorCount = document.getElementById('flavor-count');
+    const maxCount = document.getElementById('max-count');
+    const flavorGrid = document.getElementById('popup-flavor-grid');
+    const selectedCount = document.querySelector('.selected-count');
+    const finalPrice = document.getElementById('final-price');
+    const selectedFlavorsSummary = document.getElementById('selected-flavors-summary');
+    
+    disableBodyScroll();
+    
+    // Reset selected flavors
+    selectedFlavors = {};
+    
+    // Get box details from boxesData
+    const box = boxesData.find(b => b.size === size);
+    if (!box) {
+        console.error('Box not found:', size);
+        showNotification('Box information not available');
+        return;
+    }
+    
+    const sizeName = box.name;
+    const description = box.description;
+    let price = 0;
+    
+    // Get price based on selected style
+    if (selectedStyle === 'mix') {
+        price = box.mix_price;
+    } else {
+        price = box[`${selectedStyle}_price`];
+    }
+    
+    // Update popup content
+    popupTitle.textContent = `Customize Your ${sizeName}`;
+    popupBoxName.textContent = sizeName;
+    popupBoxDesc.textContent = description;
+    popupBoxPrice.textContent = `${price} LE`;
+    finalPrice.textContent = price;
+    flavorCount.textContent = cookieCount;
+    maxCount.textContent = cookieCount;
+    selectedCount.textContent = '0';
+    
+    // Reset style selection in popup
+    document.querySelectorAll('#popup-style-selection .popup-style-btn').forEach(btn => {
+        btn.classList.remove('selected');
+        if (btn.getAttribute('data-style') === selectedStyle) {
+            btn.classList.add('selected');
+        }
+    });
+    
+    // Create flavor options dynamically from cookiesData
+    const flavors = [];
+    
+    // Generate flavors from dynamic cookies data
+    Object.keys(cookiesData).forEach(slug => {
+        const cookie = cookiesData[slug];
+        if (selectedStyle === 'mix') {
+            // Add both chewy and crumble options for mix
+            flavors.push({ 
+                id: `flavor-${slug}-chewy`, 
+                name: cookie.title, 
+                type: 'chewy', 
+                price: cookie.chewy_price,
+                slug: slug
+            });
+            flavors.push({ 
+                id: `flavor-${slug}-crumble`, 
+                name: cookie.title, 
+                type: 'crumble', 
+                price: cookie.crumble_price,
+                slug: slug
+            });
+        } else {
+            // Add only the selected style
+            flavors.push({ 
+                id: `flavor-${slug}-${selectedStyle}`, 
+                name: cookie.title, 
+                type: selectedStyle, 
+                price: selectedStyle === 'chewy' ? cookie.chewy_price : cookie.crumble_price,
+                slug: slug
+            });
+        }
+    });
 
-        // Create flavor options with quantity selectors
-        flavorGrid.innerHTML = '';
-        const filteredFlavors = flavors.filter(f => selectedStyle === 'mix' ? true : f.type === selectedStyle);
+    // Create flavor options with quantity selectors
+    flavorGrid.innerHTML = '';
+    
+    flavors.forEach(flavor => {
+        const uniqueId = `${flavor.id}-${flavor.type}`;
+        selectedFlavors[uniqueId] = 0; // Initialize with 0 selected
         
-        filteredFlavors.forEach(flavor => {
-            const uniqueId = `${flavor.id}-${flavor.type}`;
-            selectedFlavors[uniqueId] = 0; // Initialize with 0 selected
+        const flavorOption = document.createElement('div');
+        flavorOption.className = 'flavor-option';
+        flavorOption.setAttribute('data-id', uniqueId);
+        flavorOption.setAttribute('data-slug', flavor.slug);
+        flavorOption.setAttribute('data-type', flavor.type);
+        flavorOption.innerHTML = `
+            <div class="flavor-label">
+                <div class="flavor-name">${flavor.name}</div>
+                <div class="flavor-type">${flavor.type.charAt(0).toUpperCase() + flavor.type.slice(1)}</div>
+            </div>
+            <div class="flavor-quantity">
+                <button class="decrease" data-id="${uniqueId}">-</button>
+                <span id="qty-${uniqueId}">0</span>
+                <button class="increase" data-id="${uniqueId}">+</button>
+            </div>
+        `;
+        flavorGrid.appendChild(flavorOption);
+    });
+
+    // Add counter logic
+    flavorGrid.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const qtySpan = document.getElementById(`qty-${id}`);
+            let qty = parseInt(qtySpan.textContent);
+            const totalSelected = getTotalSelected();
             
-            const flavorOption = document.createElement('div');
-            flavorOption.className = 'flavor-option';
-            flavorOption.setAttribute('data-id', uniqueId);
-            flavorOption.innerHTML = `
-                <div class="flavor-label">
-                    <div class="flavor-name">${flavor.name}</div>
-                    <div class="flavor-type">${flavor.type}</div>
-                </div>
-                <div class="flavor-quantity">
-                    <button class="decrease" data-id="${uniqueId}">-</button>
-                    <span id="qty-${uniqueId}">0</span>
-                    <button class="increase" data-id="${uniqueId}">+</button>
-                </div>
-            `;
-            flavorGrid.appendChild(flavorOption);
-        });
-
-        // Add counter logic
-        flavorGrid.querySelectorAll('button').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                const qtySpan = document.getElementById(`qty-${id}`);
-                let qty = parseInt(qtySpan.textContent);
-                const totalSelected = getTotalSelected();
-                
-                if (this.classList.contains('increase')) {
-                    if (totalSelected < cookieCount) {
-                        qty++;
-                        selectedFlavors[id] = qty;
-                        qtySpan.textContent = qty;
-                        updateSelectionUI(cookieCount);
-                    } else {
-                        showNotification(`You can only select ${cookieCount} cookies for this box.`);
-                    }
-                } else if (this.classList.contains('decrease') && qty > 0) {
-                    qty--;
+            if (this.classList.contains('increase')) {
+                if (totalSelected < cookieCount) {
+                    qty++;
                     selectedFlavors[id] = qty;
                     qtySpan.textContent = qty;
                     updateSelectionUI(cookieCount);
+                } else {
+                    showNotification(`You can only select ${cookieCount} cookies for this box.`);
                 }
-            });
-        });
-        
-        // Update selected flavors summary
-        function updateSelectionUI(cookieCount) {
-            const totalSelected = getTotalSelected();
-            selectedCount.textContent = totalSelected;
-            
-            // Update selected flavors summary
-            selectedFlavorsSummary.innerHTML = '<h5>Your Selection:</h5>';
-            
-            if (totalSelected === 0) {
-                selectedFlavorsSummary.innerHTML += '<p class="no-selection">No flavors selected yet</p>';
-            } else {
-                for (const [id, qty] of Object.entries(selectedFlavors)) {
-                    if (qty > 0) {
-                        const flavorDiv = document.createElement('div');
-                        flavorDiv.className = 'selected-flavor-item';
-                        
-                        // Find the flavor name
-                        const flavorName = flavors.find(f => `${f.id}-${f.type}` === id)?.name || 'Unknown Flavor';
-                        const flavorType = flavors.find(f => `${f.id}-${f.type}` === id)?.type || 'Unknown Flavor';
-                        
-                        flavorDiv.innerHTML = `
-                            <span>${flavorName} - ${flavorType}</span>
-                            <span>${qty} x</span>
-                        `;
-                        selectedFlavorsSummary.appendChild(flavorDiv);
-                    }
-                }
+            } else if (this.classList.contains('decrease') && qty > 0) {
+                qty--;
+                selectedFlavors[id] = qty;
+                qtySpan.textContent = qty;
+                updateSelectionUI(cookieCount);
             }
-            
-            // Enable/disable add to cart button
-            const addButton = document.getElementById('add-box-from-popup');
-            if (totalSelected === cookieCount) {
-                addButton.disabled = false;
-                addButton.style.opacity = '1';
-            } else {
-                addButton.disabled = true;
-                addButton.style.opacity = '0.7';
-            }
-        }
-        
-        function getTotalSelected() {
-            return Object.values(selectedFlavors).reduce((sum, qty) => sum + qty, 0);
-        }
-        
-        // Initialize UI
-        updateSelectionUI(cookieCount);
-
-        // Show popup
-        popupOverlay.classList.add('active');
-        popup.classList.add('active');
-    }
-
-    // Box selection
-    boxOptions.forEach(box => {
-        box.addEventListener('click', function () {
-            selectedBox = this;
-            const size = this.getAttribute('data-size');
-            const cookieCount = getCookieCount(size);
-
-            // Show flavor selection popup
-            showFlavorPopup(size, cookieCount, this);
         });
     });
+    
+    // Update selected flavors summary
+    function updateSelectionUI(cookieCount) {
+        const totalSelected = getTotalSelected();
+        selectedCount.textContent = totalSelected;
+        
+        // Update selected flavors summary
+        selectedFlavorsSummary.innerHTML = '<h5>Your Selection:</h5>';
+        
+        if (totalSelected === 0) {
+            selectedFlavorsSummary.innerHTML += '<p class="no-selection">No flavors selected yet</p>';
+        } else {
+            for (const [id, qty] of Object.entries(selectedFlavors)) {
+                if (qty > 0) {
+                    const flavorDiv = document.createElement('div');
+                    flavorDiv.className = 'selected-flavor-item';
+                    
+                    // Find the flavor from our flavors array
+                    const flavor = flavors.find(f => `${f.id}-${f.type}` === id);
+                    const flavorName = flavor ? flavor.name : 'Unknown Flavor';
+                    const flavorType = flavor ? flavor.type : 'Unknown Type';
+                    
+                    flavorDiv.innerHTML = `
+                        <span class="flavor-name">${flavorName}</span>
+                        <span class="flavor-details">
+                            <span class="flavor-type">${flavorType.charAt(0).toUpperCase() + flavorType.slice(1)}</span>
+                            <span class="flavor-quantity">x${qty}</span>
+                        </span>
+                    `;
+                    selectedFlavorsSummary.appendChild(flavorDiv);
+                }
+            }
+        }
+        
+        // Enable/disable add to cart button
+        const addButton = document.getElementById('add-box-from-popup');
+        if (totalSelected === cookieCount) {
+            addButton.disabled = false;
+            addButton.style.opacity = '1';
+            
+            // Validate mix selection
+            if (selectedStyle === 'mix') {
+                const chewyCount = flavors.filter(f => f.type === 'chewy').reduce((sum, f) => sum + (selectedFlavors[`${f.id}-${f.type}`] || 0), 0);
+                const crumbleCount = flavors.filter(f => f.type === 'crumble').reduce((sum, f) => sum + (selectedFlavors[`${f.id}-${f.type}`] || 0), 0);
+                
+                if (chewyCount === 0 || crumbleCount === 0) {
+                    addButton.disabled = true;
+                    addButton.style.opacity = '0.7';
+                    selectedFlavorsSummary.innerHTML += '<p class="mix-warning">⚠️ Mix must include at least 1 Chewy and 1 Crumble cookie</p>';
+                }
+            }
+        } else {
+            addButton.disabled = true;
+            addButton.style.opacity = '0.7';
+        }
+    }
+    
+    function getTotalSelected() {
+        return Object.values(selectedFlavors).reduce((sum, qty) => sum + qty, 0);
+    }
+    
+    // Initialize UI
+    updateSelectionUI(cookieCount);
+
+    // Show popup
+    popupOverlay.classList.add('active');
+    popup.classList.add('active');
+}
+
+    // Replace the box selection event in DOMContentLoaded
+boxOptions.forEach(box => {
+    box.addEventListener('click', function () {
+        selectedBox = this;
+        const size = this.getAttribute('data-size');
+        const boxData = boxesData.find(b => b.size === size);
+        
+        if (boxData) {
+            showFlavorPopup(size, boxData.cookie_count, this);
+        }
+    });
+});
 
     // Close popup
     document.getElementById('close-popup').addEventListener('click', closeFlavorPopup);
@@ -1297,8 +1613,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         // Enforce Mix must contain at least one Chewy and one Crumble
         if (selectedStyle === 'mix') {
-            const chewyCount = selectedFlavors.filter(f => f.type === 'chewy').reduce((s, f) => s + f.quantity, 0);
-            const crumbleCount = selectedFlavors.filter(f => f.type === 'crumble').reduce((s, f) => s + f.quantity, 0);
+            console.log("selectedFlavors", selectedFlavors)
+            const chewyCount = selectedFlavors.filter(f => f.type.toLowerCase() === 'chewy').reduce((s, f) => s + f.quantity, 0);
+            const crumbleCount = selectedFlavors.filter(f => f.type.toLowerCase() === 'crumble').reduce((s, f) => s + f.quantity, 0);
             if (chewyCount === 0 || crumbleCount === 0) {
                 showNotification('Mix of Both must include at least 1 Chewy and 1 Crumble.');
                 return;
