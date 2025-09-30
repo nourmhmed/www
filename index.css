@@ -1504,7 +1504,7 @@ footer {
             text-align: center;
             font-size: 2.8rem;
             margin: 50px 0 15px;
-            color: #8b5a2b;
+            color: var(--primary);
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
         }
         
@@ -1667,7 +1667,7 @@ footer {
             top: 15px;
             left: 15px;
             background: rgba(255, 255, 255, 0.9);
-            color: #8b5a2b;
+            color: var(--primary);
             padding: 5px 10px;
             border-radius: 15px;
             font-size: 0.8rem;
@@ -4161,3 +4161,93 @@ footer {
 }
 
 
+
+
+/* Add to your existing CSS */
+.price-display.range {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.box-prices {
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* Add to your existing CSS */
+.box-option {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Ensure all boxes have same height */
+}
+
+.box-option h4 {
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    min-height: 2.4rem; /* Fixed height for title */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.box-option p {
+    margin: 0 0 15px 0;
+    color: #666;
+    line-height: 1.4;
+    flex-grow: 1; /* Allow description to take available space */
+    min-height: 2.8rem; /* Minimum height for description */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.box-prices {
+    margin-top: auto; /* Push prices to bottom */
+    padding: 10px 0 0 0;
+    min-height: 40px; /* Fixed height for price area */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top: 1px solid #f0f0f0;
+}
+
+.price-display {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-align: center;
+}
+
+/* Ensure all box options have consistent sizing */
+.box-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    align-items: stretch; /* Make all boxes same height */
+}
+
+.box-option {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+    text-align: center;
+    height: 100%; /* Take full available height */
+    box-sizing: border-box;
+}
+
+.box-option:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    border-color: var(--primary);
+}
