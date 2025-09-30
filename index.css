@@ -4251,3 +4251,210 @@ footer {
     box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     border-color: var(--primary);
 }
+
+
+.loading-spinner .brand-name {
+  font-family: 'Stella', cursive;
+  font-size: 4.5rem;
+  color: var(--primary);
+  overflow: hidden;
+  border-right: 3px solid var(--primary);
+  white-space: nowrap;
+  animation: typing 3s steps(15, end) infinite, blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+  0% { width: 0 }
+  50% { width: 100% }
+  80% { width: 100% }
+  100% { width: 0 }
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: var(--primary) }
+}
+
+
+/* Speech Bubble Animations */
+.svg-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4rem;
+    position: relative;
+    margin: 2rem 0;
+}
+
+.team-container {
+    position: relative;
+    text-align: center;
+    animation: float 3s ease-in-out infinite;
+}
+
+.team-container:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.team-container:nth-child(2) {
+    animation-delay: 1.5s;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+/* Speech Bubbles */
+.speech-bubble {
+    position: absolute;
+    background: white;
+    border: 3px solid var(--primary);
+    border-radius: 20px;
+    padding: 1rem 1.5rem;
+    max-width: 280px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: bubbleAppear 8s infinite;
+    z-index: 10;
+    font-family: 'Chewy', cursive;
+}
+
+.crumble-bubble {
+    top: -140px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation-delay: 2s;
+}
+
+.chewy-bubble {
+    top: -140px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation-delay: 6s;
+}
+
+.bubble-text {
+    font-size: 0.9rem;
+    color: var(--text);
+    line-height: 1.4;
+    font-weight: 500;
+}
+
+.bubble-text strong {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.bubble-arrow {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-right: 3px solid var(--primary);
+    border-bottom: 3px solid var(--primary);
+    bottom: -11px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+}
+
+@keyframes bubbleAppear {
+    0%, 100% {
+        opacity: 0;
+        transform: translateY(20px) translateX(-50%);
+    }
+    10%, 40% {
+        opacity: 1;
+        transform: translateY(0) translateX(-50%);
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(0) translateX(-50%);
+    }
+    60% {
+        opacity: 0;
+        transform: translateY(-20px) translateX(-50%);
+    }
+}
+
+/* Cookie Character Animations */
+.cookie-img {
+    width: 100%;
+    cursor: default;
+    transition: transform 0.3s ease;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+}
+
+.crumble-img {
+    animation-name: crumbleTalk;
+}
+
+.chewy-img {
+    animation-name: chewyTalk;
+}
+
+@keyframes crumbleTalk {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    25% {
+        transform: translateY(-5px) rotate(-2deg);
+    }
+    75% {
+        transform: translateY(2px) rotate(2deg);
+    }
+}
+
+@keyframes chewyTalk {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    25% {
+        transform: translateY(-5px) rotate(2deg);
+    }
+    75% {
+        transform: translateY(2px) rotate(-2deg);
+    }
+}
+
+/* Team Labels */
+.team-label {
+    text-align: center;
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: var(--primary);
+    font-family: 'Chewy', cursive;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .svg-container {
+        flex-direction: column;
+        gap: 2rem;
+    }
+    
+    .speech-bubble {
+        max-width: 220px;
+        font-size: 0.8rem;
+    }
+    
+    .crumble-bubble {
+        top: -120px;
+    }
+    
+    .chewy-bubble {
+        top: -120px;
+    }
+    
+    .cookie-img {
+        max-width: 200px;
+    }
+}
+
