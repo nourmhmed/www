@@ -2520,7 +2520,7 @@
     const paymentStep = document.getElementById('step-payment');
     const progressSteps = document.querySelectorAll('.progress-step');
 
-
+let summaryItems = null;
     let shippingCities = [];
     let shippingZones = [];
 
@@ -2887,7 +2887,7 @@
         return;
       }
 
-      let subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      let subtotal = cart.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
       let discount = 0;
       let shippingCost = getShippingPrice();
       let freeShipping = false;
@@ -2900,6 +2900,7 @@
       if (voucher.free_shipping) {
         console.log('Applying free shipping');
         freeShipping = true;
+        discount += shippingCost;
         shippingCost = 0;
       }
 
@@ -2911,7 +2912,7 @@
         cart.forEach(item => {
           // Check if this item is in the voucher's applicable items list
           if (voucher.items.includes(item.cookieType) || voucher.items.includes(item.size)) {
-            const itemTotal = item.price * item.quantity;
+            const itemTotal = item.unitPrice * item.quantity;
             let itemDiscount = 0;
 
             // Apply discount based on discount_number or discount_rate
@@ -2952,9 +2953,9 @@
       let subtotal = 0;
 
       console.log('Current selection - City:', selectedCity, 'District:', selectedDistrict);
-
+      console.log("cartcartcart", cart)
       cart.forEach(item => {
-        const itemTotal = item.price * item.quantity;
+        const itemTotal = item.unitPrice * item.quantity;
         subtotal += itemTotal;
 
         // Build flavors block
@@ -3030,6 +3031,7 @@
         shippingEl.textContent = '-';
         shippingEl.style.color = '#999';
       } else if (freeShipping || currentShippingCost === 0) {
+        console.log("currentShippingCost", currentShippingCost)
         shippingEl.textContent = 'FREE';
         shippingEl.style.color = 'var(--success)';
         shippingCost = 0; // Ensure shipping cost is 0 for free shipping
@@ -3097,7 +3099,7 @@
 
       // Update the summary with new city (even before district is selected)
       const cart = getCart();
-      const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const subtotal = cart.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
       const shippingCost = getShippingPrice();
 
       if (appliedVoucher) {
@@ -3138,10 +3140,15 @@
     }
     document.addEventListener('DOMContentLoaded', function () {
       const CART_KEY = 'syrines_crumble_cart';
+      // debugger
       //   const cartCount = document.getElementById('cart-count');
-      const summaryItems = document.querySelector('.summary-items');
+      summaryItems = document.querySelector('.summary-items');
       const subtotalEl = document.getElementById('subtotal');
       const totalAmountEl = document.querySelector('.total-amount');
+
+      console.log("summaryItems", summaryItems)
+      console.log("subtotalEl", subtotalEl)
+      console.log("totalAmountEl", totalAmountEl)
 
       function getCart() {
         const cartJSON = localStorage.getItem(CART_KEY);
@@ -3180,7 +3187,7 @@
         } else {
           // No voucher, just update with new shipping cost
           const cart = getCart();
-          const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+          const subtotal = cart.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
           const shippingCost = getShippingPrice();
           updateOrderSummary(subtotal, 0, shippingCost);
         }
@@ -3190,12 +3197,13 @@
       function renderSummary() {
         const cart = getCart();
         const selectedCity = document.getElementById('city').value;
+        const summaryItems = document.querySelector('.summary-items');
         summaryItems.innerHTML = '';
         let subtotal = 0;
         console.log("cartcart", cart);
 
         cart.forEach(item => {
-          const itemTotal = item.price * item.quantity;
+          const itemTotal = item.unitPrice * item.quantity;
           subtotal += itemTotal;
 
           // 🔹 Build flavors block
@@ -3292,7 +3300,7 @@
             return;
           }
 
-          let subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+          let subtotal = cart.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
           let discount = 0;
           let shippingCost = getShippingPrice();
           let freeShipping = false;
@@ -3304,6 +3312,7 @@
             // Check for free shipping
             if (appliedVoucher.free_shipping) {
               freeShipping = true;
+              discount += shippingCost;
               shippingCost = 0;
               console.log('Free shipping applied');
             }
@@ -3313,7 +3322,7 @@
               // Item-specific discount
               cart.forEach(item => {
                 if (appliedVoucher.items.includes(item.cookieType) || appliedVoucher.items.includes(item.size)) {
-                  const itemTotal = item.price * item.quantity;
+                  const itemTotal = item.unitPrice * item.quantity;
                   let itemDiscount = 0;
 
                   if (appliedVoucher.discount_number) {
@@ -3428,7 +3437,7 @@
                 } : null,
                 items: cart.map(item => ({
                   name: item.name,
-                  amount_cents: Math.round(item.price * 100), // Convert to cents
+                  amount_cents: item.price * 100, // Convert to cents
                   description: item.name,
                   quantity: item.quantity,
                   flavors: item.flavors ? item.flavors.map(f => ({
