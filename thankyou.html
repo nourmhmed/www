@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* Your existing styles */
     * {
       margin: 0;
       padding: 0;
@@ -307,7 +306,7 @@
     if (urlParams.payment == 'cash' && urlParams.success === "true") {
       const encodedData = urlParams.data;
       if (encodedData) {
-        const orderData = JSON.parse(atob(encodedData));
+        const orderData = JSON.parse(decodeURIComponent(encodedData));
         console.log("Order data:", orderData);
 
         // Show confirmation message
@@ -450,11 +449,46 @@
             background: #C0394F; 
             color: white;
         }
-        .total { 
-            font-size: 20px; 
-            font-weight: bold; 
-            color: #C0394F; 
-            text-align: right;
+        .total-breakdown { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin: 20px 0;
+            border: 2px solid #f0f0f0;
+        }
+        .breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .breakdown-row.total-row {
+            border-top: 2px solid #C0394F;
+            border-bottom: none;
+            font-size: 18px;
+            font-weight: bold;
+            color: #C0394F;
+            margin-top: 15px;
+            padding-top: 15px;
+        }
+        .breakdown-label {
+            color: #666;
+        }
+        .breakdown-value {
+            font-weight: 500;
+        }
+        .discount {
+            color: #4CAF50;
+        }
+        .free-shipping-badge {
+            background: #4CAF50;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
         }
         .footer { 
             margin-top: 30px; 
@@ -539,8 +573,37 @@
             </table>
         </div>
         
-        <div class="section total">
-            <p><strong>Total Amount: LE ${(order.total / 100).toFixed(2)}</strong></p>
+        <div class="total-breakdown">
+            <h3>💰 Order Summary</h3>
+            <div class="breakdown-row">
+                <span class="breakdown-label">Subtotal:</span>
+                <span class="breakdown-value">LE ${(order.subtotal / 100).toFixed(2)}</span>
+            </div>
+            ${order.discount > 0 ? `
+            <div class="breakdown-row">
+                <span class="breakdown-label discount">Discount:</span>
+                <span class="breakdown-value discount">- LE ${(order.discount / 100).toFixed(2)}</span>
+            </div>
+            ` : ''}
+            ${order.voucher ? `
+            <div class="breakdown-row">
+                <span class="breakdown-label">Voucher Applied:</span>
+                <span class="breakdown-value">${order.voucher}</span>
+            </div>
+            ` : ''}
+            <div class="breakdown-row">
+                <span class="breakdown-label">
+                    Shipping:
+                    ${order.free_shipping ? '<span class="free-shipping-badge">FREE</span>' : ''}
+                </span>
+                <span class="breakdown-value">
+                    ${order.free_shipping ? 'LE 0.00' : `LE ${(order.shipping_cost / 100).toFixed(2)}`}
+                </span>
+            </div>
+            <div class="breakdown-row total-row">
+                <span class="breakdown-label">Total Amount:</span>
+                <span class="breakdown-value">LE ${(order.total / 100).toFixed(2)}</span>
+            </div>
         </div>
     </div>
     
@@ -548,7 +611,7 @@
         <p><strong>Delivery Information:</strong></p>
         <p>We'll contact you shortly to confirm delivery timing</p>
         <p>Estimated delivery: 1-2 business days</p>
-        <p style="margin-top: 20px;">📞 <strong>Need help?</strong> Contact us at: support@syrinescrumble.com</p>
+        <p style="margin-top: 20px;">📞 <strong>Need help?</strong> Contact us at: syrinescrumble@gmail.com</p>
         <p>Thank you for choosing Syrine's Crumble! We hope you enjoy your treats! 🎉</p>
     </div>
 </body>
@@ -588,13 +651,17 @@ ${items.map(item => `
   ${item.flavors && item.flavors.length > 0 ? item.flavors.map(flavor => `  Flavor: ${flavor.flavor} (${flavor.type}) x${flavor.quantity}`).join('\n  ') : ''}
 `).join('\n')}
 
+ORDER SUMMARY:
+Subtotal: LE ${(order.subtotal / 100).toFixed(2)}
+${order.discount > 0 ? `Discount: - LE ${(order.discount / 100).toFixed(2)}\n` : ''}${order.voucher ? `Voucher Applied: ${order.voucher}\n` : ''}Shipping: ${order.free_shipping ? 'LE 0.00 (FREE SHIPPING)' : `LE ${(order.shipping_cost / 100).toFixed(2)}`}
+────────────────────
 TOTAL AMOUNT: LE ${(order.total / 100).toFixed(2)}
 
 DELIVERY INFORMATION:
 We'll contact you shortly to confirm delivery timing
 Estimated delivery: 1-2 business days
 
-Need help? Contact us at: support@syrinescrumble.com
+Need help? Contact us at: syrinescrumble@gmail.com
 
 Thank you for choosing Syrine's Crumble!
 `;
@@ -682,174 +749,255 @@ Thank you for choosing Syrine's Crumble!
       }
     }
 
-    // Function to generate HTML receipt for email
+    // Function to generate HTML receipt for email with full breakdown
     function generateReceiptHTML(orderData) {
+      const orderId = orderData.orderId || new Date().getTime();
+      const subtotal = orderData.subtotal || 0;
+      const discount = orderData.discount || 0;
+      const shippingCost = orderData.shipping_cost || 0;
+      const total = orderData.amount || 0;
+      const freeShipping = orderData.free_shipping || false;
+      
+      // Calculate final total after discount
+      const finalSubtotal = subtotal - discount;
+      
       return `
-  <!DOCTYPE html>
-  <html>
-  <head>
-      <meta charset="utf-8">
-      <style>
-          body { 
-              font-family: 'Arial', sans-serif; 
-              line-height: 1.6; 
-              color: #333; 
-              max-width: 600px; 
-              margin: 0 auto; 
-              padding: 20px;
-          }
-          .header { 
-              text-align: center; 
-              border-bottom: 3px solid #C0394F; 
-              padding-bottom: 20px; 
-              margin-bottom: 30px;
-          }
-          .logo { 
-              color: #C0394F; 
-              font-size: 28px; 
-              font-weight: bold; 
-              margin-bottom: 10px;
-          }
-          .order-info { 
-              background: #f9f9f9; 
-              padding: 20px; 
-              border-radius: 10px; 
-              margin: 20px 0;
-          }
-          .section { 
-              margin: 25px 0; 
-          }
-          .items-table { 
-              width: 100%; 
-              border-collapse: collapse; 
-              margin: 20px 0;
-          }
-          .items-table th, .items-table td { 
-              border: 1px solid #ddd; 
-              padding: 12px; 
-              text-align: left;
-          }
-          .items-table th { 
-              background: #C0394F; 
-              color: white;
-          }
-          .total { 
-              font-size: 20px; 
-              font-weight: bold; 
-              color: #C0394F; 
-              text-align: right;
-          }
-          .footer { 
-              margin-top: 30px; 
-              padding-top: 20px; 
-              border-top: 1px solid #ddd; 
-              text-align: center; 
-              color: #666;
-          }
-          .highlight { 
-              color: #C0394F; 
-              font-weight: bold;
-          }
-          .status-badge {
-              background: #4CAF50;
-              color: white;
-              padding: 5px 15px;
-              border-radius: 20px;
-              font-size: 14px;
-              font-weight: bold;
-          }
-      </style>
-  </head>
-  <body>
-      <div class="header">
-          <div class="logo">Syrine's Crumble</div>
-          <h1>Order Confirmation</h1>
-          <p>Thank you for your order! 🍪</p>
-          <div class="status-badge">CONFIRMED</div>
-      </div>
-      
-      <div class="order-info">
-          <div class="section">
-              <h3>📋 Order Details</h3>
-              <p><strong>Order ID:</strong> <span class="highlight">#${orderData.orderId || new Date().getTime()}</span></p>
-              <p><strong>Order Date:</strong> ${new Date().toLocaleDateString('en-EG')}</p>
-              <p><strong>Order Time:</strong> ${new Date().toLocaleTimeString('en-EG')}</p>
-              <p><strong>Payment Method:</strong> Cash on Delivery</p>
-          </div>
-          
-          <div class="section">
-              <h3>👤 Customer Information</h3>
-              <p><strong>Name:</strong> ${orderData.firstName} ${orderData.lastName}</p>
-              <p><strong>Email:</strong> ${orderData.email}</p>
-              <p><strong>Phone:</strong> ${orderData.phone}</p>
-          </div>
-          
-          <div class="section">
-              <h3>🏠 Delivery Address</h3>
-              <p>${orderData.street}, Building ${orderData.building}</p>
-              <p>Floor ${orderData.floor}, Apartment ${orderData.apartment}</p>
-              <p>${orderData.city}, ${orderData.country}</p>
-          </div>
-          
-          <div class="section">
-              <h3>🛒 Order Items</h3>
-              <table class="items-table">
-                  <thead>
-                      <tr>
-                          <th>Item</th>
-                          <th>Qty</th>
-                          <th>Price</th>
-                          <th>Total</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                      ${orderData.items.map(item => `
-                          <tr>
-                              <td>${item.name}</td>
-                              <td>${item.quantity}</td>
-                              <td>LE ${item.amount_cents}.00</td>
-                              <td>LE ${item.amount_cents * item.quantity}.00</td>
-                          </tr>
-                          ${item.flavors && item.flavors.length > 0 ? item.flavors.map(flavor => `
-                              <tr style="background-color: #f5f5f5;">
-                                  <td style="padding-left: 30px;">↳ ${flavor.flavor} (${flavor.type})</td>
-                                  <td>${flavor.quantity}</td>
-                                  <td>-</td>
-                                  <td>-</td>
-                              </tr>
-                          `).join('') : ''}
-                      `).join('')}
-                  </tbody>
-              </table>
-          </div>
-          
-          <div class="section total">
-              <p><strong>Total Amount: LE ${orderData.amount}.00</strong></p>
-          </div>
-      </div>
-      
-      <div class="footer">
-          <p><strong>Delivery Information:</strong></p>
-          <p>We'll contact you shortly to confirm delivery timing</p>
-          <p>Estimated delivery: 1-2 business days</p>
-          <p style="margin-top: 20px;">📞 <strong>Need help?</strong> Contact us at: support@syrinescrumble.com</p>
-          <p>Thank you for choosing Syrine's Crumble! We hope you enjoy your treats! 🎉</p>
-      </div>
-  </body>
-  </html>
-  `;
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { 
+            font-family: 'Arial', sans-serif; 
+            line-height: 1.6; 
+            color: #333; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 20px;
+        }
+        .header { 
+            text-align: center; 
+            border-bottom: 3px solid #C0394F; 
+            padding-bottom: 20px; 
+            margin-bottom: 30px;
+        }
+        .logo { 
+            color: #C0394F; 
+            font-size: 28px; 
+            font-weight: bold; 
+            margin-bottom: 10px;
+        }
+        .order-info { 
+            background: #f9f9f9; 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin: 20px 0;
+        }
+        .section { 
+            margin: 25px 0; 
+        }
+        .items-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 20px 0;
+        }
+        .items-table th, .items-table td { 
+            border: 1px solid #ddd; 
+            padding: 12px; 
+            text-align: left;
+        }
+        .items-table th { 
+            background: #C0394F; 
+            color: white;
+        }
+        .total-breakdown { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin: 20px 0;
+            border: 2px solid #f0f0f0;
+        }
+        .breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .breakdown-row.total-row {
+            border-top: 2px solid #C0394F;
+            border-bottom: none;
+            font-size: 18px;
+            font-weight: bold;
+            color: #C0394F;
+            margin-top: 15px;
+            padding-top: 15px;
+        }
+        .breakdown-label {
+            color: #666;
+        }
+        .breakdown-value {
+            font-weight: 500;
+        }
+        .discount {
+            color: #4CAF50;
+        }
+        .free-shipping-badge {
+            background: #4CAF50;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .footer { 
+            margin-top: 30px; 
+            padding-top: 20px; 
+            border-top: 1px solid #ddd; 
+            text-align: center; 
+            color: #666;
+        }
+        .highlight { 
+            color: #C0394F; 
+            font-weight: bold;
+        }
+        .status-badge {
+            background: #4CAF50;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">Syrine's Crumble</div>
+        <h1>Order Confirmation</h1>
+        <p>Thank you for your order! 🍪</p>
+        <div class="status-badge">CONFIRMED</div>
+    </div>
+    
+    <div class="order-info">
+        <div class="section">
+            <h3>📋 Order Details</h3>
+            <p><strong>Order ID:</strong> <span class="highlight">#${orderId}</span></p>
+            <p><strong>Order Date:</strong> ${new Date().toLocaleDateString('en-EG')}</p>
+            <p><strong>Order Time:</strong> ${new Date().toLocaleTimeString('en-EG')}</p>
+            <p><strong>Payment Method:</strong> ${orderData.paymentMethod}</p>
+        </div>
+        
+        <div class="section">
+            <h3>👤 Customer Information</h3>
+            <p><strong>Name:</strong> ${orderData.firstName} ${orderData.lastName}</p>
+            <p><strong>Email:</strong> ${orderData.email}</p>
+            <p><strong>Phone:</strong> ${orderData.phone}</p>
+        </div>
+        
+        <div class="section">
+            <h3>🏠 Delivery Address</h3>
+            <p>${orderData.street}, Building ${orderData.building}</p>
+            <p>Floor ${orderData.floor}, Apartment ${orderData.apartment}</p>
+            <p>${orderData.city}, ${orderData.district || ''} ${orderData.country}</p>
+        </div>
+        
+        <div class="section">
+            <h3>🛒 Order Items</h3>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${orderData.items.map(item => `
+                        <tr>
+                            <td>${item.name}</td>
+                            <td>${item.quantity}</td>
+                            <td>LE ${item.amount_cents}.00</td>
+                            <td>LE ${item.amount_cents * item.quantity}.00</td>
+                        </tr>
+                        ${item.flavors && item.flavors.length > 0 ? item.flavors.map(flavor => `
+                            <tr style="background-color: #f5f5f5;">
+                                <td style="padding-left: 30px;">↳ ${flavor.flavor} (${flavor.type})</td>
+                                <td>${flavor.quantity}</td>
+                                <td>-</td>
+                                <td>-</td>
+                            </tr>
+                        `).join('') : ''}
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="total-breakdown">
+            <h3>💰 Order Summary</h3>
+            <div class="breakdown-row">
+                <span class="breakdown-label">Subtotal:</span>
+                <span class="breakdown-value">LE ${subtotal}.00</span>
+            </div>
+            ${discount > 0 ? `
+            <div class="breakdown-row">
+                <span class="breakdown-label discount">Discount:</span>
+                <span class="breakdown-value discount">- LE ${discount}.00</span>
+            </div>
+            ` : ''}
+            ${orderData.voucher ? `
+            <div class="breakdown-row">
+                <span class="breakdown-label">Voucher Applied:</span>
+                <span class="breakdown-value">${orderData.voucher}</span>
+            </div>
+            ` : ''}
+            <div class="breakdown-row">
+                <span class="breakdown-label">
+                    Shipping:
+                    ${freeShipping ? '<span class="free-shipping-badge">FREE</span>' : ''}
+                </span>
+                <span class="breakdown-value">
+                    ${freeShipping ? 'LE 0.00' : `LE ${shippingCost}.00`}
+                </span>
+            </div>
+            <div class="breakdown-row total-row">
+                <span class="breakdown-label">Total Amount:</span>
+                <span class="breakdown-value">LE ${total}.00</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p><strong>Delivery Information:</strong></p>
+        <p>We'll contact you shortly to confirm delivery timing</p>
+        <p>Estimated delivery: 1-2 business days</p>
+        <p style="margin-top: 20px;">📞 <strong>Need help?</strong> Contact us at: syrinescrumble@gmail.com</p>
+        <p>Thank you for choosing Syrine's Crumble! We hope you enjoy your treats! 🎉</p>
+    </div>
+</body>
+</html>
+`;
     }
 
-    // Function to generate text receipt
+    // Function to generate text receipt with full breakdown
     function generateTextReceipt(orderData) {
+      const orderId = orderData.orderId || new Date().getTime();
+      const subtotal = orderData.subtotal || 0;
+      const discount = orderData.discount || 0;
+      const shippingCost = orderData.shipping_cost || 0;
+      const total = orderData.amount || 0;
+      const freeShipping = orderData.free_shipping || false;
+      
       return `
 SYRINE'S CRUMBLE - ORDER CONFIRMATION
 
 ORDER DETAILS:
-Order ID: #${orderData.orderId || new Date().getTime()}
+Order ID: #${orderId}
 Order Date: ${new Date().toLocaleDateString('en-EG')}
 Order Time: ${new Date().toLocaleTimeString('en-EG')}
-Payment Method: Cash on Delivery
+Payment Method: ${orderData.paymentMethod}
 Status: CONFIRMED
 
 CUSTOMER INFORMATION:
@@ -860,7 +1008,7 @@ Phone: ${orderData.phone}
 DELIVERY ADDRESS:
 ${orderData.street}, Building ${orderData.building}
 Floor ${orderData.floor}, Apartment ${orderData.apartment}
-${orderData.city}, ${orderData.country}
+${orderData.city}, ${orderData.district || ''} ${orderData.country}
 
 ORDER ITEMS:
 ${orderData.items.map(item => `
@@ -871,18 +1019,22 @@ ${orderData.items.map(item => `
   ${item.flavors && item.flavors.length > 0 ? item.flavors.map(flavor => `  Flavor: ${flavor.flavor} (${flavor.type}) x${flavor.quantity}`).join('\n  ') : ''}
 `).join('\n')}
 
-TOTAL AMOUNT: LE ${orderData.amount}.00
+ORDER SUMMARY:
+Subtotal: LE ${subtotal}.00
+${discount > 0 ? `Discount: - LE ${discount}.00\n` : ''}${orderData.voucher ? `Voucher Applied: ${orderData.voucher}\n` : ''}Shipping: ${freeShipping ? 'LE 0.00 (FREE SHIPPING)' : `LE ${shippingCost}.00`}
+────────────────────
+TOTAL AMOUNT: LE ${total}.00
 
 DELIVERY INFORMATION:
 We'll contact you shortly to confirm delivery timing
 Estimated delivery: 1-2 business days
 
-Need help? Contact us at: support@syrinescrumble.com
+Need help? Contact us at: syrinescrumble@gmail.com
 
 Thank you for choosing Syrine's Crumble!
-  `;
+`;
     }
-    console.log("urlParamsurlParamsurlParams", urlParams)
+    console.log("urlParamsurlParamsurlParams", urlParams.data)
     // Check success status
     if (urlParams.success === "true") {
       // ✅ Successful
