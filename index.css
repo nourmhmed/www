@@ -3,28 +3,32 @@
   font-family: 'Stella';
   src: url('font/stella.ttf') format('truetype');
 }
+
+@font-face {
+  font-family: 'More Sugar'; /* You can name this whatever you like */
+  src: url('font/MoreSugar.otf') format('opentype');
+  /* You can add more src lines for different file formats for better browser support */
+}
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Chewy', cursive;
+    font-family: 'More Sugar', cursive;
     max-width: 100%;
     box-sizing: border-box;
     text-decoration: none;
 }
 
 :root {
-    --primary: #C0394F;
-    --primary-light: #FF6B8A;
-    --secondary: #FFD7DF;
-    --background: #FFEBEE;
+    --primary: #c80606;
+    --primary-light: #c42448;
+    --secondary: #ffa0a0;
+    --background: #ffffff;
+    --accent: #fdd1d1;
     --text: #333333;
-    --light: #FFFFFF;
-    --accent: #FF6B8A;
-    --success: #4CAF50;
-    --shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    --light: #ffffff;
+    --shadow: 0 5px 15px rgba(200, 6, 6, 0.1);
     --transition: all 0.3s ease;
-    --section-padding: 5rem 0;
 }
 
 
@@ -198,7 +202,7 @@ header {
 }
 
 .brand-name {
-    font-family: 'Chewy', cursive;
+    font-family: 'More Sugar', cursive;
     font-size: 2rem;
     color: var(--primary);
     line-height: 1;
@@ -278,7 +282,6 @@ header {
 
 .tab-content {
     display: none;
-    padding: 2rem 0;
 }
 
 .tab-content.active {
@@ -673,7 +676,7 @@ header {
 footer {
     background: #2c2c2c;
     color: var(--light);
-    padding: 4rem 0 2rem;
+    /* padding: 4rem 0 2rem; */
 }
 
 .footer-content {
@@ -1053,7 +1056,8 @@ footer {
             align-items: center;
             position: relative;
             overflow: hidden;
-            background: linear-gradient(135deg, #FFEBEE 50%, #FFD7DF 50%);
+            background: #fdd1d1;
+
         }
         
         .hero-content {
@@ -1061,7 +1065,7 @@ footer {
             z-index: 2;
             text-align: center;
             padding: 2rem;
-            max-width: 800px;
+            /* max-width: 800px; */
             margin: 0 auto;
         }
         
@@ -1144,7 +1148,7 @@ footer {
 /* Labels */
 .team-label {
     text-align: center;
-    margin-top: 10px;
+    margin-top: -66px;
     font-weight: bold;
     font-size: 18px;
     color: #333;
@@ -1162,6 +1166,7 @@ footer {
             font-size: 1.5rem;
             margin-bottom: 2.5rem;
             color: var(--primary);
+            font-family: 'More Sugar', cursive;
         }
         
         .hero-buttons {
@@ -1245,7 +1250,7 @@ footer {
             background: white;
             padding: 0.8rem 1.2rem;
             border-radius: 20px;
-            font-family: 'Chewy', cursive;
+            font-family: 'More Sugar', cursive;
             font-weight: bold;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             opacity: 0;
@@ -1275,7 +1280,7 @@ footer {
             font-size: 2.8rem;
             margin-bottom: 3rem;
             color: #7b4b2b;
-            font-family: 'Chewy', cursive;
+            font-family: 'More Sugar', cursive;
         }
         
         .features-grid {
@@ -1681,7 +1686,21 @@ footer {
         .cookie-card:hover .click-indicator {
             opacity: 1;
         }
-        
+        .cart-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
         /* Popup Styles */
         .popup-overlay {
             position: fixed;
@@ -1707,8 +1726,8 @@ footer {
         .cookie-popup {
             background: #fff;
             border-radius: 20px;
-            width: 90%;
-            max-width: 900px;
+            width: 56%;
+            max-width: 1090pxs;
             max-height: 90vh;
             overflow-y: auto;
             display: flex;
@@ -1721,14 +1740,32 @@ footer {
             transform: scale(1);
         }
         
-        .popup-image {
-            flex: 1;
-            min-height: 400px;
-            background-size: cover;
-            background-position: center;
-            border-radius: 20px 0 0 20px;
-            transition: background-image 0.5s ease;
-        }
+        /* Update your existing popup styles */
+.popup-image {
+    flex: 1;
+    min-height: 400px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 20px 0 0 20px;
+}
+
+/* Or if using img tags */
+.popup-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+}
+
+/* Ensure the popup container has enough space */
+.cookie-popup {
+    max-height: 70vh; /* Adjust based on your needs */
+}
+
+.popup-overlay.active .cookie-popup {
+    transform: scale(1);
+}
         
         .popup-content {
             flex: 1;
@@ -2041,8 +2078,8 @@ footer {
             background: var(--background);
             color: var(--primary);
             text-align: center;
-            padding: 40px 0;
-            margin-top: 80px;
+            /* padding: 40px 0; */
+            /* margin-top: 80px; */
         }
         
         .footer-content {
@@ -2266,7 +2303,7 @@ footer {
 
 /* === MODERN HEADER STYLES === */
 .modern-header {
-            background: var(--light);
+    background-color: transparent;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             position: sticky;
             top: 0;
@@ -4310,7 +4347,7 @@ footer {
 }
 
 /* Speech Bubbles */
-.speech-bubble {
+/* .speech-bubble {
     position: absolute;
     background: white;
     border: 3px solid var(--primary);
@@ -4322,7 +4359,7 @@ footer {
     transform: translateY(20px);
     animation: bubbleAppear 8s infinite;
     z-index: 10;
-    font-family: 'Chewy', cursive;
+    font-family: 'More Sugar', cursive;
 }
 
 .crumble-bubble {
@@ -4337,7 +4374,7 @@ footer {
     left: 50%;
     transform: translateX(-50%);
     animation-delay: 6s;
-}
+} */
 
 .bubble-text {
     font-size: 0.9rem;
@@ -4351,17 +4388,6 @@ footer {
     font-weight: 700;
 }
 
-.bubble-arrow {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background: white;
-    border-right: 3px solid var(--primary);
-    border-bottom: 3px solid var(--primary);
-    bottom: -11px;
-    left: 50%;
-    transform: translateX(-50%) rotate(45deg);
-}
 
 @keyframes bubbleAppear {
     0%, 100% {
@@ -4426,11 +4452,11 @@ footer {
 /* Team Labels */
 .team-label {
     text-align: center;
-    margin-top: 15px;
+    margin-top: -65px;
     font-weight: bold;
     font-size: 1.2rem;
     color: var(--primary);
-    font-family: 'Chewy', cursive;
+    font-family: 'More Sugar', cursive;
 }
 
 /* Mobile Responsive */
@@ -4458,3 +4484,1319 @@ footer {
     }
 }
 
+/* VS Badge Styles */
+.vs-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    position: relative;
+}
+
+.vs-badge {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 25px rgba(200, 6, 6, 0.3);
+    border: 4px solid white;
+    position: relative;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.vs-text {
+    font-family: 'Stella', cursive;
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 8px 25px rgba(200, 6, 6, 0.3);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 12px 35px rgba(200, 6, 6, 0.5);
+    }
+}
+
+/* Update SVG container for proper spacing */
+.svg-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem; /* Reduced gap since VS is in the middle */
+    margin-top: 2rem;
+    position: relative;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .svg-container {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .vs-container {
+        margin: 1rem 0;
+    }
+    
+    .vs-badge {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .vs-text {
+        font-size: 1.4rem;
+    }
+}
+
+/* Footer Styles */
+footer {
+    background: #2c2c2c;
+    color: var(--light);
+    padding: 4rem 0 2rem;
+    position: relative;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.footer-column h3 {
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    color: var(--primary);
+}
+
+.footer-column p {
+    color: #ccc;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.footer-column ul {
+    list-style: none;
+}
+
+.footer-column ul li {
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+}
+
+.footer-column ul li i {
+    margin-right: 0.8rem;
+    color: var(--primary);
+    width: 16px;
+    text-align: center;
+}
+
+.footer-column ul li a {
+    color: #ccc;
+    text-decoration: none;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.footer-column ul li a:hover {
+    color: var(--secondary);
+    transform: translateX(5px);
+}
+
+.social-icons {
+    font-size: 1.5rem;
+    display: flex;
+    gap: 1.2rem;
+    margin-top: 1.5rem;
+}
+
+.social-icons a {
+    color: var(--light);
+    transition: var(--transition);
+    padding: 0.5rem;
+}
+
+.social-icons a:hover {
+    color: var(--secondary);
+    transform: translateY(-5px);
+}
+
+/* Powered By Section */
+.powered-by {
+    text-align: center;
+    margin: 2rem 0 1.5rem;
+    padding: 1.5rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ccc;
+    font-size: 0.95rem;
+}
+
+.developer-link {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.developer-link:hover {
+    color: var(--secondary);
+    transform: translateY(-2px);
+}
+
+.developer-link i {
+    font-size: 1.1rem;
+}
+
+.copyright {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    color: #999;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.9rem;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .footer-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 2.5rem;
+    }
+
+    .footer-column ul li {
+        justify-content: center;
+    }
+
+    .social-icons {
+        justify-content: center;
+    }
+
+    .powered-by {
+        margin: 1.5rem 0;
+        padding: 1rem 0;
+    }
+
+    .developer-link {
+        margin-left: 0.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    footer {
+        padding: 3rem 0 1.5rem;
+    }
+
+    .footer-content {
+        gap: 2rem;
+    }
+
+    .powered-by {
+        font-size: 0.9rem;
+    }
+}
+
+
+/* Hero Logo Styles */
+.hero-logo {
+    text-align: center;
+    background-color: transparent;
+    animation: fadeInDown 1s ease-out;
+    background-color: #fdd1d1 ;
+}
+
+.hero-logo-img {
+    max-width: 910px;
+    height: auto;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+    transition: all 0.3s ease;
+}
+
+.hero-logo-img:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.3));
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Update hero title margin to account for logo */
+.hero-title {
+    font-family: 'Stella', cursive;
+    font-size: 8rem;
+    color: var(--primary);
+    line-height: 1;
+    margin-bottom: 1.5rem; /* Reduced margin since logo is above */
+    animation: fadeInUp 1s ease-out 0.3s both;
+}
+
+.hero-subtitle {
+    font-size: 1.5rem;
+    margin-bottom: 2.5rem;
+    color: var(--primary);
+    font-family: 'More Sugar', cursive;
+    animation: fadeInUp 1s ease-out 0.5s both;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .hero-logo {
+        margin-bottom: 1rem;
+    }
+    
+    .hero-logo-img {
+        max-width: 150px;
+    }
+    
+    .hero-title {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-logo-img {
+        max-width: 120px;
+    }
+    
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* VS Battle Styles */
+.vs-battle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    position: relative;
+    margin: 0 2rem;
+}
+
+.vs-circle {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 25px rgba(200, 6, 6, 0.4);
+    border: 4px solid white;
+    position: relative;
+    animation: vsPulse 2s ease-in-out infinite;
+}
+
+.vs-circle::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    right: -6px;
+    bottom: -6px;
+    border: 2px solid var(--primary);
+    border-radius: 50%;
+    animation: vsRotate 3s linear infinite;
+}
+
+.vs-text {
+    font-family: 'Stella', cursive;
+    font-size: 2rem;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    z-index: 2;
+}
+
+.vs-subtitle {
+    margin-top: 1rem;
+    font-family: 'More Sugar', cursive;
+    color: var(--primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-align: center;
+    opacity: 0.9;
+    animation: vsFade 3s ease-in-out infinite;
+}
+
+@keyframes vsPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 8px 25px rgba(200, 6, 6, 0.4);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 12px 35px rgba(200, 6, 6, 0.6);
+    }
+}
+
+@keyframes vsRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes vsFade {
+    0%, 100% {
+        opacity: 0.7;
+        transform: translateY(0);
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(-5px);
+    }
+}
+
+/* Update SVG container for proper spacing with VS */
+.svg-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    position: relative;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .svg-container {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .vs-battle {
+        margin: 1rem 0;
+        order: 2; /* Ensure VS appears between cookies in column layout */
+    }
+    
+    .vs-circle {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .vs-text {
+        font-size: 1.6rem;
+    }
+    
+    .vs-subtitle {
+        font-size: 1rem;
+        margin-top: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .vs-circle {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .vs-text {
+        font-size: 1.4rem;
+    }
+    
+    .vs-subtitle {
+        font-size: 0.9rem;
+    }
+}
+
+
+/* Fighting Animation Styles */
+.svg-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    position: relative;
+    transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.team-container {
+    position: relative;
+    text-align: center;
+    transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    flex: 1;
+    max-width: 350px;
+}
+
+.team-container.crumble {
+    transform: translateX(0);
+}
+
+.team-container.chewy {
+    transform: translateX(0);
+}
+
+/* Fighting animations */
+.team-container.fighting-crumble {
+    animation: crumbleCharge 1s ease-in-out forwards;
+}
+
+.team-container.fighting-chewy {
+    animation: chewyCharge 1s ease-in-out forwards;
+}
+
+.team-container.return-crumble {
+    animation: crumbleReturn 0.8s ease-out forwards;
+}
+
+.team-container.return-chewy {
+    animation: chewyReturn 0.8s ease-out forwards;
+}
+
+@keyframes crumbleCharge {
+    0% {
+        transform: translateX(0) scale(1);
+    }
+    50% {
+        transform: translateX(120px) scale(1.1) rotate(-5deg);
+    }
+    100% {
+        transform: translateX(80px) scale(1.05) rotate(-3deg);
+    }
+}
+
+@keyframes chewyCharge {
+    0% {
+        transform: translateX(0) scale(1);
+    }
+    50% {
+        transform: translateX(-120px) scale(1.1) rotate(5deg);
+    }
+    100% {
+        transform: translateX(-80px) scale(1.05) rotate(3deg);
+    }
+}
+
+@keyframes crumbleReturn {
+    0% {
+        transform: translateX(80px) scale(1.05) rotate(-3deg);
+    }
+    100% {
+        transform: translateX(0) scale(1) rotate(0deg);
+    }
+}
+
+@keyframes chewyReturn {
+    0% {
+        transform: translateX(-80px) scale(1.05) rotate(3deg);
+    }
+    100% {
+        transform: translateX(0) scale(1) rotate(0deg);
+    }
+}
+
+/* Cookie impact animation */
+@keyframes cookieImpact {
+    0% {
+        transform: scale(1);
+    }
+    25% {
+        transform: scale(1.2);
+    }
+    50% {
+        transform: scale(0.9);
+    }
+    75% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.cookie-impact {
+    animation: cookieImpact 0.4s ease-in-out;
+}
+
+/* Dust Effects */
+.dust-effect {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 10;
+}
+
+.dust-particle {
+    position: absolute;
+    background: linear-gradient(45deg, #8B4513, #D2B48C, #F5F5DC);
+    border-radius: 50%;
+    opacity: 0;
+    animation: dustExplode 1s ease-out forwards;
+}
+
+@keyframes dustExplode {
+    0% {
+        transform: translate(0, 0) scale(0);
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(var(--dust-x), var(--dust-y)) scale(1);
+        opacity: 0;
+    }
+}
+
+/* Impact Flash */
+.impact-flash {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+    border-radius: 50%;
+    animation: flash 0.3s ease-out forwards;
+    pointer-events: none;
+    z-index: 5;
+}
+
+@keyframes flash {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+/* Shockwave Effect */
+.shockwave {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 215, 0, 0.8);
+    border-radius: 50%;
+    animation: shockwave 0.8s ease-out forwards;
+    pointer-events: none;
+    z-index: 4;
+}
+
+@keyframes shockwave {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(8);
+        opacity: 0;
+    }
+}
+
+/* VS Battle Styles - Updated */
+.vs-battle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    position: relative;
+    margin: 0 2rem;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.vs-battle:hover {
+    transform: scale(1.05);
+}
+
+.vs-circle {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 25px rgba(200, 6, 6, 0.4);
+    border: 4px solid white;
+    position: relative;
+    animation: vsPulse 2s ease-in-out infinite;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.vs-circle.battle-active {
+    animation: vsBattleActive 1s ease-in-out;
+}
+
+@keyframes vsBattleActive {
+    0%, 100% {
+        transform: scale(1);
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    }
+    25% {
+        transform: scale(1.2);
+        background: linear-gradient(135deg, #ff6b6b, #c0394f);
+    }
+    50% {
+        transform: scale(0.9);
+        background: linear-gradient(135deg, #ffd700, #ffa500);
+    }
+    75% {
+        transform: scale(1.1);
+        background: linear-gradient(135deg, #c0394f, #ff6b6b);
+    }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .svg-container {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .vs-battle {
+        margin: 1rem 0;
+        order: 2;
+    }
+    
+    @keyframes crumbleCharge {
+        0% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(80px) scale(1.1) rotate(-5deg); }
+        100% { transform: translateY(60px) scale(1.05) rotate(-3deg); }
+    }
+    
+    @keyframes chewyCharge {
+        0% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-80px) scale(1.1) rotate(5deg); }
+        100% { transform: translateY(-60px) scale(1.05) rotate(3deg); }
+    }
+    
+    @keyframes crumbleReturn {
+        0% { transform: translateY(60px) scale(1.05) rotate(-3deg); }
+        100% { transform: translateY(0) scale(1) rotate(0deg); }
+    }
+    
+    @keyframes chewyReturn {
+        0% { transform: translateY(-60px) scale(1.05) rotate(3deg); }
+        100% { transform: translateY(0) scale(1) rotate(0deg); }
+    }
+}
+
+
+
+/* Reposition speech bubbles to sides */
+.speech-bubble {
+    position: absolute;
+    background: white;
+    border: 3px solid var(--primary);
+    border-radius: 20px;
+    padding: 1rem 1.5rem;
+    max-width: 280px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: bubbleAppear 8s infinite;
+    z-index: 10;
+    font-family: 'More Sugar', cursive;
+}
+
+.crumble-bubble {
+    top: 50%;
+    left: -220px; /* Position to the left of the cookie */
+    transform: translateY(-50%);
+    animation-delay: 2s;
+}
+
+/* Chewy bubble on RIGHT side */
+.chewy-bubble {
+    top: 50%;
+    right: -220px; /* Position to the right of the cookie */
+    transform: translateY(-50%);
+    animation-delay: 6s;
+}
+/* Update bubble arrows to point toward cookies from right side */
+/* Crumble arrow pointing RIGHT */
+.crumble-bubble .bubble-arrow {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-right: 3px solid var(--primary);
+    border-bottom: 3px solid var(--primary);
+    right: -11px; /* Arrow on right side pointing left */
+    top: 50%;
+    transform: translateY(-50%) rotate(-45deg);
+}
+
+/* Chewy arrow pointing LEFT */
+.chewy-bubble .bubble-arrow {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-left: 3px solid var(--primary);
+    border-top: 3px solid var(--primary);
+    left: -11px; /* Arrow on left side pointing right */
+    top: 50%;
+    transform: translateY(-50%) rotate(-45deg);
+}
+
+/* Make sure team containers have relative positioning */
+.team-container {
+    position: relative;
+    text-align: center;
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Update animation for side positioning */
+@keyframes bubbleAppear {
+    0%, 100% {
+        opacity: 0;
+        transform: translateY(-50%) translateX(20px);
+    }
+    10%, 40% {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+    60% {
+        opacity: 0;
+        transform: translateY(-50%) translateX(-20px);
+    }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .speech-bubble {
+        max-width: 200px;
+        font-size: 0.8rem;
+        padding: 0.8rem 1rem;
+    }
+    
+    .crumble-bubble {
+        left: -250px;
+    }
+    
+    .chewy-bubble {
+        right: -250px;
+    }
+}
+
+@media (max-width: 480px) {
+    .speech-bubble {
+        max-width: 150px;
+        font-size: 0.7rem;
+        padding: 0.6rem 0.8rem;
+    }
+    
+    .crumble-bubble {
+        left: -180px;
+    }
+    
+    .chewy-bubble {
+        right: -180px;
+    }
+    
+    /* On very small screens, stack bubbles above */
+    @media (max-width: 360px) {
+        .speech-bubble {
+            position: relative;
+            left: auto;
+            right: auto;
+            top: auto;
+            transform: none;
+            margin: 1rem auto;
+            max-width: 250px;
+        }
+        
+        .crumble-bubble {
+            order: -1;
+        }
+        
+        .chewy-bubble {
+            order: 1;
+        }
+        
+        .svg-container {
+            flex-direction: column;
+        }
+        
+        .team-container {
+            margin-bottom: 2rem;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .crumble-bubble {
+        left: -250px;
+    }
+    .chewy-bubble {
+        right: -250px;
+    }
+}
+
+@media (max-width: 480px) {
+    .crumble-bubble {
+        left: -180px;
+    }
+    .chewy-bubble {
+        right: -180px;
+    }
+}
+
+
+/* Add this to your existing CSS */
+
+/* Home Tab Background */
+#home-tab {
+    background-image: url('images/10.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+/* Ensure hero section has transparent background */
+
+/* Update hero logo to work with background */
+.hero-logo {
+    background: transparent;
+    padding: 2rem 0;
+}
+
+/* Ensure content sections have proper backgrounds */
+.features {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(5px);
+}
+
+/* Make sure text is readable over the background */
+.hero-subtitle {
+    color: var(--primary);
+    text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.7);
+    padding: 1rem;
+    border-radius: 15px;
+    display: inline-block;
+}
+
+
+
+/* Make speech bubbles more visible */
+.speech-bubble {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+.brand-story {
+    max-width: 800px;
+    margin: 0 auto 2rem;
+    padding: 1.5rem;
+    /* background-color: transparent; */
+    border-radius: 12px;
+    /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); */
+}
+
+.brand-story h1 {
+    font-size: 2rem;
+    color: var(--primary);;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.brand-name {
+    color: var(--primary);
+    font-weight: bold;
+    color: var(--primary);  ;
+    font-family: "Stella", serif;
+}
+
+.story-text {
+    margin-bottom: 1rem;
+    text-align: center;
+    color: var(--primary);
+    font-size: 1.1rem;
+    line-height: 1.7;
+}
+
+.brand-tagline {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--primary);
+    text-align: center;
+    margin-top: 1rem;
+    font-style: italic;
+}
+
+
+.brand-signature {
+    font-size: 1.2rem;
+    text-align: center;
+    margin-top: 2rem;
+    font-style: italic;
+    color: var(--primary);;
+    line-height: 1.8;
+}
+
+
+/* Cookie Showcase Section */
+.cookie-showcase {
+    padding: 5rem 0;
+    background: #fdd1d1;
+}
+
+.cookie-showcase-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.showcase-cookie-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 3px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.showcase-cookie-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary);
+}
+
+.showcase-cookie-image {
+    height: 120px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.showcase-cookie-image img {
+    max-height: 100%;
+    transition: transform 0.3s ease;
+}
+
+.showcase-cookie-card:hover .showcase-cookie-image img {
+    transform: scale(1.1);
+}
+
+.showcase-cookie-details h3 {
+    color: var(--primary);
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    font-family: 'More Sugar', cursive;
+}
+
+.showcase-cookie-details p {
+    color: var(--text);
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.showcase-cookie-price {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+}
+
+.showcase-add-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    font-family: 'More Sugar', cursive;
+}
+
+.showcase-add-btn:hover {
+    background: #A02A3F;
+    transform: translateY(-2px);
+}
+
+.showcase-more-btn {
+    display: block;
+    margin: 0 auto;
+    padding: 1rem 2.5rem;
+    background: transparent;
+    border: 3px solid var(--primary);
+    color: var(--primary);
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'More Sugar', cursive;
+}
+
+.showcase-more-btn:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(192, 57, 79, 0.3);
+}
+
+.showcase-more-btn i {
+    margin-left: 0.5rem;
+    transition: transform 0.3s ease;
+}
+
+.showcase-more-btn:hover i {
+    transform: translateX(5px);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .cookie-showcase-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .showcase-cookie-card {
+        padding: 1.5rem;
+    }
+    
+    .showcase-cookie-image {
+        height: 100px;
+    }
+}
+
+/* Make showcase cards more interactive */
+.showcase-cookie-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.showcase-cookie-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.showcase-add-btn {
+    pointer-events: auto; /* Ensure button is clickable */
+}
+
+/* Add a subtle click indicator */
+.showcase-cookie-card::after {
+    content: 'Click for details';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    color: var(--primary);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.showcase-cookie-card:hover::after {
+    opacity: 1;
+}
+
+/* Box Showcase Section */
+.box-showcase {
+    padding: 5rem 0;
+    background: #fdd1d1;
+}
+
+.box-showcase-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.showcase-box-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 3px solid transparent;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.showcase-box-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary);
+}
+
+.showcase-box-image {
+    height: 140px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.showcase-box-image img {
+    max-height: 100%;
+    max-width: 100%;
+    transition: transform 0.3s ease;
+}
+
+.showcase-box-card:hover .showcase-box-image img {
+    transform: scale(1.1);
+}
+
+.showcase-box-details h3 {
+    color: var(--primary);
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    font-family: 'More Sugar', cursive;
+    min-height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.showcase-box-details p {
+    color: var(--text);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+    min-height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.showcase-box-price {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+}
+
+.showcase-box-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    font-family: 'More Sugar', cursive;
+}
+
+.showcase-box-btn:hover {
+    background: #A02A3F;
+    transform: translateY(-2px);
+}
+
+/* Click indicator for box cards */
+.showcase-box-card::after {
+    content: 'Click to customize';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    color: var(--primary);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.showcase-box-card:hover::after {
+    opacity: 1;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .box-showcase-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .showcase-box-card {
+        padding: 1.5rem;
+    }
+    
+    .showcase-box-image {
+        height: 120px;
+    }
+    
+    .showcase-box-details h3 {
+        min-height: auto;
+    }
+    
+    .showcase-box-details p {
+        min-height: auto;
+    }
+}

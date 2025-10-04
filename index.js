@@ -1,9 +1,12 @@
-// Global cart functionality using localStorage
+
 
 const CART_KEY = 'syrines_crumble_cart';
 let selectedBox = null;
 let selectedStyle = 'chewy';
 let cookiesData = {};
+// Fighting Animation functionality
+let isFighting = false;
+let allCookiesData = {};
 
 // Add these with your other global variables
 let boxesData = [];
@@ -18,32 +21,352 @@ let SUPABASE_URL = null;
 let SUPABASE_ANON_KEY = null;
 let supabase = null;
 
-// Fetch Supabase credentials from backend API
+// Add this to your initializeSupabase function
 async function initializeSupabase() {
     try {
         const response = await fetch('https://backend-quiet-glitter-4571.fly.dev/supabase-keys');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const { url, key } = await response.json();
+        if (!response.ok) throw new Error('Failed to fetch Supabase keys');
         
+        const { url, key } = await response.json();
         SUPABASE_URL = url;
         SUPABASE_ANON_KEY = key;
         
         // Initialize Supabase client
-        if (typeof supabaseClient !== 'undefined') {
-            supabase = supabaseClient;
-        } else {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        }
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        console.log('Supabase initialized successfully');
+        // Test connection
+        const { error } = await supabase.from('cookies').select('count').limit(1);
+        if (error) throw error;
+        
         return true;
     } catch (error) {
-        console.error('Error initializing Supabase:', error);
+        console.error('Supabase initialization failed:', error);
         return false;
     }
 }
+
+
+function initializeVSBattle() {
+    const vsBattle = document.getElementById('vs-battle');
+    const vsCircle = document.getElementById('vs-circle');
+    const svgContainer = document.querySelector('.svg-container');
+    const vsSubtitle = document.querySelector('.vs-subtitle');
+
+    // Debug: Check if elements exist
+    console.log('VS Battle Elements:', {
+        vsBattle: !!vsBattle,
+        vsCircle: !!vsCircle,
+        svgContainer: !!svgContainer,
+        vsSubtitle: !!vsSubtitle
+    });
+
+    if (!vsBattle || !svgContainer) {
+        console.error('VS Battle: Required elements not found');
+        return;
+    }
+
+    // Find team containers - more flexible approach
+    const teamContainers = document.querySelectorAll('.team-container');
+    let crumbleContainer, chewyContainer;
+
+    teamContainers.forEach(container => {
+        const img = container.querySelector('img');
+        if (img) {
+            if (img.classList.contains('crumble-img')) {
+                crumbleContainer = container;
+                container.classList.add('crumble');
+            } else if (img.classList.contains('chewy-img')) {
+                chewyContainer = container;
+                container.classList.add('chewy');
+            }
+        }
+    });
+
+    // Alternative: Find by team label
+    if (!crumbleContainer || !chewyContainer) {
+        teamContainers.forEach(container => {
+            const label = container.querySelector('.team-label');
+            if (label) {
+                if (label.textContent.toLowerCase().includes('crumble')) {
+                    crumbleContainer = container;
+                    container.classList.add('crumble');
+                } else if (label.textContent.toLowerCase().includes('chewy')) {
+                    chewyContainer = container;
+                    container.classList.add('chewy');
+                }
+            }
+        });
+    }
+
+    // Debug: Check if team containers were found
+    console.log('Team Containers:', {
+        crumbleContainer: !!crumbleContainer,
+        chewyContainer: !!chewyContainer,
+        totalContainers: teamContainers.length
+    });
+
+    if (!crumbleContainer || !chewyContainer) {
+        console.error('VS Battle: Could not find both team containers');
+        return;
+    }
+
+    vsBattle.addEventListener('click', async function() {
+        if (isFighting) return;
+        
+        isFighting = true;
+        
+        // Update subtitle
+        if (vsSubtitle) {
+            vsSubtitle.textContent = 'Fighting!';
+        }
+
+        // VS button animation
+        vsCircle.classList.add('battle-active');
+
+        try {
+            // Phase 1: Charge towards each other
+            crumbleContainer.classList.add('fighting-crumble');
+            chewyContainer.classList.add('fighting-chewy');
+
+            // Wait for charge animation to complete
+            await new Promise(resolve => setTimeout(resolve, 600));
+
+            // Phase 2: Impact effects
+            createImpactEffects();
+            
+            // Add impact animation to cookies
+            const cookies = document.querySelectorAll('.cookie-img');
+            cookies.forEach(cookie => {
+                cookie.classList.add('cookie-impact');
+            });
+
+            // Swap speech bubbles during impact
+            swapSpeechBubbles();
+
+            // Play impact sound
+            playImpactSound();
+
+            // Wait for impact effects
+            await new Promise(resolve => setTimeout(resolve, 400));
+
+            // Phase 3: Return to original positions
+            crumbleContainer.classList.remove('fighting-crumble');
+            chewyContainer.classList.remove('fighting-chewy');
+            crumbleContainer.classList.add('return-crumble');
+            chewyContainer.classList.add('return-chewy');
+
+            // Remove impact animation
+            cookies.forEach(cookie => {
+                cookie.classList.remove('cookie-impact');
+            });
+
+            // Wait for return animation
+            await new Promise(resolve => setTimeout(resolve, 800));
+
+        } catch (error) {
+            console.error('VS Battle animation error:', error);
+        } finally {
+            // Clean up - always run this
+            crumbleContainer.classList.remove('return-crumble', 'fighting-crumble');
+            chewyContainer.classList.remove('return-chewy', 'fighting-chewy');
+            vsCircle.classList.remove('battle-active');
+
+            // Update subtitle
+            if (vsSubtitle) {
+                vsSubtitle.textContent = 'Click to Battle!';
+            }
+
+            isFighting = false;
+        }
+    });
+
+    // Add hover effects
+    vsBattle.addEventListener('mouseenter', function() {
+        if (vsSubtitle && !isFighting) {
+            vsSubtitle.style.animationPlayState = 'paused';
+            vsSubtitle.style.opacity = '1';
+            vsSubtitle.style.transform = 'translateY(-3px)';
+        }
+    });
+
+    vsBattle.addEventListener('mouseleave', function() {
+        if (vsSubtitle && !isFighting) {
+            vsSubtitle.style.animationPlayState = 'running';
+        }
+    });
+}
+
+// Update the initCookieShowcase function
+function initCookieShowcase() {
+    const showMoreBtn = document.getElementById('showMoreCookiesBtn');
+    
+    if (showMoreBtn) {
+        showMoreBtn.addEventListener('click', function() {
+            console.log('Explore All Cookies clicked - switching to cookies tab');
+            // Switch to cookies tab
+            switchTab('cookies');
+        });
+    }
+    
+    // Fix for add to cart buttons in showcase
+    document.addEventListener('click', function(e) {
+        // Handle showcase add buttons
+        if (e.target.classList.contains('showcase-add-btn') || e.target.closest('.showcase-add-btn')) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const button = e.target.classList.contains('showcase-add-btn') ? e.target : e.target.closest('.showcase-add-btn');
+            const slug = button.getAttribute('data-cookie-slug');
+            
+            if (slug) {
+                console.log('Showcase button clicked:', slug);
+                openPopup(slug);
+            } else {
+                console.warn('No slug found on showcase button');
+            }
+        }
+    });
+}
+
+
+// Rest of the functions remain the same...
+function createImpactEffects() {
+    const svgContainer = document.querySelector('.svg-container');
+    if (!svgContainer) return;
+    
+    // Create impact flash
+    const flash = document.createElement('div');
+    flash.className = 'impact-flash';
+    svgContainer.appendChild(flash);
+    
+    // Create shockwave
+    const shockwave = document.createElement('div');
+    shockwave.className = 'shockwave';
+    svgContainer.appendChild(shockwave);
+    
+    // Create dust explosion
+    const dustEffect = document.createElement('div');
+    dustEffect.className = 'dust-effect';
+    svgContainer.appendChild(dustEffect);
+    
+    // Create multiple dust particles
+    for (let i = 0; i < 15; i++) {
+        const dust = document.createElement('div');
+        dust.className = 'dust-particle';
+        
+        // Random direction and distance
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 30 + Math.random() * 70;
+        const dustX = Math.cos(angle) * distance;
+        const dustY = Math.sin(angle) * distance;
+        
+        // Random size
+        const size = 3 + Math.random() * 8;
+        
+        dust.style.setProperty('--dust-x', `${dustX}px`);
+        dust.style.setProperty('--dust-y', `${dustY}px`);
+        dust.style.width = `${size}px`;
+        dust.style.height = `${size}px`;
+        dust.style.animationDelay = `${Math.random() * 0.3}s`;
+        
+        dustEffect.appendChild(dust);
+    }
+    
+    // Remove effects after animation
+    setTimeout(() => {
+        flash.remove();
+        shockwave.remove();
+        dustEffect.remove();
+    }, 1000);
+}
+
+function swapSpeechBubbles() {
+    const crumbleBubble = document.querySelector('.crumble-bubble');
+    const chewyBubble = document.querySelector('.chewy-bubble');
+
+    if (crumbleBubble && chewyBubble) {
+        // Swap the bubble content temporarily
+        const tempHTML = crumbleBubble.innerHTML;
+        crumbleBubble.innerHTML = chewyBubble.innerHTML;
+        chewyBubble.innerHTML = tempHTML;
+
+        // Add animation to bubbles
+        [crumbleBubble, chewyBubble].forEach(bubble => {
+            bubble.style.animation = 'bubbleSwap 0.5s ease-in-out';
+            setTimeout(() => {
+                bubble.style.animation = '';
+            }, 500);
+        });
+    }
+}
+
+function playImpactSound() {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Create impact sound (low frequency thud)
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(80, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(40, audioContext.currentTime + 0.2);
+        
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.3);
+        
+    } catch (error) {
+        console.log('Audio not supported');
+    }
+}
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes bubbleSwap {
+        0% { opacity: 1; transform: translateY(0) scale(1); }
+        50% { opacity: 0; transform: translateY(-20px) scale(0.8); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    
+    @keyframes vsPulse {
+        0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 8px 25px rgba(200, 6, 6, 0.4);
+        }
+        50% {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(200, 6, 6, 0.6);
+        }
+    }
+    
+    @keyframes vsBattleActive {
+        0%, 100% {
+            transform: scale(1);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        }
+        25% {
+            transform: scale(1.2);
+            background: linear-gradient(135deg, #ff6b6b, #c0394f);
+        }
+        50% {
+            transform: scale(0.9);
+            background: linear-gradient(135deg, #ffd700, #ffa500);
+        }
+        75% {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, #c0394f, #ff6b6b);
+        }
+    }
+`;
+document.head.appendChild(style);
+
 
 // Initialize Supabase when the script loads
 let supabaseInitialized = false;
@@ -132,6 +455,20 @@ function getFallbackBoxesData() {
     ];
 }
 
+document.querySelectorAll('.footer-column a[data-tab]').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const tabId = this.getAttribute('data-tab');
+        switchTab(tabId);
+        
+        // Scroll to top when navigating
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+});
+
 // Fallback data for mystery box
 function getFallbackMysteryBoxData() {
     return {
@@ -145,13 +482,14 @@ function getFallbackMysteryBoxData() {
 }
 
 
-// Function to fetch cookies from Supabase
+// Update fetchCookiesData to always use the global variable
 async function fetchCookiesData() {
     try {
         const initialized = await ensureSupabaseInitialized();
         if (!initialized) {
             console.warn('Supabase not initialized, using fallback data');
-            return getFallbackCookiesData();
+            allCookiesData = getFallbackCookiesData();
+            return allCookiesData;
         }
 
         const { data, error } = await supabase
@@ -162,10 +500,11 @@ async function fetchCookiesData() {
 
         if (error) {
             console.error('Error fetching cookies:', error);
-            return getFallbackCookiesData();
+            allCookiesData = getFallbackCookiesData();
+            return allCookiesData;
         }
 
-        // Transform the data to match your expected format
+        // Transform the data and store globally
         const transformedData = {};
         data.forEach(cookie => {
             transformedData[cookie.slug] = {
@@ -185,10 +524,13 @@ async function fetchCookiesData() {
             };
         });
 
-        return transformedData;
+        allCookiesData = transformedData;
+        console.log('Cookies data loaded:', Object.keys(allCookiesData)); // Debug
+        return allCookiesData;
     } catch (error) {
         console.error('Error in fetchCookiesData:', error);
-        return getFallbackCookiesData();
+        allCookiesData = getFallbackCookiesData();
+        return allCookiesData;
     }
 }
 
@@ -349,7 +691,7 @@ async function renderMysteryBox() {
     }
 }
 
-// Function to render cookies grid dynamically
+// Update renderCookiesGrid to use global data
 async function renderCookiesGrid() {
     const cookiesGrid = document.querySelector('.cookies-grid');
     if (!cookiesGrid) return;
@@ -357,8 +699,8 @@ async function renderCookiesGrid() {
     // Show loading state
     cookiesGrid.innerHTML = '<div class="loading-cookies">Loading cookies...</div>';
 
-    // Fetch cookies data
-    cookiesData = await fetchCookiesData();
+    // Use global cookies data
+    const cookiesData = allCookiesData;
 
     // Clear loading state and render cookies
     cookiesGrid.innerHTML = '';
@@ -535,39 +877,43 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-// Close mobile menu when a link is clicked
 function setupMobileMenu() {
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mainNav = document.getElementById('main-nav');
+    
     if (mobileMenuBtn && mainNav) {
-        mobileMenuBtn.addEventListener('click', function(e) {
-            if (window.innerWidth <= 768 && mainNav.classList.contains('active')) {
-                enableBodyScroll();
-                } else if (window.innerWidth <= 768) {
-                disableBodyScroll();
-                }
+        mobileMenuBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            toggleMobileMenu();
+            mainNav.classList.toggle('active');
+            document.body.style.overflow = mainNav.classList.contains('active') ? 'hidden' : '';
         });
 
-        // Close mobile menu when nav links are clicked
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', function() {
-                if (window.innerWidth <= 768) {
-                    mainNav.classList.remove('active');
-                }
-            });
-        });
-
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', function(e) {
-            if (window.innerWidth <= 768 && 
-                mainNav.classList.contains('active') &&
-                !e.target.closest('.main-nav') && 
-                !e.target.closest('.mobile-menu-btn')) {
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            if (!mainNav.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
                 mainNav.classList.remove('active');
+                document.body.style.overflow = '';
             }
+        });
+
+        // Close on link click
+        mainNav.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mainNav.classList.remove('active');
+                document.body.style.overflow = '';
+            });
         });
     }
 }
+
+// Performance monitoring
+const perfObserver = new PerformanceObserver((list) => {
+    list.getEntries().forEach((entry) => {
+        console.log(`${entry.name}: ${entry.duration}ms`);
+    });
+});
+
+perfObserver.observe({ entryTypes: ['navigation', 'paint', 'largest-contentful-paint'] });
 
 // Close mobile navigation
 function closeMobileNav() {
@@ -690,15 +1036,23 @@ document.querySelectorAll('.tab-btn').forEach(button => {
     });
 });
 
+
+
 function openPopup(cookieType) {
-    disableBodyScroll();
+    console.log('Opening popup for:', cookieType); // Debug
+    console.log('Available cookies:', Object.keys(allCookiesData)); // Debug
+    
+    // disableBodyScroll();
     currentCookie = cookieType;
     currentStyle = 'chewy';
     quantity = 1;
     
-    const cookie = cookiesData[cookieType];
+    // Always use global data - change cookiesData to allCookiesData
+    const cookie = allCookiesData[cookieType];
+    
     if (!cookie) {
-        console.error('Cookie not found:', cookieType);
+        console.error('Cookie not found in global data:', cookieType);
+        console.error('Available cookies:', Object.keys(allCookiesData));
         showNotification('Cookie information not available');
         return;
     }
@@ -751,9 +1105,9 @@ function changeStyle(style) {
     });
     document.querySelector(`.popup-style-option[data-style="${style}"]`).classList.add('active');
     
-    // Update image based on style
-    if (currentCookie && cookiesData[currentCookie]) {
-        const cookie = cookiesData[currentCookie];
+    // Update image based on style - use allCookiesData
+    if (currentCookie && allCookiesData[currentCookie]) {
+        const cookie = allCookiesData[currentCookie];
         document.getElementById('popupImage').style.backgroundImage = `url(${cookie.images[style]})`;
         
         // Update price based on style
@@ -782,9 +1136,12 @@ async function addToCartFromPopup() {
         return;
     }
 
-    const cookie = cookiesData[currentCookie];
+    // Use allCookiesData instead of cookiesData
+    const cookie = allCookiesData[currentCookie];
     if (!cookie) {
         showNotification('Error: Cookie data not available');
+        console.error('Cookie not found:', currentCookie);
+        console.error('Available cookies:', Object.keys(allCookiesData));
         return;
     }
 
@@ -1080,9 +1437,19 @@ if (mobileMenuBtn && headerTabs) {
 
 
 function disableBodyScroll() {
-  document.body.classList.add('body-no-scroll');
-  document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
 }
+
+
+// Add to your image loading
+document.querySelectorAll('img').forEach(img => {
+    img.addEventListener('error', function() {
+        this.src = 'images/fallback-cookie.svg';
+        this.alt = 'Cookie image not available';
+    });
+});
 
 
 // Performance optimization: Load non-critical scripts after page load
@@ -1109,8 +1476,9 @@ function disableBodyScroll() {
         });
 
 function enableBodyScroll() {
-  document.body.classList.remove('body-no-scroll');
-  document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
 }
 
 async function initializeSupabaseWithTimeout() {
@@ -1129,189 +1497,263 @@ async function initializeSupabaseWithTimeout() {
     }
 }
 
-// Tab functionality
-document.addEventListener('DOMContentLoaded', async function () {
-    // Initialize Supabase first
 
-    await initializeSupabaseWithTimeout();
-    await ensureSupabaseInitialized();
+async function renderCookieShowcase() {
+    const showcaseGrid = document.getElementById('cookie-showcase-grid');
+    if (!showcaseGrid) return;
 
-    // Initialize prices
-    currentPrices = await priceService.getCurrentPrices();
-    console.log('Prices loaded successfully:', currentPrices);
-    await renderCookiesGrid(); // Add this line
-    await renderBoxes();
-    await renderMysteryBox();
-    
-    setupMobileMenu(); 
-    
-    const tabBtns = document.querySelectorAll('.header-tabs .tab-btn');
-    const footerTabLinks = document.querySelectorAll('.footer-tab-link');
-    const tabContents = document.querySelectorAll('.tab-content');
-    const cookies = document.querySelectorAll('.cookie-character');
-    const btn = document.querySelector(".mystery-btn");
+    // Show loading state
+    showcaseGrid.innerHTML = '<div class="loading-cookies">🍪 Loading our delicious cookies...</div>';
 
-    btn.addEventListener("click", () => {
-        btn.textContent = "🎉 Added to Cart!";
-        setTimeout(() => {
-            btn.textContent = "Order Mystery Box";
-        }, 2000);
-    });
-
-    // Event listener for mobile menu button
-    mobileMenuBtnn.addEventListener('click', openMobileNav);
-
-    cookies.forEach(cookie => {
-        cookie.addEventListener('mouseenter', () => {
-            const speech = cookie.querySelector('.cookie-speech');
-            speech.style.animation = 'none';
-            setTimeout(() => {
-                speech.style.animation = 'fadeInOut 5s';
-            }, 10);
+    try {
+        // Ensure we have cookies data
+        if (Object.keys(allCookiesData).length === 0) {
+            await fetchCookiesData();
+        }
+        
+        const cookieSlugs = Object.keys(allCookiesData);
+        const shuffledSlugs = shuffleArray([...cookieSlugs]);
+        const featuredCookies = shuffledSlugs.slice(0, 4);
+        
+        showcaseGrid.innerHTML = '';
+        console.log('Rendering showcase with cookies:', featuredCookies); // Debug
+        featuredCookies.forEach((slug, index) => {
+            const cookie = allCookiesData[slug]; // Use allCookiesData
+            const cookieCard = document.createElement('div');
+            cookieCard.className = 'showcase-cookie-card';
+            cookieCard.style.animationDelay = `${index * 0.2}s`;
+            
+            // Generate tags HTML
+            let tagsHTML = '';
+            if (cookie.tags && cookie.tags.length > 0) {
+                cookie.tags.forEach(tag => {
+                    const tagClass = tag.toLowerCase();
+                    tagsHTML += `<div class="cookie-tag ${tagClass}">${tag.charAt(0).toUpperCase() + tag.slice(1)}</div>`;
+                });
+            }
+            
+            cookieCard.innerHTML = `
+                <div class="showcase-cookie-image">
+                    <img src="${cookie.images.chewy}" alt="${cookie.title}" loading="lazy">
+                    ${tagsHTML}
+                </div>
+                <div class="showcase-cookie-details">
+                    <h3>${cookie.title}</h3>
+                    <p>${cookie.description}</p>
+                    <div class="showcase-cookie-price">${cookie.chewy_price} LE</div>
+                    <button class="showcase-add-btn" data-cookie-slug="${slug}">
+                        <i class="fas fa-plus"></i> Add to Cart
+                    </button>
+                </div>
+            `;
+            
+            // Make entire card clickable
+            cookieCard.addEventListener('click', function(e) {
+                // Don't trigger if the button was clicked (to avoid double events)
+                if (!e.target.closest('.showcase-add-btn')) {
+                    openPopup(slug);
+                }
+            });
+            
+            // Add button click event
+            const button = cookieCard.querySelector('.showcase-add-btn');
+            button.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent card click event
+                openPopup(slug);
+            });
+            
+            showcaseGrid.appendChild(cookieCard);
         });
-    });
+        
+    } catch (error) {
+        console.error('Error rendering cookie showcase:', error);
+        showcaseGrid.innerHTML = '<div class="error-message">😢 Unable to load our delicious cookies. Please try again later.</div>';
+    }
+}
 
-    // Simple floating animation
-    setInterval(() => {
-        cookies.forEach(cookie => {
-            cookie.style.transform = `translateY(${Math.sin(Date.now() / 1000) * 10}px)`;
-        });
-    }, 100);
+// Function to open popup from home tab showcase
+function openPopupFromHome(cookieType) {
+    console.log('Opening popup from home for:', cookieType);
+    openPopup(cookieType); // Use the same popup function
+}
 
-    // Event listeners for desktop nav links
+// Helper function to shuffle array (Fisher-Yates algorithm)
+function shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
+// Test function - run this in browser console
+function testHomePopup() {
+    const showcaseButtons = document.querySelectorAll('.showcase-add-btn');
+    if (showcaseButtons.length > 0) {
+        const firstButton = showcaseButtons[0];
+        const slug = firstButton.getAttribute('data-cookie-slug');
+        if (slug) {
+            console.log('Testing popup with slug:', slug);
+            openPopup(slug);
+        } else {
+            console.log('No slug found on button');
+        }
+    } else {
+        console.log('No showcase buttons found');
+    }
+}
+
+function switchTab(tabId) {
+    enableBodyScroll();
+    
+    // Remove active class from all nav links
     document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const tabId = this.getAttribute('data-tab');
-            switchTab(tabId);
-        });
+        link.classList.remove('active');
     });
-
-    // Update tab switching to work with new navigation
-    function switchTab(tabId) {
-        enableBodyScroll()
-        // Remove active class from all nav links
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.classList.remove('active');
-        });
-        
-        // Add active class to clicked button
-        const activeNavLink = document.querySelector(`.nav-link[data-tab="${tabId}"]`);
-        if (activeNavLink) {
-            activeNavLink.classList.add('active');
-        }
-        
-        // Remove active class from all tab contents
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.remove('active');
-        });
-        
-        // Show corresponding content
-        const activeTab = document.getElementById(`${tabId}-tab`);
-        if (activeTab) {
-            activeTab.classList.add('active');
-        }
-        
-        // Scroll to top
-        window.scrollTo(0, 0);
-        
-        // Close mobile menu if open
-        if (window.innerWidth <= 768 && mainNav.classList.contains('active')) {
+    
+    // Add active class to clicked button
+    const activeNavLink = document.querySelector(`.nav-link[data-tab="${tabId}"]`);
+    if (activeNavLink) {
+        activeNavLink.classList.add('active');
+    }
+    
+    // Remove active class from all tab contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // Show corresponding content
+    const activeTab = document.getElementById(`${tabId}-tab`);
+    if (activeTab) {
+        activeTab.classList.add('active');
+    }
+    
+    // Scroll to top
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+    
+    // Close mobile menu if open
+    if (window.innerWidth <= 768) {
+        const mainNav = document.getElementById('main-nav');
+        if (mainNav && mainNav.classList.contains('active')) {
             mainNav.classList.remove('active');
         }
     }
-
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tabId = btn.getAttribute('data-tab');
-            switchTab(tabId);
-        });
-    });
-
-    footerTabLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const tabId = link.getAttribute('data-tab');
-            switchTab(tabId);
-        });
-    });
-
-    // Box selection functionality
-    const styleBtns = document.querySelectorAll('.style-btn');
-    const boxOptions = document.querySelectorAll('.box-option');
-    const popupStyleBtns = document.querySelectorAll('.popup-style-btn');
-
-    // In your DOMContentLoaded event, update the style selection to show dynamic prices
-styleBtns.forEach(btn => {
-    btn.addEventListener('click', function () {
-        document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('selected'));
-        this.classList.add('selected');
-
-        selectedStyle = this.getAttribute('data-style');
-
-        // Update box prices with ranges
-        boxesData.forEach(box => {
-            const boxElement = document.querySelector(`.box-option[data-size="${box.size}"]`);
-            if (boxElement) {
-                const priceDisplay = boxElement.querySelector('.price-display');
-                
-                if (selectedStyle === 'mix') {
-                    // For mix, show the mix price
-                    priceDisplay.textContent = `${box.mix_price} LE`;
-                } else {
-                    // For chewy/crumble, show range if prices are different
-                    if (box.chewy_price === box.crumble_price) {
-                        priceDisplay.textContent = `${box[`${selectedStyle}_price`]} LE`;
-                    } else {
-                        const minPrice = Math.min(box.chewy_price, box.crumble_price);
-                        const maxPrice = Math.max(box.chewy_price, box.crumble_price);
-                        priceDisplay.textContent = `${minPrice} - ${maxPrice} LE`;
-                    }
-                }
-            }
-        });
-    });
-});
-    
-    // Update popup style selection
-popupStyleBtns.forEach(btn => {
-    btn.addEventListener('click', function () {
-        document.querySelectorAll('#popup-style-selection .popup-style-btn').forEach(b => b.classList.remove('selected'));
-        this.classList.add('selected');
-
-        selectedStyle = this.getAttribute('data-style');
-
-        // Update price in popup
-        if (selectedBox) {
-            const size = selectedBox.getAttribute('data-size');
-            const box = boxesData.find(b => b.size === size);
-            
-            if (box) {
-                let price = 0;
-                if (selectedStyle === 'mix') {
-                    price = box.mix_price;
-                } else {
-                    price = box[`${selectedStyle}_price`];
-                }
-                
-                document.getElementById('popup-box-price').textContent = `${price} LE`;
-                document.getElementById('final-price').textContent = price;
-
-                // Refresh flavor grid based on newly selected style
-                showFlavorPopup(size, box.cookie_count, selectedBox);
-            }
-        }
-    });
-});
-
-    // Get number of cookies based on box size
-    // Replace the static getCookieCount function with dynamic version
-function getCookieCount(size) {
-    const box = boxesData.find(b => b.size === size);
-    return box ? box.cookie_count : 2; // Default to 2 if not found
 }
 
-    // Show flavor selection popup
+// Function to render box showcase
+async function renderBoxShowcase() {
+    const showcaseGrid = document.getElementById('box-showcase-grid');
+    if (!showcaseGrid) return;
+
+    // Show loading state
+    showcaseGrid.innerHTML = '<div class="loading-boxes">📦 Loading our amazing boxes...</div>';
+
+    try {
+        // Ensure we have boxes data
+        if (boxesData.length === 0) {
+            boxesData = await fetchBoxesData();
+        }
+        
+        // Take first 4 boxes for showcase
+        const featuredBoxes = boxesData.slice(0, 4);
+        
+        showcaseGrid.innerHTML = '';
+        
+        featuredBoxes.forEach((box, index) => {
+            const boxCard = document.createElement('div');
+            boxCard.className = 'showcase-box-card';
+            boxCard.style.animationDelay = `${index * 0.2}s`;
+            
+            // Determine price display
+            let priceDisplay = '';
+            if (box.chewy_price === box.crumble_price) {
+                priceDisplay = `${box.chewy_price} LE`;
+            } else {
+                const minPrice = Math.min(box.chewy_price, box.crumble_price);
+                const maxPrice = Math.max(box.chewy_price, box.crumble_price);
+                priceDisplay = `${minPrice} - ${maxPrice} LE`;
+            }
+            
+            boxCard.innerHTML = `
+                <div class="showcase-box-image">
+                    <img src="${box.image_url}" alt="${box.name}" loading="lazy">
+                </div>
+                <div class="showcase-box-details">
+                    <h3>${box.name}</h3>
+                    <p>${box.description}</p>
+                    <div class="showcase-box-price">${priceDisplay}</div>
+                    <button class="showcase-box-btn" data-box-size="${box.size}">
+                        <i class="fas fa-gift"></i> Customize Box
+                    </button>
+                </div>
+            `;
+            
+            // Make entire card clickable
+            boxCard.addEventListener('click', function(e) {
+                // Don't trigger if the button was clicked (to avoid double events)
+                if (!e.target.closest('.showcase-box-btn')) {
+                    selectAndCustomizeBox(box.size);
+                }
+            });
+            
+            // Add button click event
+            const button = boxCard.querySelector('.showcase-box-btn');
+            button.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent card click event
+                selectAndCustomizeBox(box.size);
+            });
+            
+            showcaseGrid.appendChild(boxCard);
+        });
+        
+    } catch (error) {
+        console.error('Error rendering box showcase:', error);
+        showcaseGrid.innerHTML = '<div class="error-message">😢 Unable to load our amazing boxes. Please try again later.</div>';
+    }
+}
+
+// Function to handle box selection and customization
+async function selectAndCustomizeBox(boxSize) {
+    const boxElement = document.querySelector(`.box-option[data-size="${boxSize}"]`);
+    if (boxElement) {
+        selectedBox = boxElement;
+        const boxData = boxesData.find(b => b.size === boxSize);
+        
+        if (boxData) {
+            // Ensure cookies data is loaded before showing popup
+            await ensureCookiesDataLoaded();
+            showFlavorPopup(boxSize, boxData.cookie_count, boxElement);
+        }
+    }
+}
+
+// Function to initialize box showcase
+function initBoxShowcase() {
+    const showMoreBtn = document.getElementById('showMoreBoxesBtn');
+    
+    if (showMoreBtn) {
+        showMoreBtn.addEventListener('click', function() {
+            console.log('Explore All Boxes clicked - switching to boxes tab');
+            // Switch to boxes tab
+            switchTab('boxes');
+        });
+    }
+}
+
+// Function to ensure cookies data is loaded
+async function ensureCookiesDataLoaded() {
+    if (Object.keys(allCookiesData).length === 0) {
+        console.log('Loading cookies data for flavor selection...');
+        await fetchCookiesData();
+    }
+    return allCookiesData;
+}
+
+// Show flavor selection popup
 function showFlavorPopup(size, cookieCount, boxElement) {
     const popupOverlay = document.getElementById('flavor-popup-overlay');
     const popup = document.getElementById('flavor-popup');
@@ -1368,12 +1810,12 @@ function showFlavorPopup(size, cookieCount, boxElement) {
         }
     });
     
-    // Create flavor options dynamically from cookiesData
+    // Create flavor options dynamically from allCookiesData (FIXED)
     const flavors = [];
     
-    // Generate flavors from dynamic cookies data
-    Object.keys(cookiesData).forEach(slug => {
-        const cookie = cookiesData[slug];
+    // Generate flavors from dynamic cookies data - use allCookiesData instead of cookiesData
+    Object.keys(allCookiesData).forEach(slug => {
+        const cookie = allCookiesData[slug]; // Use allCookiesData here
         if (selectedStyle === 'mix') {
             // Add both chewy and crumble options for mix
             flavors.push({ 
@@ -1522,18 +1964,198 @@ function showFlavorPopup(size, cookieCount, boxElement) {
     popup.classList.add('active');
 }
 
-    // Replace the box selection event in DOMContentLoaded
+// Tab functionality
+document.addEventListener('DOMContentLoaded', async function () {
+    // Initialize Supabase first
+    window.scrollTo(0, 0);
+
+    await initializeSupabaseWithTimeout();
+    await ensureSupabaseInitialized();
+
+
+    // Fetch all cookies data FIRST, before rendering anything
+    console.log('Fetching cookies data...'); // Debug
+    await fetchCookiesData();
+
+    // Initialize prices
+    currentPrices = await priceService.getCurrentPrices();
+    console.log('Prices loaded successfully:', currentPrices);
+    await renderCookiesGrid(); // Add this line
+    await renderBoxes();
+    await renderMysteryBox();
+    await renderCookieShowcase(); 
+    await renderBoxShowcase();
+    initBoxShowcase();
+
+
+    setTimeout(() => {
+        initializeVSBattle();
+    }, 100);
+
+    
+    
+    setupMobileMenu(); 
+    
+    initCookieShowcase();
+    
+    
+    const tabBtns = document.querySelectorAll('.header-tabs .tab-btn');
+    const footerTabLinks = document.querySelectorAll('.footer-tab-link');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const cookies = document.querySelectorAll('.cookie-character');
+    const btn = document.querySelector(".mystery-btn");
+
+    btn.addEventListener("click", () => {
+        btn.textContent = "🎉 Added to Cart!";
+        setTimeout(() => {
+            btn.textContent = "Order Mystery Box";
+        }, 2000);
+    });
+
+    // Event listener for mobile menu button
+    mobileMenuBtnn.addEventListener('click', openMobileNav);
+
+    cookies.forEach(cookie => {
+        cookie.addEventListener('mouseenter', () => {
+            const speech = cookie.querySelector('.cookie-speech');
+            speech.style.animation = 'none';
+            setTimeout(() => {
+                speech.style.animation = 'fadeInOut 5s';
+            }, 10);
+        });
+    });
+
+    // Simple floating animation
+    setInterval(() => {
+        cookies.forEach(cookie => {
+            cookie.style.transform = `translateY(${Math.sin(Date.now() / 1000) * 10}px)`;
+        });
+    }, 100);
+
+    // Event listeners for desktop nav links
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const tabId = this.getAttribute('data-tab');
+            switchTab(tabId);
+        });
+    });
+
+    // Add this function to your JavaScript
+
+
+
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.getAttribute('data-tab');
+            switchTab(tabId);
+        });
+    });
+
+    footerTabLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const tabId = link.getAttribute('data-tab');
+            switchTab(tabId);
+        });
+    });
+
+    // Box selection functionality
+    const styleBtns = document.querySelectorAll('.style-btn');
+    const boxOptions = document.querySelectorAll('.box-option');
+    const popupStyleBtns = document.querySelectorAll('.popup-style-btn');
+
+    // In your DOMContentLoaded event, update the style selection to show dynamic prices
+styleBtns.forEach(btn => {
+    btn.addEventListener('click', function () {
+        document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('selected'));
+        this.classList.add('selected');
+
+        selectedStyle = this.getAttribute('data-style');
+
+        // Update box prices with ranges
+        boxesData.forEach(box => {
+            const boxElement = document.querySelector(`.box-option[data-size="${box.size}"]`);
+            if (boxElement) {
+                const priceDisplay = boxElement.querySelector('.price-display');
+                
+                if (selectedStyle === 'mix') {
+                    // For mix, show the mix price
+                    priceDisplay.textContent = `${box.mix_price} LE`;
+                } else {
+                    // For chewy/crumble, show range if prices are different
+                    if (box.chewy_price === box.crumble_price) {
+                        priceDisplay.textContent = `${box[`${selectedStyle}_price`]} LE`;
+                    } else {
+                        const minPrice = Math.min(box.chewy_price, box.crumble_price);
+                        const maxPrice = Math.max(box.chewy_price, box.crumble_price);
+                        priceDisplay.textContent = `${minPrice} - ${maxPrice} LE`;
+                    }
+                }
+            }
+        });
+    });
+});
+    
+    // Update popup style selection
+popupStyleBtns.forEach(btn => {
+    btn.addEventListener('click', function () {
+        document.querySelectorAll('#popup-style-selection .popup-style-btn').forEach(b => b.classList.remove('selected'));
+        this.classList.add('selected');
+
+        selectedStyle = this.getAttribute('data-style');
+
+        // Update price in popup
+        if (selectedBox) {
+            const size = selectedBox.getAttribute('data-size');
+            const box = boxesData.find(b => b.size === size);
+            
+            if (box) {
+                let price = 0;
+                if (selectedStyle === 'mix') {
+                    price = box.mix_price;
+                } else {
+                    price = box[`${selectedStyle}_price`];
+                }
+                
+                document.getElementById('popup-box-price').textContent = `${price} LE`;
+                document.getElementById('final-price').textContent = price;
+
+                // Refresh flavor grid based on newly selected style
+                showFlavorPopup(size, box.cookie_count, selectedBox);
+            }
+        }
+    });
+});
+
+
+
+    // Get number of cookies based on box size
+    // Replace the static getCookieCount function with dynamic version
+function getCookieCount(size) {
+    const box = boxesData.find(b => b.size === size);
+    return box ? box.cookie_count : 2; // Default to 2 if not found
+}
+
+    
+
+// Replace the box selection event in DOMContentLoaded
 boxOptions.forEach(box => {
-    box.addEventListener('click', function () {
+    box.addEventListener('click', async function () {
         selectedBox = this;
         const size = this.getAttribute('data-size');
         const boxData = boxesData.find(b => b.size === size);
         
         if (boxData) {
+            // Ensure cookies data is loaded before showing popup
+            await ensureCookiesDataLoaded();
             showFlavorPopup(size, boxData.cookie_count, this);
         }
     });
 });
+
+
 
     // Close popup
     document.getElementById('close-popup').addEventListener('click', closeFlavorPopup);
