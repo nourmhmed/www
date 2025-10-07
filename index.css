@@ -7674,8 +7674,8 @@ footer {
     /* Position the main navigation at the bottom */
     .modern-header {
         position: fixed;
-        bottom: 0;
-        top: auto;
+        bottom: auto;
+        /* top: auto; */
         width: 100%;
         background: var(--light);
         box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
