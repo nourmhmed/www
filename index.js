@@ -1760,58 +1760,49 @@ async function renderCookieShowcase() {
         const featuredCookies = shuffledSlugs.slice(0, 4);
         
         showcaseGrid.innerHTML = '';
-        console.log('Rendering showcase with cookies:', featuredCookies); // Debug
-        featuredCookies.forEach((slug, index) => {
-            const cookie = allCookiesData[slug]; // Use allCookiesData
+        console.log('Rendering showcase with cookies:', featuredCookies);
+        
+        featuredCookies.forEach(slug => {
+            const cookie = allCookiesData[slug];
             const cookieCard = document.createElement('div');
-            cookieCard.className = 'showcase-cookie-card';
-            cookieCard.style.animationDelay = `${index * 0.2}s`;
-            
-            // Generate tags HTML
+            cookieCard.className = 'cookie-card';
+            cookieCard.onclick = () => openPopup(slug);
+
             let tagsHTML = '';
             if (cookie.tags && cookie.tags.length > 0) {
                 cookie.tags.forEach(tag => {
-                    const tagClass = tag.toLowerCase();
-                    tagsHTML += `<div class="cookie-tag ${tagClass}">${tag.charAt(0).toUpperCase() + tag.slice(1)}</div>`;
+                    tagsHTML += `<div class="cookie-tag">${tag.charAt(0).toUpperCase() + tag.slice(1)}</div>`;
                 });
             }
-            
+
             cookieCard.innerHTML = `
-                <div class="showcase-cookie-image">
-                    <img src="${cookie.images.chewy}" alt="${cookie.title}" loading="lazy">
+                <div class="cookie-image">
+                    <div class="image-loading-container">
+                        <div class="image-loading"></div>
+                        <img src="${cookie.images.chewy}" alt="${cookie.title}" loading="lazy">
+                    </div>
                     ${tagsHTML}
-                </div>
-                <div class="showcase-cookie-details">
-                    <h3>${cookie.title}</h3>
-                    <p>${cookie.description}</p>
-                    <div class="showcase-cookie-price">${cookie.chewy_price} LE</div>
-                    <button class="showcase-add-btn" data-cookie-slug="${slug}">
+                    <button class="cookie-overlay-btn" onclick="event.stopPropagation(); openPopup('${slug}')">
                         <i class="fas fa-plus"></i> Add to Cart
                     </button>
                 </div>
+                <div class="cookie-details">
+                    <h3>${cookie.title}</h3>
+                    <div class="cookie-price">${cookie.chewy_price} LE</div>
+                </div>
             `;
-            
-            // Make entire card clickable
-            cookieCard.addEventListener('click', function(e) {
-                // Don't trigger if the button was clicked (to avoid double events)
-                if (!e.target.closest('.showcase-add-btn')) {
-                    openPopup(slug);
-                }
-            });
-            
-            // Add button click event
-            const button = cookieCard.querySelector('.showcase-add-btn');
-            button.addEventListener('click', function(e) {
-                e.stopPropagation(); // Prevent card click event
-                openPopup(slug);
-            });
-            
+
+            // Setup image handlers for this cookie
+            const img = cookieCard.querySelector('img');
+            setupImageHandlers(img);
+
             showcaseGrid.appendChild(cookieCard);
         });
-        
+
+        console.log('Cookie showcase rendered successfully:', featuredCookies.length, 'cookies');
     } catch (error) {
         console.error('Error rendering cookie showcase:', error);
-        showcaseGrid.innerHTML = '<div class="error-message">😢 Unable to load our delicious cookies. Please try again later.</div>';
+        showcaseGrid.innerHTML = '<div class="error-message">😢 Failed to load cookies. Please try refreshing the page.</div>';
     }
 }
 
@@ -2602,6 +2593,97 @@ function switchStoryTab(tabId) {
 }
 
 
+// Enhanced mobile dropdown functionality
+function setupMobileDropdown() {
+    const dropdownItems = document.querySelectorAll('.nav-item.dropdown');
+    
+    dropdownItems.forEach(item => {
+        const toggle = item.querySelector('.dropdown-toggle');
+        const menu = item.querySelector('.dropdown-menu');
+        const arrow = item.querySelector('.dropdown-arrow');
+        
+        // Mobile behavior
+        if (window.innerWidth <= 768) {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Close other open dropdowns
+                dropdownItems.forEach(otherItem => {
+                    if (otherItem !== item) {
+                        const otherMenu = otherItem.querySelector('.dropdown-menu');
+                        const otherArrow = otherItem.querySelector('.dropdown-arrow');
+                        otherMenu.classList.remove('active');
+                        if (otherArrow) {
+                            otherArrow.style.transform = 'rotate(0deg)';
+                        }
+                    }
+                });
+                
+                // Toggle current dropdown
+                menu.classList.toggle('active');
+                
+                // Rotate arrow
+                if (arrow) {
+                    if (menu.classList.contains('active')) {
+                        arrow.style.transform = 'rotate(180deg)';
+                    } else {
+                        arrow.style.transform = 'rotate(0deg)';
+                    }
+                }
+            });
+        }
+        
+        // Handle dropdown link clicks
+        const dropdownLinks = menu.querySelectorAll('.dropdown-link');
+        dropdownLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const storyTab = this.getAttribute('data-story-tab');
+                
+                console.log('Switching to story tab:', storyTab);
+                
+                // Switch to our-story tab first
+                switchTab('our-story');
+                
+                // Then switch the story sub-tab
+                setTimeout(() => {
+                    switchStoryTab(storyTab);
+                }, 100);
+                
+                // Close dropdown and reset arrow
+                if (window.innerWidth <= 768) {
+                    menu.classList.remove('active');
+                    if (arrow) {
+                        arrow.style.transform = 'rotate(0deg)';
+                    }
+                    
+                    // Close mobile menu
+                    const mainNav = document.getElementById('main-nav');
+                    if (mainNav) {
+                        mainNav.classList.remove('active');
+                    }
+                }
+            });
+        });
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.nav-item.dropdown')) {
+            dropdownItems.forEach(item => {
+                const menu = item.querySelector('.dropdown-menu');
+                const arrow = item.querySelector('.dropdown-arrow');
+                menu.classList.remove('active');
+                if (arrow) {
+                    arrow.style.transform = 'rotate(0deg)';
+                }
+            });
+        }
+    });
+}
+
+
 // Tab functionality
 document.addEventListener('DOMContentLoaded', async function () {
     // Initialize Supabase first
@@ -2615,6 +2697,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 document.body.style.overflow = 'hidden';
     setupLoadingTimeout();
     setupDropdown();
+    setupMobileDropdown();
 
     // Fetch all cookies data FIRST, before rendering anything
     console.log('Fetching cookies data...'); // Debug
