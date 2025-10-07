@@ -1849,12 +1849,12 @@ function testHomePopup() {
 }
 
 // عدل الـ switchTab function عشان متفتحش أي تاب لـ Explore Us
+// Enhanced switchTab function with URL updates
 function switchTab(tabId) {
-    // إذا التاب مش موجود، ما تعملش أي حاجة
+    // If the tab doesn't exist, do nothing
     const activeTab = document.getElementById(`${tabId}-tab`);
     if (!activeTab) return;
     
-    // كمل الكود العادي...
     enableBodyScroll();
     
     // Remove active class from all nav links
@@ -1878,6 +1878,9 @@ function switchTab(tabId) {
         activeTab.classList.add('active');
     }
     
+    // Update URL for display
+    updateTabURL(tabId);
+    
     // Scroll to top
     window.scrollTo({
         top: 0,
@@ -1889,6 +1892,102 @@ function switchTab(tabId) {
         const mainNav = document.getElementById('main-nav');
         if (mainNav && mainNav.classList.contains('active')) {
             mainNav.classList.remove('active');
+        }
+    }
+}
+
+
+function updateTabURL(tabId) {
+    const urlMap = {
+        'home': '/',
+        'cookies': '/cookies',
+        'boxes': '/boxes',
+        'mystery': '/mystery',
+        'our-story': '/our-story'
+    };
+    
+    const href = urlMap[tabId] || '/';
+    
+    // Update URL for display only
+    try {
+        window.history.pushState({}, '', href);
+        console.log('URL updated to:', href);
+    } catch (error) {
+        // Ignore errors in local file protocol
+        console.log('Could not update URL (normal for local development)');
+    }
+}
+
+
+// Enhanced setup for all navigation
+function setupNavigation() {
+    // Handle main nav links
+    document.querySelectorAll('.nav-link[data-tab]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const tabId = this.getAttribute('data-tab');
+            switchTab(tabId);
+        });
+    });
+    
+    // Handle footer tab links
+    document.querySelectorAll('.footer-tab-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const tabId = this.getAttribute('data-tab');
+            switchTab(tabId);
+        });
+    });
+    
+    // Handle header tab buttons
+    document.querySelectorAll('.header-tabs .tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tabId = this.getAttribute('data-tab');
+            switchTab(tabId);
+        });
+    });
+    
+    // Handle dropdown story links
+    setupDropdown();
+    
+    // Handle browser back/forward buttons
+    window.addEventListener('popstate', handleBrowserNavigation);
+}
+
+
+// Handle browser navigation (back/forward buttons)
+function handleBrowserNavigation() {
+    const currentPath = window.location.pathname;
+    console.log('Browser navigation to:', currentPath);
+    
+    const pathToTabMap = {
+        '/': 'home',
+        '/cookies': 'cookies',
+        '/boxes': 'boxes',
+        '/mystery': 'mystery',
+        '/our-story': 'our-story',
+        '/our-vision': 'our-story', // These will need special handling
+        '/our-mission': 'our-story' // These will need special handling
+    };
+    
+    const tabId = pathToTabMap[currentPath];
+    
+    if (tabId) {
+        // For main tabs
+        if (tabId !== 'our-story') {
+            switchTab(tabId);
+        } else {
+            // For story sub-tabs
+            switchTab('our-story');
+            
+            // Determine which story tab to show
+            let storySubTab = 'our-story'; // default
+            if (currentPath === '/our-vision') storySubTab = 'vision';
+            if (currentPath === '/our-mission') storySubTab = 'mission';
+            
+            setTimeout(() => {
+                switchStoryTab(storySubTab);
+            }, 100);
         }
     }
 }
@@ -2407,6 +2506,7 @@ function setupStoryTabs() {
     });
 }
 
+
 function setupDropdown() {
     const dropdownItems = document.querySelectorAll('.nav-item.dropdown');
     
@@ -2477,7 +2577,7 @@ function setupDropdown() {
             });
         }
         
-        // Handle dropdown link clicks - SIMPLIFIED VERSION
+        // Handle dropdown link clicks
         const dropdownLinks = menu.querySelectorAll('.dropdown-link');
         dropdownLinks.forEach(link => {
             link.addEventListener('click', function(e) {
@@ -2485,10 +2585,14 @@ function setupDropdown() {
                 const storyTab = this.getAttribute('data-story-tab');
                 const href = this.getAttribute('href');
                 
-                console.log('Switching to:', storyTab);
+                console.log('Switching to story tab:', storyTab);
                 
-                // JUST UPDATE THE URL FOR DISPLAY - no navigation
-                updateURLForDisplay(href);
+                // Update URL for display
+                try {
+                    window.history.pushState({}, '', href);
+                } catch (error) {
+                    // Ignore errors in local file protocol
+                }
                 
                 // Switch to our-story tab first
                 switchTab('our-story');
@@ -2652,6 +2756,10 @@ document.body.style.overflow = 'hidden';
     
     setupMobileMenu(); 
     setupStoryTabs();
+    setupNavigation();
+    
+    // Check initial URL and set appropriate tab
+    handleBrowserNavigation();
     
         setupLogoSection();
     
