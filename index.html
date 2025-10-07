@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Syrine's Crumble | Artisanal Cookies</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- <link rel="stylesheet" href="index.css"> -->
@@ -90,21 +90,21 @@
                         </ul>
                     </li>
                     <!-- Cart as a navigation item -->
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                         <div class="cart-icon" id="cart-icon" aria-label="Shopping cart">
                             <i class="fas fa-shopping-cart"></i>
                             <span class="cart-count" id="cart-count">0</span>
                         </div>
-                    </li>
+                    </li> -->
                 </ul>
             </nav>
             <!-- Cart -->
-            <!-- <div class="header-actions">
+            <div class="header-actions">
                 <div class="cart-icon" id="cart-icon" aria-label="Shopping cart">
                     <i class="fas fa-shopping-cart"></i>
                     <span class="cart-count" id="cart-count">0</span>
                 </div>
-            </div> -->
+            </div>
         </div>
     </header>
 
@@ -118,7 +118,7 @@
             <!-- Logo Animation Section -->
             <section class="logo-section">
                 <div class="container">
-                    <div class="logo-animation-container" style="max-width:100vw;overflow-x:hidden;">
+                    <div class="logo-animation-container">
                         <div class="logo-with-animation">
                             <img src="images/logo.svg" alt="Syrine's Crumble" class="animated-logo">
 
@@ -224,7 +224,7 @@
 
             <!-- In your home tab - replace the static showcase cookies with this: -->
             <section class="cookie-showcase">
-                <div class="container" style="max-width:100vw;overflow-x:hidden;">
+                <div class="container">
                     <h2 class="section-title">Our Signature Cookies</h2>
                     <p class="section-subtitle">Discover our most loved flavors - perfect for any occasion</p>
 
@@ -240,7 +240,7 @@
 
             <!-- Box Showcase Section -->
             <section class="box-showcase">
-                <div class="container" style="max-width:100vw;overflow-x:hidden;">
+                <div class="container">
                     <h2 class="section-title">Our Popular Boxes</h2>
                     <p class="section-subtitle">Perfect for sharing, gifting, or treating yourself</p>
 
@@ -258,7 +258,7 @@
         <!-- Boxes Tab -->
         <div class="tab-content" id="boxes-tab">
             <section class="boxes">
-                <div class="container" style="max-width:100vw;overflow-x:hidden;">
+                <div class="container">
                     <h2 class="section-title">Cookie Boxes</h2>
 
                     <div class="box-options">
@@ -321,7 +321,7 @@
         <!-- Cookies Tab -->
         <div class="tab-content" id="cookies-tab">
             <section class="cookies">
-                <div class="container" style="max-width:100vw;overflow-x:hidden;">
+                <div class="container">
                     <h2 class="section-title">Our Cookie Selection</h2>
                     <p class="section-subtitle">Choose from our delicious range of artisanal cookies - click any card to
                         learn more!</p>
@@ -438,7 +438,7 @@
         <!-- Mystery Tab -->
         <div class="tab-content" id="mystery-tab">
             <section class="mystery">
-                <div class="container" style="max-width:100vw;overflow-x:hidden;">
+                <div class="container">
                     <h2 class="section-title">Mystery Box</h2>
                     <div class="mystery-content">
                         <!-- Left Image -->
@@ -468,7 +468,7 @@
 
         <div class="tab-content" id="our-story-tab">
             <section class="our-story-tab-section">
-                <div class="container" style="max-width:100vw;overflow-x:hidden;">
+                <div class="container">
                     <!-- Hidden Story Tabs Navigation -->
                     <div class="story-tabs-nav" style="display: none;">
                         <button class="story-tab-btn active" data-story-tab="our-story">Our Story</button>
@@ -869,76 +869,126 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer>
-    <div class="container" style="max-width:100vw;overflow-x:hidden;">
-            <div class="footer-content">
-                <div class="footer-column">
-                    <h3>Syrine's Crumble</h3>
-                    <p>Artisanal cookies made with love and the finest ingredients. Freshly baked daily for your
-                        enjoyment.</p>
-                    <div class="social-icons">
-                        <a href="https://www.instagram.com/syrinescrumble/" aria-label="Instagram"><i
-                                class="fab fa-instagram"></i></a>
+    <!-- Mobile Navigation Overlay -->
+    
+        <!-- Footer -->
+        <footer>
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-column">
+                        <h3>Syrine's Crumble</h3>
+                        <p>Artisanal cookies made with love and the finest ingredients. Freshly baked daily for your
+                            enjoyment.</p>
+                        <div class="social-icons">
+                            <a href="https://www.instagram.com/syrinescrumble/" aria-label="Instagram"><i
+                                    class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="footer-column">
+                        <h3>Contact Us</h3>
+                        <ul>
+                            <li><i class="fas fa-map-marker-alt"></i> Maadi, Cairo</li>
+                            <li><i class="fas fa-phone"></i> +20 104 493 0284</li>
+                            <li><i class="fas fa-envelope"></i> syrinescrumble@gmail.com</li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-column">
+                        <h3>Quick Links</h3>
+                        <ul>
+                            <li><a href="#" data-tab="home">Home</a></li>
+                            <li><a href="#" data-tab="cookies">Cookies</a></li>
+                            <li><a href="#" data-tab="boxes">Boxes</a></li>
+                            <li><a href="#" data-tab="mystery">Mystery Box</a></li>
+                        </ul>
                     </div>
                 </div>
 
-                <div class="footer-column">
-                    <h3>Contact Us</h3>
-                    <ul>
-                        <li><i class="fas fa-map-marker-alt"></i> Maadi, Cairo</li>
-                        <li><i class="fas fa-phone"></i> +20 104 493 0284</li>
-                        <li><i class="fas fa-envelope"></i> syrinescrumble@gmail.com</li>
-                    </ul>
+                <!-- Powered By Section -->
+                <div class="powered-by">
+                    <span>Powered by </span>
+                    <a href="https://www.linkedin.com/in/nourmhmed/" target="_blank" rel="noopener noreferrer"
+                        class="developer-link">NOUR
+                    </a>
                 </div>
 
-                <div class="footer-column">
-                    <h3>Quick Links</h3>
-                    <ul>
-                        <li><a href="#" data-tab="home">Home</a></li>
-                        <li><a href="#" data-tab="cookies">Cookies</a></li>
-                        <li><a href="#" data-tab="boxes">Boxes</a></li>
-                        <li><a href="#" data-tab="mystery">Mystery Box</a></li>
-                    </ul>
+                <div class="copyright">
+                    © 2025 Syrine's Crumble. All rights reserved.
                 </div>
             </div>
+        </footer>
 
-            <!-- Powered By Section -->
-            <div class="powered-by">
-                <span>Powered by </span>
-                <a href="https://www.linkedin.com/in/nourmhmed/" target="_blank" rel="noopener noreferrer"
-                    class="developer-link">NOUR
+        <!-- Cart Sidebar -->
+        <div class="cart-overlay" id="cart-overlay"></div>
+        <div class="cart-sidebar" id="cart-sidebar">
+            <div class="cart-header">
+                <h2>Your Cart</h2>
+                <button class="close-cart" id="close-cart">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="cart-items" id="cart-items">
+                <!-- Cart items will be inserted by JavaScript -->
+            </div>
+            <div class="cart-footer">
+                <div class="cart-total">
+                    <span>Total:</span>
+                    <span id="cart-total">LE 0.00 EGP</span>
+                </div>
+                <button class="checkout-btn" id="start-checkout">Proceed to Checkout</button>
+            </div>
+        </div>
+
+        <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
+
+    <!-- Mobile Navigation Menu -->
+    <nav class="mobile-nav" id="mobile-nav">
+        <div class="mobile-nav-header">
+            <img src="images/logo.svg" alt="Syrine's Crumble" class="mobile-nav-logo" height="40">
+        </div>
+
+        <ul class="mobile-nav-list">
+            <li class="mobile-nav-item">
+                <a href="#" class="mobile-nav-link" data-tab="home">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
                 </a>
-            </div>
-
-            <div class="copyright">
-                © 2025 Syrine's Crumble. All rights reserved.
-            </div>
+            </li>
+            <li class="mobile-nav-item">
+                <a href="#" class="mobile-nav-link" data-tab="cookies">
+                    <i class="fas fa-cookie"></i>
+                    <span>Cookies</span>
+                </a>
+            </li>
+            <li class="mobile-nav-item">
+                <a href="#" class="mobile-nav-link" data-tab="boxes">
+                    <i class="fas fa-gift"></i>
+                    <span>Boxes</span>
+                </a>
+            </li>
+            <li class="mobile-nav-item">
+                <a href="#" class="mobile-nav-link" data-tab="mystery">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Mystery</span>
+                </a>
+            </li>
+            <li class="mobile-nav-item mobile-dropdown">
+                <a href="#" class="mobile-nav-link mobile-dropdown-toggle">
+                    <i class="fas fa-book-open"></i>
+                    <span>About Us</span>
+                    <i class="fas fa-chevron-down mobile-dropdown-arrow"></i>
+                </a>
+                <ul class="mobile-dropdown-menu">
+                    <li><a href="#" class="mobile-dropdown-link" data-story-tab="our-story">Our Story</a></li>
+                    <li><a href="#" class="mobile-dropdown-link" data-story-tab="vision">Our Vision</a></li>
+                    <li><a href="#" class="mobile-dropdown-link" data-story-tab="mission">Our Mission</a></li>
+                </ul>
+            </li>
+        </ul>
         </div>
-    </footer>
-
-    <!-- Cart Sidebar -->
-    <div class="cart-overlay" id="cart-overlay"></div>
-    <div class="cart-sidebar" id="cart-sidebar">
-        <div class="cart-header">
-            <h2>Your Cart</h2>
-            <button class="close-cart" id="close-cart">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="cart-items" id="cart-items">
-            <!-- Cart items will be inserted by JavaScript -->
-        </div>
-        <div class="cart-footer">
-            <div class="cart-total">
-                <span>Total:</span>
-                <span id="cart-total">LE 0.00 EGP</span>
-            </div>
-            <button class="checkout-btn" id="start-checkout">Proceed to Checkout</button>
-        </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="index.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script src="index.js"></script>
 </body>
 
 </html>

@@ -5392,6 +5392,13 @@ footer {
     .chewy-bubble {
         right: -250px;
     }
+    #home-tab {
+    background-image: url('images/10.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
 }
 
 @media (max-width: 480px) {
@@ -6217,7 +6224,7 @@ footer {
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .logo-section {
-        padding: 3rem 0;
+        /* padding: 3rem 0; */
     }
     
     .animated-logo {
@@ -6318,7 +6325,7 @@ footer {
 
 @media (max-width: 480px) {
     .logo-section {
-        padding: 2rem 0;
+        /* padding: 2rem 0; */
     }
     
     .animated-logo {
@@ -7677,7 +7684,7 @@ footer {
         bottom: auto;
         /* top: auto; */
         width: 100%;
-        /* background: var(--light); */
+        background: var(--light);
         box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
         /* padding: 0.5rem 0; */
         z-index: 1000;
@@ -8015,3 +8022,232 @@ footer {
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* Mobile Three-Dash Navigation */
+@media (max-width: 768px) {
+    /* Hide the regular navigation */
+    .main-nav {
+        display: none !important;
+    }
+    
+    /* Style the three-dash hamburger button */
+    .mobile-menu-btn {
+        display: flex !important;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 44px;
+        height: 44px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+        gap: 4px;
+    }
+    
+    .mobile-menu-btn span {
+        display: block;
+        width: 24px;
+        height: 3px;
+        background-color: var(--primary);
+        border-radius: 2px;
+        transition: all 0.3s ease;
+    }
+    
+    /* Hamburger animation when active */
+    .mobile-menu-btn.active span:nth-child(1) {
+        transform: rotate(45deg) translate(6px, 6px);
+    }
+    
+    .mobile-menu-btn.active span:nth-child(2) {
+        opacity: 0;
+    }
+    
+    .mobile-menu-btn.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(6px, -6px);
+    }
+    
+    /* Mobile navigation menu */
+    .mobile-nav {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 80%;
+        max-width: 300px;
+        height: 100vh;
+        background: var(--light);
+        z-index: 1001;
+        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
+        transition: left 0.4s ease;
+        padding: 80px 20px 20px;
+        overflow-y: auto;
+    }
+    
+    .mobile-nav.active {
+        left: 0;
+    }
+    
+    /* Mobile navigation overlay */
+    .mobile-nav-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.4s ease;
+    }
+    
+    .mobile-nav-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    /* Mobile navigation list */
+    .mobile-nav-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .mobile-nav-item {
+        margin-bottom: 0.5rem;
+    }
+    
+    .mobile-nav-link {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        color: var(--text);
+        text-decoration: none;
+        border-radius: 10px;
+        transition: background 0.3s ease;
+        font-weight: 500;
+    }
+    
+    .mobile-nav-link:hover,
+    .mobile-nav-link.active {
+        background: var(--secondary);
+        color: var(--primary);
+    }
+    
+    .mobile-nav-link i {
+        margin-right: 0.8rem;
+        font-size: 1.2rem;
+        width: 24px;
+        text-align: center;
+    }
+    
+    /* Mobile dropdown styles */
+    .mobile-dropdown-menu {
+        list-style: none;
+        padding: 0;
+        margin: 10px 0 0 20px;
+        display: none;
+    }
+    
+    .mobile-dropdown-menu.active {
+        display: block;
+    }
+    
+    .mobile-dropdown-link {
+        display: block;
+        padding: 0.8rem 1rem;
+        color: var(--text);
+        text-decoration: none;
+        border-radius: 8px;
+        transition: background 0.3s ease;
+        font-size: 0.9rem;
+    }
+    
+    .mobile-dropdown-link:hover {
+        background: var(--secondary);
+        color: var(--primary);
+    }
+    
+    /* Header layout for mobile */
+    .header-container {
+        padding: 0 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .logo-container {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .header-actions {
+        display: flex;
+        align-items: center;
+    }
+    
+    /* Ensure cart is visible */
+    .cart-icon {
+        display: flex !important;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Ensure cart icon stays visible in mobile header */
+    .header-actions {
+        display: flex !important;
+        align-items: center;
+        order: 3; /* Right side */
+    }
+
+    .cart-icon {
+        display: flex !important;
+        position: relative;
+        width: 44px;
+        height: 44px;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+        font-size: 1.2rem;
+    }
+
+    .cart-count {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: var(--primary);
+        color: white;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 0.7rem;
+        font-weight: bold;
+    }
+
+    /* Header layout for mobile */
+    .header-container {
+        padding: 0 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+    }
+
+    .mobile-menu-btn {
+        order: 1; /* Left side */
+    }
+
+    .logo-container {
+        order: 2; /* Center */
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .header-actions {
+        order: 3; /* Right side */
+    }
+}

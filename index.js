@@ -2683,6 +2683,181 @@ function setupMobileDropdown() {
     });
 }
 
+// Mobile Navigation Functionality
+function setupMobileNavigation() {
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileNav = document.getElementById('mobile-nav');
+    const mobileNavOverlay = document.getElementById('mobile-nav-overlay');
+    const mobileDropdownToggles = document.querySelectorAll('.mobile-dropdown-toggle');
+    
+    if (mobileMenuBtn && mobileNav) {
+        // Toggle mobile menu
+        mobileMenuBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Toggle mobile menu
+            mobileNav.classList.toggle('active');
+            mobileNavOverlay.classList.toggle('active');
+            mobileMenuBtn.classList.toggle('active');
+            
+            // Toggle body scroll
+            if (mobileNav.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        });
+        
+        // Close menu when clicking on overlay
+        mobileNavOverlay.addEventListener('click', function() {
+            mobileNav.classList.remove('active');
+            mobileNavOverlay.classList.remove('active');
+            mobileMenuBtn.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+        
+        // Close menu when clicking on nav links
+        mobileNav.querySelectorAll('.mobile-nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                if (!this.classList.contains('mobile-dropdown-toggle')) {
+                    mobileNav.classList.remove('active');
+                    mobileNavOverlay.classList.remove('active');
+                    mobileMenuBtn.classList.remove('active');
+                    document.body.style.overflow = '';
+                    
+                    // Switch tab if it's a regular link
+                    const tabId = this.getAttribute('data-tab');
+                    if (tabId) {
+                        switchTab(tabId);
+                    }
+                }
+            });
+        });
+        
+        // Mobile dropdown functionality
+        mobileDropdownToggles.forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const dropdownMenu = this.nextElementSibling;
+                const dropdownArrow = this.querySelector('.mobile-dropdown-arrow');
+                
+                // Toggle dropdown
+                dropdownMenu.classList.toggle('active');
+                
+                // Rotate arrow
+                if (dropdownArrow) {
+                    dropdownArrow.style.transform = dropdownMenu.classList.contains('active') 
+                        ? 'rotate(180deg)' 
+                        : 'rotate(0deg)';
+                }
+            });
+        });
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.mobile-dropdown')) {
+                document.querySelectorAll('.mobile-dropdown-menu').forEach(menu => {
+                    menu.classList.remove('active');
+                });
+                document.querySelectorAll('.mobile-dropdown-arrow').forEach(arrow => {
+                    arrow.style.transform = 'rotate(0deg)';
+                });
+            }
+        });
+        
+        // Handle story tab links in mobile dropdown
+        document.querySelectorAll('.mobile-dropdown-link[data-story-tab]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const storyTab = this.getAttribute('data-story-tab');
+                
+                // Close mobile menu
+                mobileNav.classList.remove('active');
+                mobileNavOverlay.classList.remove('active');
+                mobileMenuBtn.classList.remove('active');
+                document.body.style.overflow = '';
+                
+                // Switch to our-story tab and then to the specific story tab
+                switchTab('our-story');
+                setTimeout(() => {
+                    switchStoryTab(storyTab);
+                }, 100);
+            });
+        });
+        
+        // Close menu on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+                mobileNav.classList.remove('active');
+                mobileNavOverlay.classList.remove('active');
+                mobileMenuBtn.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+    }
+}
+
+// Update the mobile menu button HTML in your header
+function updateMobileMenuButton() {
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    if (mobileMenuBtn) {
+        mobileMenuBtn.innerHTML = `
+            <span></span>
+            <span></span>
+            <span></span>
+        `;
+    }
+}
+
+// Ensure cart works in mobile view
+function setupMobileCart() {
+    const cartIcon = document.getElementById('cart-icon');
+    const cartSidebar = document.getElementById('cart-sidebar');
+    const closeCart = document.getElementById('close-cart');
+    const cartOverlay = document.getElementById('cart-overlay');
+
+    if (cartIcon && cartSidebar) {
+        cartIcon.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Close mobile menu if open
+            const mobileNav = document.getElementById('mobile-nav');
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            if (mobileNav && mobileNav.classList.contains('active')) {
+                mobileNav.classList.remove('active');
+                mobileMenuBtn.classList.remove('active');
+                document.getElementById('mobile-nav-overlay').classList.remove('active');
+                document.body.style.overflow = '';
+            }
+            
+            // Open cart
+            cartSidebar.classList.add('active');
+            cartOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+
+        // Close cart functionality remains the same
+        if (closeCart) {
+            closeCart.addEventListener('click', function() {
+                cartSidebar.classList.remove('active');
+                cartOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        }
+
+        if (cartOverlay) {
+            cartOverlay.addEventListener('click', function() {
+                cartSidebar.classList.remove('active');
+                cartOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        }
+    }
+}
 
 // Tab functionality
 document.addEventListener('DOMContentLoaded', async function () {
@@ -2698,6 +2873,7 @@ document.body.style.overflow = 'hidden';
     setupLoadingTimeout();
     setupDropdown();
     setupMobileDropdown();
+    setupMobileCart(); 
 
     // Fetch all cookies data FIRST, before rendering anything
     console.log('Fetching cookies data...'); // Debug
@@ -2709,6 +2885,8 @@ document.body.style.overflow = 'hidden';
    
     
     setupMobileMenu(); 
+    updateMobileMenuButton();
+    setupMobileNavigation();
     setupStoryTabs();
     
         setupLogoSection();
