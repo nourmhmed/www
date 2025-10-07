@@ -13,6 +13,9 @@ let loadingProgress = 0;
 let totalTasks = 5; // Adjust based on how many data sources you're loading
 // Add a timeout fallback in case loading gets stuck
 let loadingTimeout;
+// Global variables for detail page
+let currentDetailCookie = null;
+let currentDetailStyle = 'chewy';
 
 
 // Add these with your other global variables
@@ -1262,41 +1265,146 @@ function updateLoadingProgress(increment = 20) {
 
 
 function openPopup(cookieType) {
-    console.log('Opening popup for:', cookieType); // Debug
-    console.log('Available cookies:', Object.keys(allCookiesData)); // Debug
+    if (window.innerWidth <= 768) {
+        // Use detail page for mobile
+        openCookieDetail(cookieType);
+    } else {
+        // Use popup for desktop
+        openDesktopPopup(cookieType);
+    }
+}
+
+
+function openCookieDetail(cookieType) {
+    console.log('Opening mobile detail page for:', cookieType);
+    currentDetailCookie = cookieType;
+    currentDetailStyle = 'chewy';
     
-    // disableBodyScroll();
-    currentCookie = cookieType;
-    currentStyle = 'chewy';
-    quantity = 1;
-    
-    // Always use global data - change cookiesData to allCookiesData
     const cookie = allCookiesData[cookieType];
     
     if (!cookie) {
-        console.error('Cookie not found in global data:', cookieType);
-        console.error('Available cookies:', Object.keys(allCookiesData));
+        console.error('Cookie not found:', cookieType);
         showNotification('Cookie information not available');
         return;
     }
     
-    // Update all popup content with dynamic data
+    // Update detail page content
+    document.getElementById('detail-title').textContent = cookie.title;
+    document.getElementById('detail-description').textContent = cookie.description;
+    document.getElementById('detail-image').style.backgroundImage = `url(${cookie.images.chewy})`;
+    
+    const currentPrice = currentDetailStyle === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
+    document.getElementById('detail-price').textContent = `${currentPrice} LE`;
+    
+    document.getElementById('detail-ingredients').textContent = cookie.ingredients || 'Premium ingredients carefully selected for the best flavor';
+    document.getElementById('detail-specialty').textContent = cookie.specialty || 'Handcrafted with care for exceptional taste and texture';
+    document.getElementById('detail-perfect-for').textContent = cookie.perfectFor || 'Any occasion that calls for delicious homemade cookies';
+    
+    // Set active style button
+    document.querySelectorAll('.cookie-detail-style-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector('.cookie-detail-style-btn[data-style="chewy"]').classList.add('active');
+    
+    // Show detail page
+    document.getElementById('cookie-detail-page').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeCookieDetail() {
+    document.getElementById('cookie-detail-page').classList.remove('active');
+    document.body.style.overflow = 'auto';
+    currentDetailCookie = null;
+}
+
+// Change style in mobile detail page
+function changeDetailStyle(style) {
+    currentDetailStyle = style;
+    
+    document.querySelectorAll('.cookie-detail-style-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(`.cookie-detail-style-btn[data-style="${style}"]`).classList.add('active');
+    
+    if (currentDetailCookie && allCookiesData[currentDetailCookie]) {
+        const cookie = allCookiesData[currentDetailCookie];
+        document.getElementById('detail-image').style.backgroundImage = `url(${cookie.images[style]})`;
+        
+        const currentPrice = style === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
+        document.getElementById('detail-price').textContent = `${currentPrice} LE`;
+    }
+}
+
+async function addToCartFromDetail() {
+    if (!currentDetailCookie) {
+        showNotification('Error: No cookie selected');
+        return;
+    }
+
+    const cookie = allCookiesData[currentDetailCookie];
+    if (!cookie) {
+        showNotification('Error: Cookie data not available');
+        return;
+    }
+
+    const cookiePrice = await getCookiePrice(currentDetailCookie, currentDetailStyle);
+    if (!cookiePrice) {
+        showNotification('Error: Could not verify price. Please try again.');
+        return;
+    }
+
+    const unitPrice = cookiePrice;
+    const cookieName = cookie.title;
+    
+    const name = `${cookieName} (${currentDetailStyle.charAt(0).toUpperCase() + currentDetailStyle.slice(1)})`;
+
+    const cart = getCart();
+    cart.push({
+        id: Date.now(),
+        name: name,
+        unitPrice: unitPrice,
+        price: unitPrice,
+        img: cookie.images[currentDetailStyle] || 'images/default_cookie.svg',
+        quantity: 1,
+        style: currentDetailStyle,
+        cookieType: currentDetailCookie
+    });
+
+    saveCart(cart);
+    updateCartUI();
+    showNotification(`${name} added to cart!`);
+
+    closeCookieDetail();
+}
+
+function openDesktopPopup(cookieType) {
+    console.log('Opening desktop popup for:', cookieType);
+    currentCookie = cookieType;
+    currentStyle = 'chewy';
+    quantity = 1;
+    
+    const cookie = allCookiesData[cookieType];
+    
+    if (!cookie) {
+        console.error('Cookie not found:', cookieType);
+        showNotification('Cookie information not available');
+        return;
+    }
+    
+    // Update popup content
     document.getElementById('popupTitle').textContent = cookie.title;
     document.getElementById('popupDescription').textContent = cookie.description;
     document.getElementById('popupImage').style.backgroundImage = `url(${cookie.images.chewy})`;
     
-    // Update price based on current style
     const currentPrice = currentStyle === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
     document.getElementById('popupPrice').textContent = `${currentPrice} LE`;
     
-    // Update dynamic content - use fallback if data is missing
     document.getElementById('popupIngredients').textContent = cookie.ingredients || 'Premium ingredients carefully selected for the best flavor';
     document.getElementById('popupSpecialty').textContent = cookie.specialty || 'Handcrafted with care for exceptional taste and texture';
     document.getElementById('popupPerfectFor').textContent = cookie.perfectFor || 'Any occasion that calls for delicious homemade cookies';
     
     document.getElementById('quantityValue').textContent = quantity;
     
-    // Set active style button
     document.querySelectorAll('.popup-style-option').forEach(btn => {
         btn.classList.remove('active');
     });
@@ -1306,10 +1414,15 @@ function openPopup(cookieType) {
     document.body.style.overflow = 'hidden';
 }
 
+
+// Update existing closePopup function
 function closePopup() {
-    enableBodyScroll();
-    document.getElementById('popupOverlay').classList.remove('active');
-    document.body.style.overflow = 'auto'; // Re-enable scrolling
+    if (window.innerWidth <= 768) {
+        closeCookieDetail();
+    } else {
+        document.getElementById('popupOverlay').classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
 }
 
 // Close popup when clicking outside of it
@@ -2858,6 +2971,7 @@ function setupMobileCart() {
         }
     }
 }
+
 
 // Tab functionality
 document.addEventListener('DOMContentLoaded', async function () {
