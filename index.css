@@ -940,7 +940,7 @@ footer {
 
 @media (max-width: 768px) {
     .cart-sidebar {
-        width: 320px;
+        /* width: 320px; */
     }
 
     .style-selection {
@@ -988,19 +988,7 @@ footer {
 
 
 
-@media (max-width: 576px) {
-    header {
-        padding: 1rem;
-    }
 
-    .brand-name {
-        font-size: 1.5rem;
-    }
-
-    .cart-sidebar {
-        width: 100%;
-    }
-}
 
 
 .selected-flavors-summary {
@@ -2572,20 +2560,7 @@ footer {
     }
 }
 
-@media (max-width: 576px) {
-    .logo-img {
-        height: 40px;
-    }
-    
-    .cart-icon {
-        width: 40px;
-        height: 40px;
-    }
-    
-    .cart-icon i {
-        font-size: 1.1rem;
-    }
-}
+
 
 /* Enhanced Popular Boxes Section */
 .popular-boxes {
@@ -3467,7 +3442,7 @@ footer {
     
     /* Cart sidebar mobile */
     .cart-sidebar {
-        width: 100%;
+        /* width: 100%; */
         height: 100%;
 
     }
@@ -8262,22 +8237,24 @@ footer {
     
     /* Cookie Detail Page Styles */
     .cookie-detail-page {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: var(--background);
-        z-index: 1000;
-        overflow-y: auto;
-        padding: 1rem;
-        display: none;
-    }
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--background);
+    z-index: 1000;
+    overflow-y: auto;
+    padding: 1rem;
+    display: none; /* Add this line to hide by default */
+    transform: translateY(100%); /* Start off-screen */
+    transition: transform 0.3s ease; /* Smooth animation */
+}
     
     .cookie-detail-page.active {
-        display: block;
-        animation: slideInUp 0.3s ease;
-    }
+    display: block; /* Show when active */
+    transform: translateY(0); /* Slide into view */
+}
     
     .cookie-detail-header {
         display: flex;
@@ -8412,5 +8389,102 @@ footer {
         to {
             transform: translateY(0);
         }
+    }
+}
+
+/* Mobile Back Button Styles */
+@media (max-width: 768px) {
+    .back-button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: transparent;
+        border: none;
+        border-radius: 8px;
+        color: var(--primary);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+    
+    .back-button:hover {
+        background: var(--primary);
+        color: white;
+        transform: translateX(-3px);
+    }
+    
+    .back-button i {
+        font-size: 1rem;
+    }
+    
+    /* Cookie Detail Header Layout */
+    .cookie-detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--secondary);
+        margin-bottom: 1.5rem;
+        position: sticky;
+        top: 0;
+        background: var(--background);
+        z-index: 10;
+    }
+    
+    .cookie-detail-header h3 {
+        color: var(--primary);
+        font-size: 1.2rem;
+        margin: 0;
+        text-align: center;
+        flex: 1;
+    }
+    
+    /* Ensure proper spacing */
+    .cookie-detail-header .back-button {
+        flex-shrink: 0;
+        margin-right: auto;
+    }
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+    .cookie-detail-page {
+        /* Ensure it's properly styled for mobile */
+        padding: 0.5rem;
+    }
+    
+    .cookie-detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: var(--background);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 1px solid var(--secondary);
+    }
+    
+    
+    
+    .cookie-detail-header h3 {
+        color: var(--primary);
+        margin: 0;
+        font-size: 1.2rem;
+        flex: 1;
+        text-align: center;
+    }
+    
+    .cookie-detail-content {
+        padding: 1rem;
+    }
+}
+
+/* Desktop - hide completely */
+@media (min-width: 769px) {
+    .cookie-detail-page {
+        display: none !important;
     }
 }
