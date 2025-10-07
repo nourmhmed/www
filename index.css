@@ -3000,7 +3000,7 @@ footer {
     
     /* Header mobile styles - Logo centered with menu/cart on sides */
     .modern-header {
-        padding: 10px 0;
+        /* padding: 10px 0; */
     }
     
     .header-container {
@@ -7679,7 +7679,7 @@ footer {
         width: 100%;
         background: var(--light);
         box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-        padding: 0.5rem 0;
+        /* padding: 0.5rem 0; */
         z-index: 1000;
     }
 
@@ -7897,9 +7897,9 @@ footer {
 }
 
 /* Landscape orientation adjustments */
-@media (max-width: 768px) and (orientation: landscape) {
+@media (max-width: 768px) {
     .modern-header {
-        padding: 0.3rem 0;
+        /* padding: 0.3rem 0; */
     }
 
     .nav-link {
@@ -7928,7 +7928,7 @@ footer {
 /* Mobile Header Size Fix */
 @media (max-width: 768px) {
     .modern-header {
-        padding: 0.3rem 0;
+        /* padding: 0.3rem 0; */
         height: 74px;
     }
     
