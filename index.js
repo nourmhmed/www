@@ -8,19 +8,69 @@ let cookiesData = {};
 let isFighting = false;
 let allCookiesData = {};
 
+// Global loading state management
+let loadingProgress = 0;
+let totalTasks = 5; // Adjust based on how many data sources you're loading
+// Add a timeout fallback in case loading gets stuck
+let loadingTimeout;
+
+
 // Add these with your other global variables
 let boxesData = [];
 let mysteryBoxData = null;
 
-const mobileMenuBtnn = document.getElementById('mobile-menu-btn');
-const mobileNav = document.createElement('div');
-const mobileNavOverlay = document.createElement('div');
+
 
 // Variables to store Supabase credentials
 let SUPABASE_URL = null;
 let SUPABASE_ANON_KEY = null;
 let supabase = null;
+function setupLoadingTimeout() {
+    loadingTimeout = setTimeout(() => {
+        console.warn('Loading timeout reached, forcing completion');
+        updateLoadingProgress(100);
+    }, 15000); // 15 second timeout
+}
 
+// Clear timeout when loading completes
+function clearLoadingTimeout() {
+    if (loadingTimeout) {
+        clearTimeout(loadingTimeout);
+    }
+}
+
+// Ensure mobile menu setup runs once after DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    setupMobileMenu();
+});
+
+// Update the updateLoadingProgress function to clear timeout
+function updateLoadingProgress(increment = 20) {
+    loadingProgress += increment;
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+    
+    if (progressFill && progressText) {
+        progressFill.style.width = `${loadingProgress}%`;
+        progressText.textContent = `${loadingProgress}%`;
+    }
+    
+    // Hide loading screen when complete
+    if (loadingProgress >= 100) {
+        clearLoadingTimeout();
+        setTimeout(() => {
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    // Re-enable body scroll
+                    document.body.style.overflow = 'auto';
+                }, 500);
+            }
+        }, 500);
+    }
+}
 // Add this to your initializeSupabase function
 async function initializeSupabase() {
     try {
@@ -482,7 +532,7 @@ function getFallbackMysteryBoxData() {
 }
 
 
-// Update fetchCookiesData to always use the global variable
+// Enhanced fetch functions with loading states
 async function fetchCookiesData() {
     try {
         const initialized = await ensureSupabaseInitialized();
@@ -525,7 +575,7 @@ async function fetchCookiesData() {
         });
 
         allCookiesData = transformedData;
-        console.log('Cookies data loaded:', Object.keys(allCookiesData)); // Debug
+        console.log('Cookies data loaded:', Object.keys(allCookiesData));
         return allCookiesData;
     } catch (error) {
         console.error('Error in fetchCookiesData:', error);
@@ -556,190 +606,314 @@ function getFallbackCookiesData() {
     };
 }
 
-// Function to render boxes dynamically
+// Update the render functions to use a more robust image loading approach
 async function renderBoxes() {
-    const boxOptions = document.querySelector('.box-options');
-    if (!boxOptions) return;
-
-    // Show loading state
-    boxOptions.innerHTML = '<div class="loading-boxes">Loading boxes...</div>';
-
-    // Fetch boxes data
-    boxesData = await fetchBoxesData();
-
-    // Clear loading state and render boxes
-    boxOptions.innerHTML = '';
-
-    boxesData.forEach(box => {
-        const boxOption = document.createElement('div');
-        boxOption.className = 'box-option';
-        boxOption.setAttribute('data-size', box.size);
-        boxOption.setAttribute('data-chewy', box.chewy_price);
-        boxOption.setAttribute('data-crumble', box.crumble_price);
-        boxOption.setAttribute('data-mix', box.mix_price);
-        boxOption.setAttribute('data-img', box.image_url);
-
-        // Determine price display
-        let priceDisplay = '';
-        if (box.chewy_price === box.crumble_price) {
-            // Same price - show single price
-            priceDisplay = `${box.chewy_price} LE`;
-        } else {
-            // Different prices - show range
-            const minPrice = Math.min(box.chewy_price, box.crumble_price);
-            const maxPrice = Math.max(box.chewy_price, box.crumble_price);
-            priceDisplay = `${minPrice} - ${maxPrice} LE`;
+    try {
+        console.log('Rendering boxes...');
+        const boxOptions = document.querySelector('.box-options');
+        if (!boxOptions) {
+            console.warn('Box options container not found');
+            return;
         }
 
-        boxOption.innerHTML = `
-            <div class="image-loading-container">
-                <div class="image-loading"></div>
-                <img src="${box.image_url}" alt="${box.name}" class="box-img" loading="lazy" >
+        // Show loading state
+        boxOptions.innerHTML = '<div class="loading-boxes">📦 Loading our amazing boxes...</div>';
+
+        // Fetch boxes data
+        boxesData = await fetchBoxesData();
+
+        // Clear loading state and render boxes
+        boxOptions.innerHTML = '';
+
+        if (!boxesData || boxesData.length === 0) {
+            boxOptions.innerHTML = '<div class="error-message">😢 No boxes available at the moment.</div>';
+            return;
+        }
+
+        boxesData.forEach(box => {
+            const boxOption = document.createElement('div');
+            boxOption.className = 'box-option';
+            boxOption.setAttribute('data-size', box.size);
+            boxOption.setAttribute('data-chewy', box.chewy_price);
+            boxOption.setAttribute('data-crumble', box.crumble_price);
+            boxOption.setAttribute('data-mix', box.mix_price);
+            boxOption.setAttribute('data-img', box.image_url);
+
+            // Determine price display
+            let priceDisplay = '';
+            if (box.chewy_price === box.crumble_price) {
+                priceDisplay = `${box.chewy_price} LE`;
+            } else {
+                const minPrice = Math.min(box.chewy_price, box.crumble_price);
+                const maxPrice = Math.max(box.chewy_price, box.crumble_price);
+                priceDisplay = `${minPrice} - ${maxPrice} LE`;
+            }
+
+            boxOption.innerHTML = `
+                <div class="image-loading-container">
+                    <div class="image-loading"></div>
+                    <img src="${box.image_url}" alt="${box.name}" class="box-img" loading="lazy">
+                </div>
+                <h4>${box.name}</h4>
+                <p>${box.description}</p>
+                <div class="box-prices">
+                    <span class="price-display">${priceDisplay}</span>
+                </div>
+            `;
+
+            // Add individual image load/error handlers
+            const img = boxOption.querySelector('img');
+            setupImageHandlers(img);
+
+            // Add click event
+            boxOption.addEventListener('click', function() {
+                selectedBox = this;
+                showFlavorPopup(box.size, box.cookie_count, this);
+            });
+
+            boxOptions.appendChild(boxOption);
+        });
+
+        console.log('Boxes rendered successfully:', boxesData.length, 'boxes');
+    } catch (error) {
+        console.error('Error rendering boxes:', error);
+        const boxOptions = document.querySelector('.box-options');
+        if (boxOptions) {
+            boxOptions.innerHTML = '<div class="error-message">😢 Failed to load boxes. Please try refreshing the page.</div>';
+        }
+    }
+}
+
+
+async function renderMysteryBox() {
+    try {
+        console.log('Rendering mystery box...');
+        const mysterySection = document.querySelector('.mystery-content');
+        if (!mysterySection) {
+            console.warn('Mystery section not found');
+            return;
+        }
+
+        // Fetch mystery box data
+        mysteryBoxData = await fetchMysteryBoxData();
+
+        if (!mysteryBoxData) {
+            mysterySection.innerHTML = '<div class="error-message">😢 Mystery box not available at the moment.</div>';
+            return;
+        }
+
+        mysterySection.innerHTML = `
+            <!-- Left Image -->
+            <div class="mystery-image">
+                <div class="image-loading-container">
+                    <div class="image-loading"></div>
+                    <img src="${mysteryBoxData.image_url}" alt="${mysteryBoxData.name}" loading="lazy">
+                </div>
+                <div class="question-mark">?</div>
             </div>
-            <h4>${box.name}</h4>
-            <p>${box.description}</p>
-            <div class="box-prices">
-                <span class="price-display">${priceDisplay}</span>
+
+            <!-- Right Details -->
+            <div class="mystery-details">
+                <h3>🎁 ${mysteryBoxData.name}</h3>
+                <p>${mysteryBoxData.description}</p>
+                <ul>
+                    ${mysteryBoxData.contents ? mysteryBoxData.contents.split(',').map(item => 
+                        `<li>${item.trim()}</li>`
+                    ).join('') : `
+                        <li>🍪 6 assorted cookies (bestsellers + seasonal specials)</li>
+                        <li>🌟 1 limited edition flavor not available elsewhere</li>
+                        <li>🎉 A surprise gift with every order</li>
+                    `}
+                </ul>
+                <div class="mystery-price">${mysteryBoxData.price} LE</div>
+                <p class="mystery-note">✨ Contents change daily based on what's fresh and delicious!</p>
+                <button class="btn mystery-btn">Order Mystery Box</button>
             </div>
         `;
 
-        // Add click event
-        boxOption.addEventListener('click', function() {
-            selectedBox = this;
-            showFlavorPopup(box.size, box.cookie_count, this);
-        });
+        // Setup image handlers for mystery box
+        const mysteryImg = mysterySection.querySelector('.mystery-image img');
+        if (mysteryImg) {
+            setupImageHandlers(mysteryImg);
+        }
 
-        boxOptions.appendChild(boxOption);
-    });
-}
+        // Add event listener to the mystery button
+        const mysteryBtn = mysterySection.querySelector('.mystery-btn');
+        if (mysteryBtn) {
+            mysteryBtn.addEventListener('click', async function() {
+                if (!mysteryBoxData) {
+                    showNotification('Mystery box data not available');
+                    return;
+                }
 
-// Function to render mystery box dynamically
-async function renderMysteryBox() {
-    const mysterySection = document.querySelector('.mystery-content');
-    if (!mysterySection) return;
+                const name = mysteryBoxData.name;
+                const unitPrice = mysteryBoxData.price;
+                const img = mysteryBoxData.image_url;
 
-    // Fetch mystery box data
-    mysteryBoxData = await fetchMysteryBoxData();
+                const cart = getCart();
+                cart.push({
+                    id: Date.now(),
+                    name: name,
+                    unitPrice: unitPrice,
+                    price: unitPrice,
+                    img: img,
+                    quantity: 1,
+                    flavors: [],
+                    size: "mystery",
+                    style: "surprise"
+                });
 
-    if (!mysteryBoxData) return;
+                saveCart(cart);
+                updateCartUI();
+                showNotification(`${name} added to cart!`);
 
-    mysterySection.innerHTML = `
-        <!-- Left Image -->
-        <div class="mystery-image">
-            <div class="image-loading-container">
-                <div class="image-loading"></div>
-                <img src="${mysteryBoxData.image_url}" alt="${mysteryBoxData.name}" loading="lazy" >
-            </div>
-            <div class="question-mark">?</div>
-        </div>
-
-        <!-- Right Details -->
-        <div class="mystery-details">
-            <h3>🎁 ${mysteryBoxData.name}</h3>
-            <p>${mysteryBoxData.description}</p>
-            <ul>
-                ${mysteryBoxData.contents ? mysteryBoxData.contents.split(',').map(item => 
-                    `<li>${item.trim()}</li>`
-                ).join('') : `
-                    <li>🍪 6 assorted cookies (bestsellers + seasonal specials)</li>
-                    <li>🌟 1 limited edition flavor not available elsewhere</li>
-                    <li>🎉 A surprise gift with every order</li>
-                `}
-            </ul>
-            <div class="mystery-price">${mysteryBoxData.price} LE</div>
-            <p class="mystery-note">✨ Contents change daily based on what's fresh and delicious!</p>
-            <button class="btn mystery-btn">Order Mystery Box</button>
-        </div>
-    `;
-
-    // Add event listener to the mystery button
-    const mysteryBtn = mysterySection.querySelector('.mystery-btn');
-    if (mysteryBtn) {
-        mysteryBtn.addEventListener('click', async function() {
-            if (!mysteryBoxData) {
-                showNotification('Mystery box data not available');
-                return;
-            }
-
-            const name = mysteryBoxData.name;
-            const unitPrice = mysteryBoxData.price;
-            const img = mysteryBoxData.image_url;
-
-            const cart = getCart();
-            cart.push({
-                id: Date.now(),
-                name: name,
-                unitPrice: unitPrice,
-                price: unitPrice,
-                img: img,
-                quantity: 1,
-                flavors: [],
-                size: "mystery",
-                style: "surprise"
+                // Visual feedback
+                this.textContent = "🎉 Added to Cart!";
+                setTimeout(() => {
+                    this.textContent = "Order Mystery Box";
+                }, 2000);
             });
+        }
 
-            saveCart(cart);
-            updateCartUI();
-            showNotification(`${name} added to cart!`);
-
-            // Visual feedback
-            this.textContent = "🎉 Added to Cart!";
-            setTimeout(() => {
-                this.textContent = "Order Mystery Box";
-            }, 2000);
-        });
+        console.log('Mystery box rendered successfully');
+    } catch (error) {
+        console.error('Error rendering mystery box:', error);
+        const mysterySection = document.querySelector('.mystery-content');
+        if (mysterySection) {
+            mysterySection.innerHTML = '<div class="error-message">😢 Failed to load mystery box details.</div>';
+        }
     }
 }
 
 // Update renderCookiesGrid to use global data
 async function renderCookiesGrid() {
-    const cookiesGrid = document.querySelector('.cookies-grid');
-    if (!cookiesGrid) return;
-
-    // Show loading state
-    cookiesGrid.innerHTML = '<div class="loading-cookies">Loading cookies...</div>';
-
-    // Use global cookies data
-    const cookiesData = allCookiesData;
-
-    // Clear loading state and render cookies
-    cookiesGrid.innerHTML = '';
-
-    Object.keys(cookiesData).forEach(slug => {
-        const cookie = cookiesData[slug];
-        const cookieCard = document.createElement('div');
-        cookieCard.className = 'cookie-card';
-        cookieCard.onclick = () => openPopup(slug);
-
-        let tagsHTML = '';
-        if (cookie.tags && cookie.tags.length > 0) {
-            cookie.tags.forEach(tag => {
-                tagsHTML += `<div class="cookie-tag">${tag.charAt(0).toUpperCase() + tag.slice(1)}</div>`;
-            });
+    try {
+        console.log('Rendering cookies grid...');
+        const cookiesGrid = document.querySelector('.cookies-grid');
+        if (!cookiesGrid) {
+            console.warn('Cookies grid not found');
+            return;
         }
 
-        cookieCard.innerHTML = `
-            <div class="click-indicator">
-                <i class="fas fa-hand-pointer"></i> Click for details
-            </div>
-            <div class="cookie-image">
-                <img src="${cookie.images.chewy}" alt="${cookie.title}" loading="lazy">
-                ${tagsHTML}
-            </div>
-            <div class="cookie-details">
-                <h3>${cookie.title}</h3>
-                <p>${cookie.description}</p>
-                <div class="cookie-options">
+        // Show loading state
+        cookiesGrid.innerHTML = '<div class="loading-cookies">🍪 Loading our delicious cookies...</div>';
+
+        // Use global cookies data
+        const cookiesData = allCookiesData;
+
+        // Clear loading state and render cookies
+        cookiesGrid.innerHTML = '';
+
+        if (!cookiesData || Object.keys(cookiesData).length === 0) {
+            cookiesGrid.innerHTML = '<div class="error-message">😢 No cookies available at the moment.</div>';
+            return;
+        }
+
+        Object.keys(cookiesData).forEach(slug => {
+            const cookie = cookiesData[slug];
+            console.log('cookie', cookie)
+            const cookieCard = document.createElement('div');
+            cookieCard.className = 'cookie-card';
+            cookieCard.onclick = () => openPopup(slug);
+
+            let tagsHTML = '';
+            if (cookie.tags && cookie.tags.length > 0) {
+                cookie.tags.forEach(tag => {
+                    tagsHTML += `<div class="cookie-tag">${tag.charAt(0).toUpperCase() + tag.slice(1)}</div>`;
+                });
+            }
+
+            cookieCard.innerHTML = `
+                <div class="cookie-image">
+                    <div class="image-loading-container">
+                        <div class="image-loading"></div>
+                        <img src="${cookie.images.chewy}" alt="${cookie.title}" loading="lazy">
+                    </div>
+                    ${tagsHTML}
+                    <button class="cookie-overlay-btn" onclick="event.stopPropagation(); openPopup('${slug}')">
+                        <i class="fas fa-plus"></i> Add to Cart
+                    </button>
+                </div>
+                <div class="cookie-details">
+                    <h3>${cookie.title}</h3>
                     <div class="cookie-price">${cookie.chewy_price} LE</div>
                 </div>
-                <button class="add-to-cart-btn" onclick="event.stopPropagation(); openPopup('${slug}')">
-                    Choose
-                </button>
-            </div>
-        `;
+            `;
 
-        cookiesGrid.appendChild(cookieCard);
-    });
+            // Setup image handlers for this cookie
+            const img = cookieCard.querySelector('img');
+            setupImageHandlers(img);
+
+            cookiesGrid.appendChild(cookieCard);
+        });
+
+        console.log('Cookies grid rendered successfully:', Object.keys(cookiesData).length, 'cookies');
+    } catch (error) {
+        console.error('Error rendering cookies grid:', error);
+        const cookiesGrid = document.querySelector('.cookies-grid');
+        if (cookiesGrid) {
+            cookiesGrid.innerHTML = '<div class="error-message">😢 Failed to load cookies. Please try refreshing the page.</div>';
+        }
+    }
+}
+
+
+// Individual image handler setup function
+function setupImageHandlers(img) {
+    if (!img) return;
+
+    // Remove any existing handlers first
+    img.onload = null;
+    img.onerror = null;
+
+    // Set loading state
+    const container = img.closest('.image-loading-container');
+    const loading = container ? container.querySelector('.image-loading') : null;
+
+    img.onload = function() {
+        console.log('Image loaded successfully:', img.src);
+        if (loading) {
+            loading.style.display = 'none';
+        }
+        // Remove handlers after successful load
+        img.onload = null;
+        img.onerror = null;
+    };
+
+    img.onerror = function() {
+        console.warn('Image failed to load:', img.src);
+        
+        // Prevent multiple error handling
+        if (img.hasAttribute('data-error-handled')) {
+            return;
+        }
+        img.setAttribute('data-error-handled', 'true');
+
+        // Set appropriate fallback image
+        if (img.classList.contains('box-img') || img.closest('.box-image') || img.closest('.mystery-image')) {
+            img.src = 'images/fallback-box.svg';
+        } else {
+            img.src = 'images/fallback-cookie.svg';
+        }
+        
+        img.alt = 'Image not available';
+
+        if (loading) {
+            loading.style.display = 'none';
+        }
+
+        // Remove handlers after setting fallback
+        img.onload = null;
+        img.onerror = null;
+    };
+
+    // Add timeout for image loading (optional)
+    setTimeout(() => {
+        if (loading && loading.style.display !== 'none' && !img.complete) {
+            console.log('Image loading timeout:', img.src);
+            loading.style.display = 'none';
+        }
+    }, 5000); // 5 second timeout
 }
 
 
@@ -877,31 +1051,54 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
+// Replace your existing setupMobileMenu function with this:
 function setupMobileMenu() {
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const mainNav = document.getElementById('main-nav');
+    const body = document.body;
     
     if (mobileMenuBtn && mainNav) {
         mobileMenuBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             e.stopPropagation();
+            
+            // Toggle mobile menu
             mainNav.classList.toggle('active');
-            document.body.style.overflow = mainNav.classList.contains('active') ? 'hidden' : '';
-        });
-
-        // Close on outside click
-        document.addEventListener('click', (e) => {
-            if (!mainNav.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
-                mainNav.classList.remove('active');
-                document.body.style.overflow = '';
+            mobileMenuBtn.classList.toggle('active');
+            
+            // Toggle body scroll
+            if (mainNav.classList.contains('active')) {
+                body.style.overflow = 'hidden';
+            } else {
+                body.style.overflow = '';
             }
         });
 
-        // Close on link click
-        mainNav.querySelectorAll('a').forEach(link => {
+        // Close menu when clicking on nav links
+        mainNav.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', () => {
                 mainNav.classList.remove('active');
-                document.body.style.overflow = '';
+                mobileMenuBtn.classList.remove('active');
+                body.style.overflow = '';
             });
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!mainNav.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                mainNav.classList.remove('active');
+                mobileMenuBtn.classList.remove('active');
+                body.style.overflow = '';
+            }
+        });
+
+        // Close menu on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && mainNav.classList.contains('active')) {
+                mainNav.classList.remove('active');
+                mobileMenuBtn.classList.remove('active');
+                body.style.overflow = '';
+            }
         });
     }
 }
@@ -1035,6 +1232,32 @@ document.querySelectorAll('.tab-btn').forEach(button => {
         this.classList.add('active');
     });
 });
+
+// Function to update loading progress
+function updateLoadingProgress(increment = 20) {
+    loadingProgress += increment;
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+    
+    if (progressFill && progressText) {
+        progressFill.style.width = `${loadingProgress}%`;
+        progressText.textContent = `${loadingProgress}%`;
+    }
+    
+    // Hide loading screen when complete
+    if (loadingProgress >= 100) {
+        setTimeout(() => {
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }
+        }, 500);
+    }
+}
+
 
 
 
@@ -1444,6 +1667,27 @@ function disableBodyScroll() {
 
 
 // Add to your image loading
+        // --- EXPLORE US DROPDOWN MOBILE HANDLING ---
+        const exploreDropdown = mainNav.querySelector('.dropdown');
+        const dropdownToggle = exploreDropdown?.querySelector('.dropdown-toggle');
+        const dropdownMenu = exploreDropdown?.querySelector('.dropdown-menu');
+        if (exploreDropdown && dropdownToggle && dropdownMenu) {
+            dropdownToggle.onclick = null;
+            dropdownToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (window.innerWidth <= 992) {
+                    dropdownMenu.classList.toggle('active');
+                    document.addEventListener('click', function handler(ev) {
+                        if (!dropdownMenu.contains(ev.target) && !dropdownToggle.contains(ev.target)) {
+                            dropdownMenu.classList.remove('active');
+                            document.removeEventListener('click', handler);
+                        }
+                    });
+                }
+            });
+        }
+        // --- END EXPLORE US DROPDOWN MOBILE HANDLING ---
 document.querySelectorAll('img').forEach(img => {
     img.addEventListener('error', function() {
         this.src = 'images/fallback-cookie.svg';
@@ -1604,7 +1848,13 @@ function testHomePopup() {
     }
 }
 
+// عدل الـ switchTab function عشان متفتحش أي تاب لـ Explore Us
 function switchTab(tabId) {
+    // إذا التاب مش موجود، ما تعملش أي حاجة
+    const activeTab = document.getElementById(`${tabId}-tab`);
+    if (!activeTab) return;
+    
+    // كمل الكود العادي...
     enableBodyScroll();
     
     // Remove active class from all nav links
@@ -1624,7 +1874,6 @@ function switchTab(tabId) {
     });
     
     // Show corresponding content
-    const activeTab = document.getElementById(`${tabId}-tab`);
     if (activeTab) {
         activeTab.classList.add('active');
     }
@@ -1644,6 +1893,19 @@ function switchTab(tabId) {
     }
 }
 
+// في الـ event listeners بتاعت الـ navigation
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        // تأكد إن الـ link ده مش الـ Explore Us
+        if (this.classList.contains('dropdown-toggle')) {
+            e.preventDefault();
+            return;
+        }
+        
+        const tabId = this.getAttribute('data-tab');
+        switchTab(tabId);
+    });
+});
 // Function to render box showcase
 async function renderBoxShowcase() {
     const showcaseGrid = document.getElementById('box-showcase-grid');
@@ -1964,40 +2226,434 @@ function showFlavorPopup(size, cookieCount, boxElement) {
     popup.classList.add('active');
 }
 
+async function initializeApp() {
+    try {
+        // Initialize Supabase
+        await initializeSupabaseWithTimeout();
+        updateLoadingProgress(20);
+        
+        // Fetch cookies data
+        await fetchCookiesData();
+        updateLoadingProgress(20);
+        
+        // Fetch boxes data
+        await fetchBoxesData();
+        updateLoadingProgress(20);
+        
+        // Fetch mystery box data
+        await fetchMysteryBoxData();
+        updateLoadingProgress(20);
+        
+        // Initialize prices
+        currentPrices = await priceService.getCurrentPrices();
+        updateLoadingProgress(20);
+        
+        // Render all components
+        await renderAllComponents();
+        
+    } catch (error) {
+        console.error('App initialization failed:', error);
+        // Even if there's an error, hide the loading screen
+        updateLoadingProgress(100);
+        
+        // Show error notification
+        showNotification('Failed to load some content. Please refresh the page.');
+    }
+}
+
+async function renderAllComponents() {
+    try {
+        // Render all components in sequence
+        await renderCookiesGrid();
+        await renderBoxes();
+        await renderMysteryBox();
+        await renderCookieShowcase();
+        await renderBoxShowcase();
+        
+        // Initialize interactive elements
+        initializeVSBattle();
+        setupMobileMenu();
+        initCookieShowcase();
+        initBoxShowcase();
+        
+        // Update cart UI
+        updateCartUI();
+        
+    } catch (error) {
+        console.error('Error rendering components:', error);
+        throw error;
+    }
+}
+// Enhanced image error handling to prevent flashing
+function setupImageErrorHandling() {
+    // Handle image loading errors - prevent multiple triggers
+    document.addEventListener('error', function(e) {
+        if (e.target.tagName === 'IMG') {
+            const img = e.target;
+            
+            // Prevent infinite error loop by removing the onerror handler after first failure
+            if (!img.hasAttribute('data-error-handled')) {
+                img.setAttribute('data-error-handled', 'true');
+                
+                // Set fallback image based on context
+                if (img.src.includes('cookie') || img.closest('.cookie-image')) {
+                    img.src = 'images/fallback-cookie.svg';
+                } else if (img.src.includes('box') || img.closest('.box-image') || img.closest('.mystery-image')) {
+                    img.src = 'images/fallback-box.svg';
+                } else {
+                    img.src = 'images/fallback-image.svg';
+                }
+                
+                img.alt = 'Image not available';
+                
+                // Hide loading state for this image
+                const container = img.closest('.image-loading-container');
+                if (container) {
+                    const loading = container.querySelector('.image-loading');
+                    if (loading) {
+                        loading.style.display = 'none';
+                    }
+                }
+                
+                // Stop propagation to prevent multiple handlers
+                e.stopImmediatePropagation();
+            }
+        }
+    }, true);
+    
+    // Handle successful image loads
+    document.addEventListener('load', function(e) {
+        if (e.target.tagName === 'IMG') {
+            const img = e.target;
+            const container = img.closest('.image-loading-container');
+            if (container) {
+                const loading = container.querySelector('.image-loading');
+                if (loading) {
+                    loading.style.display = 'none';
+                }
+            }
+        }
+    }, true);
+}
+
+// Optional: Enhanced logo interaction
+function setupLogoSection() {
+    const logoSection = document.querySelector('.logo-section');
+    const animatedLogo = document.querySelector('.animated-logo');
+    
+    if (logoSection && animatedLogo) {
+        // Add scroll-based animation
+        window.addEventListener('scroll', function() {
+            const scrollPosition = window.scrollY;
+            const sectionTop = logoSection.offsetTop;
+            const sectionHeight = logoSection.offsetHeight;
+            
+            if (scrollPosition > sectionTop - window.innerHeight + 100 && 
+                scrollPosition < sectionTop + sectionHeight) {
+                const progress = (scrollPosition - (sectionTop - window.innerHeight + 100)) / 
+                               (window.innerHeight + sectionHeight - 100);
+                
+                // Subtle scale effect based on scroll
+                const scale = 1 + (progress * 0.1);
+                animatedLogo.style.transform = `scale(${scale})`;
+            }
+        });
+        
+        // Click effect
+        animatedLogo.addEventListener('click', function() {
+            this.style.animation = 'logoPulse 0.5s ease';
+            setTimeout(() => {
+                this.style.animation = '';
+            }, 500);
+        });
+        
+        // Add CSS for click animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes logoPulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
+
+
+function setupStoryTabs() {
+    // Hide the story tabs navigation but keep it in DOM for functionality
+    const storyTabsNav = document.querySelector('.story-tabs-nav');
+    if (storyTabsNav) {
+        storyTabsNav.style.display = 'none';
+    }
+    
+    // Set default active tab
+    const defaultPane = document.getElementById('our-story-pane');
+    if (defaultPane) {
+        defaultPane.classList.add('active');
+    }
+    
+    // Add hover effects to cards
+    const cards = document.querySelectorAll('.timeline-item, .founder-card, .vision-card, .promise-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+}
+
+function setupDropdown() {
+    const dropdownItems = document.querySelectorAll('.nav-item.dropdown');
+    
+    dropdownItems.forEach(item => {
+        const toggle = item.querySelector('.dropdown-toggle');
+        const menu = item.querySelector('.dropdown-menu');
+        const arrow = item.querySelector('.dropdown-arrow');
+        
+        // Remove hover behavior and add click behavior for desktop
+        if (window.innerWidth > 768) {
+            // Remove hover behavior for desktop
+            item.removeEventListener('mouseenter', handleMouseEnter);
+            item.removeEventListener('mouseleave', handleMouseLeave);
+            
+            // Add click behavior for desktop
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Close other open dropdowns
+                dropdownItems.forEach(otherItem => {
+                    if (otherItem !== item) {
+                        const otherMenu = otherItem.querySelector('.dropdown-menu');
+                        const otherArrow = otherItem.querySelector('.dropdown-arrow');
+                        otherMenu.style.opacity = '0';
+                        otherMenu.style.visibility = 'hidden';
+                        otherMenu.style.transform = 'translateY(-10px)';
+                        if (otherArrow) {
+                            otherArrow.style.transform = 'rotate(0deg)';
+                        }
+                    }
+                });
+                
+                // Toggle current dropdown
+                if (menu.style.visibility === 'visible') {
+                    menu.style.opacity = '0';
+                    menu.style.visibility = 'hidden';
+                    menu.style.transform = 'translateY(-10px)';
+                    if (arrow) {
+                        arrow.style.transform = 'rotate(0deg)';
+                    }
+                } else {
+                    menu.style.opacity = '1';
+                    menu.style.visibility = 'visible';
+                    menu.style.transform = 'translateY(0)';
+                    if (arrow) {
+                        arrow.style.transform = 'rotate(180deg)';
+                    }
+                }
+            });
+        }
+        
+        // Mobile behavior with arrow rotation
+        if (window.innerWidth <= 768) {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                menu.classList.toggle('active');
+                
+                // Rotate arrow for mobile
+                if (arrow) {
+                    if (menu.classList.contains('active')) {
+                        arrow.style.transform = 'rotate(180deg)';
+                    } else {
+                        arrow.style.transform = 'rotate(0deg)';
+                    }
+                }
+            });
+        }
+        
+        // Handle dropdown link clicks - SIMPLIFIED VERSION
+        const dropdownLinks = menu.querySelectorAll('.dropdown-link');
+        dropdownLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const storyTab = this.getAttribute('data-story-tab');
+                const href = this.getAttribute('href');
+                
+                console.log('Switching to:', storyTab);
+                
+                // JUST UPDATE THE URL FOR DISPLAY - no navigation
+                updateURLForDisplay(href);
+                
+                // Switch to our-story tab first
+                switchTab('our-story');
+                
+                // Then switch the story sub-tab
+                setTimeout(() => {
+                    switchStoryTab(storyTab);
+                }, 100);
+                
+                // Close dropdown and reset arrow
+                if (window.innerWidth <= 768) {
+                    menu.classList.remove('active');
+                    if (arrow) {
+                        arrow.style.transform = 'rotate(0deg)';
+                    }
+                } else {
+                    menu.style.opacity = '0';
+                    menu.style.visibility = 'hidden';
+                    menu.style.transform = 'translateY(-10px)';
+                    if (arrow) {
+                        arrow.style.transform = 'rotate(0deg)';
+                    }
+                }
+            });
+        });
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.nav-item.dropdown')) {
+            dropdownItems.forEach(item => {
+                const menu = item.querySelector('.dropdown-menu');
+                const arrow = item.querySelector('.dropdown-arrow');
+                if (window.innerWidth > 768) {
+                    menu.style.opacity = '0';
+                    menu.style.visibility = 'hidden';
+                    menu.style.transform = 'translateY(-10px)';
+                    if (arrow) {
+                        arrow.style.transform = 'rotate(0deg)';
+                    }
+                } else {
+                    menu.classList.remove('active');
+                    if (arrow) {
+                        arrow.style.transform = 'rotate(0deg)';
+                    }
+                }
+            });
+        }
+    });
+    
+    // Close dropdown on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            dropdownItems.forEach(item => {
+                const menu = item.querySelector('.dropdown-menu');
+                const arrow = item.querySelector('.dropdown-arrow');
+                if (window.innerWidth > 768) {
+                    menu.style.opacity = '0';
+                    menu.style.visibility = 'hidden';
+                    menu.style.transform = 'translateY(-10px)';
+                    if (arrow) {
+                        arrow.style.transform = 'rotate(0deg)';
+                    }
+                } else {
+                    menu.classList.remove('active');
+                    if (arrow) {
+                        arrow.style.transform = 'rotate(0deg)';
+                    }
+                }
+            });
+        }
+    });
+}
+
+// SIMPLE FUNCTION TO UPDATE URL FOR DISPLAY ONLY
+function updateURLForDisplay(href) {
+    if (!href || href === '#') return;
+    
+    try {
+        // This just changes what's shown in the address bar
+        // It doesn't actually navigate to the page
+        window.history.pushState({}, '', href);
+        console.log('URL updated for display:', href);
+    } catch (error) {
+        // If it fails (like in file:// protocol), just continue silently
+        console.log('Could not update URL (normal for local development)');
+    }
+}
+
+// Handle browser back/forward buttons to maintain the illusion
+window.addEventListener('popstate', function(event) {
+    // When user clicks back/forward, we can handle it if needed
+    // But since we're just displaying URLs, we can ignore or handle minimally
+    console.log('URL changed via browser navigation:', window.location.pathname);
+});
+
+// Add these helper functions if they don't exist
+function handleMouseEnter() {
+    if (window.innerWidth > 768) {
+        const menu = this.querySelector('.dropdown-menu');
+        menu.style.opacity = '1';
+        menu.style.visibility = 'visible';
+        menu.style.transform = 'translateY(0)';
+    }
+}
+
+function handleMouseLeave() {
+    if (window.innerWidth > 768) {
+        const menu = this.querySelector('.dropdown-menu');
+        menu.style.opacity = '0';
+        menu.style.visibility = 'hidden';
+        menu.style.transform = 'translateY(-10px)';
+    }
+}
+
+
+// Updated function to switch story tabs without scrolling
+function switchStoryTab(tabId) {
+    const storyTabPanes = document.querySelectorAll('.story-tab-pane');
+    
+    // Hide all story tab panes
+    storyTabPanes.forEach(pane => {
+        pane.classList.remove('active');
+    });
+    
+    // Show the selected story tab pane
+    const targetPane = document.getElementById(`${tabId}-pane`);
+    if (targetPane) {
+        targetPane.classList.add('active');
+        console.log('Activated story pane:', targetPane.id);
+        
+        // REMOVED THE SCROLLING BEHAVIOR - this keeps the page position
+    } else {
+        console.error('Story tab pane not found:', `${tabId}-pane`);
+    }
+}
+
+
 // Tab functionality
 document.addEventListener('DOMContentLoaded', async function () {
     // Initialize Supabase first
     window.scrollTo(0, 0);
-
-    await initializeSupabaseWithTimeout();
-    await ensureSupabaseInitialized();
-
+// Start with 0% progress
+    updateLoadingProgress(0);
+    setupImageErrorHandling();
+    
+    // Initialize Supabase and load data
+    initializeApp();
+document.body.style.overflow = 'hidden';
+    setupLoadingTimeout();
+    setupDropdown();
 
     // Fetch all cookies data FIRST, before rendering anything
     console.log('Fetching cookies data...'); // Debug
-    await fetchCookiesData();
+    // await fetchCookiesData();
 
     // Initialize prices
     currentPrices = await priceService.getCurrentPrices();
     console.log('Prices loaded successfully:', currentPrices);
-    await renderCookiesGrid(); // Add this line
-    await renderBoxes();
-    await renderMysteryBox();
-    await renderCookieShowcase(); 
-    await renderBoxShowcase();
-    initBoxShowcase();
-
-
-    setTimeout(() => {
-        initializeVSBattle();
-    }, 100);
-
-    
+   
     
     setupMobileMenu(); 
+    setupStoryTabs();
     
-    initCookieShowcase();
-    
+        setupLogoSection();
     
     const tabBtns = document.querySelectorAll('.header-tabs .tab-btn');
     const footerTabLinks = document.querySelectorAll('.footer-tab-link');
@@ -2013,7 +2669,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     });
 
     // Event listener for mobile menu button
-    mobileMenuBtnn.addEventListener('click', openMobileNav);
+    // mobileMenuBtnn.addEventListener('click', openMobileNav);
 
     cookies.forEach(cookie => {
         cookie.addEventListener('mouseenter', () => {

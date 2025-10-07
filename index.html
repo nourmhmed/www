@@ -36,8 +36,19 @@
         <div class="loading-spinner"></div>
     </div> -->
 
-    <div id="loading-screen" class="loading-spinner">
-        <div class="brand-name pulse">Syrine's Crumble</div>
+    <!-- Enhanced Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="brand-name pulse">Syrine's Crumble</div>
+            <div class="loading-text">Loading delicious cookies...</div>
+            <div class="loading-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <span class="progress-text" id="progress-text">0%</span>
+            </div>
+        </div>
     </div>
 
     <!-- Modern Header -->
@@ -47,8 +58,8 @@
             <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
                 <i class="fas fa-bars"></i>
             </button>
-
             <!-- Navigation -->
+            <!-- Update your mobile navigation structure -->
             <nav class="main-nav" id="main-nav">
                 <ul class="nav-list">
                     <li class="nav-item">
@@ -72,19 +83,37 @@
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-tab="mystery">
                             <i class="fas fa-question-circle"></i>
-                            <span>Mystery Box</span>
+                            <span>Mystery</span>
                         </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <span class="nav-link dropdown-toggle">
+                            <i class="fas fa-book-open"></i>
+                            <span>Explore</span>
+                        </span>
+                        <ul class="dropdown-menu">
+                            <li><a href="/our-story" class="dropdown-link" data-story-tab="our-story">Our Story</a></li>
+                            <li><a href="/our-vision" class="dropdown-link" data-story-tab="vision">Our Vision</a></li>
+                            <li><a href="/our-mission" class="dropdown-link" data-story-tab="mission">Our Mission</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- Cart as a navigation item -->
+                    <li class="nav-item">
+                        <div class="cart-icon" id="cart-icon" aria-label="Shopping cart">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="cart-count" id="cart-count">0</span>
+                        </div>
                     </li>
                 </ul>
             </nav>
-
             <!-- Cart -->
-            <div class="header-actions">
+            <!-- <div class="header-actions">
                 <div class="cart-icon" id="cart-icon" aria-label="Shopping cart">
                     <i class="fas fa-shopping-cart"></i>
                     <span class="cart-count" id="cart-count">0</span>
                 </div>
-            </div>
+            </div> -->
         </div>
     </header>
 
@@ -95,29 +124,54 @@
         <div class="tab-content active" id="home-tab">
 
 
-            <!-- Hero Section with Cookie Battle -->
-            <div class="hero-logo">
-                <img src="images/logo.svg" alt="Syrine's Crumble" class="hero-logo-img">
-            </div>
+            <!-- Logo Animation Section -->
+            <section class="logo-section">
+                <div class="container">
+                    <div class="logo-animation-container">
+                        <div class="logo-with-animation">
+                            <img src="images/logo.svg" alt="Syrine's Crumble" class="animated-logo">
+
+                            <!-- Crumbs Animation -->
+                            <div class="logo-crumbs">
+                                <div class="crumb crumb-1"></div>
+                                <div class="crumb crumb-2"></div>
+                                <div class="crumb crumb-3"></div>
+                                <div class="crumb crumb-4"></div>
+                                <div class="crumb crumb-5"></div>
+                                <div class="crumb crumb-6"></div>
+                            </div>
+
+                            <!-- Steam Animation -->
+                            <div class="logo-steam">
+                                <div class="steam steam-1"></div>
+                                <div class="steam steam-2"></div>
+                                <div class="steam steam-3"></div>
+                                <div class="steam steam-4"></div>
+                            </div>
+                        </div>
+
+                        <div class="logo-tagline">
+                            <h2>Chewy. Crumbly. Made with love.</h2>
+                            <p>Freshly baked artisanal cookies delivered to your door</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section class="hero">
                 <div class="hero-content">
                     <!-- Brand Story Section -->
                     <div class="brand-story">
                         <h1>Welcome to Syrine’s Crumble</h1>
                         <p class="story-text">
-                            We’re Syrine and Islam — a Tunisian–Egyptian couple who believe that love is best expressed
-                            through something warm, sweet, and homemade.
+                            We're Syrine and Islam — a Tunisian-Egyptian couple turning our love story into
+                            extraordinary cookies,
+                            baked with passion in our Maadi kitchen.
                         </p>
                         <p class="story-text">
-                            Born from our kitchen in Maadi, Syrine’s Crumble is more than just a cookie brand — it’s a
-                            story of two cultures, countless late-night baking experiments, and a shared passion for
-                            creating indulgent moments.
-                        </p>
-                        <p class="story-text">
-                            Every batch is handcrafted with care, inspired by the flavors we grew up with and the joy we
-                            find in sharing them with others. Whether it’s the gooey center of a classic chocolate chip
-                            or the unexpected twist of a date-pistachio crumble, we bake each cookie to seduce — just
-                            like our slogan promises.
+                            Each batch blends our cultural heritage with late-night baking experiments, creating
+                            indulgent moments
+                            through every warm, homemade cookie.
                         </p>
                         <p class="brand-signature">
                             <strong>Chewy. Crumbly. Made with love.</strong>
@@ -176,6 +230,7 @@
                 </div>
             </section>
 
+
             <!-- In your home tab - replace the static showcase cookies with this: -->
             <section class="cookie-showcase">
                 <div class="container">
@@ -207,48 +262,6 @@
                     </button>
                 </div>
             </section>
-
-            <!-- Features Section -->
-            <section class="features">
-                <div class="container">
-                    <h2 class="section-title">Why Choose Your Cookie Side</h2>
-                    <div class="features-grid">
-                        <div class="feature-card">
-                            <div class="feature-icon">
-                                <i class="fas fa-heart"></i>
-                            </div>
-                            <h3>Made With Love</h3>
-                            <p>Every cookie is crafted with care and passion, using recipes perfected over time.</p>
-                        </div>
-                        <div class="feature-card">
-                            <div class="feature-icon">
-                                <i class="fas fa-leaf"></i>
-                            </div>
-                            <h3>Premium Ingredients</h3>
-                            <p>We source only the finest ingredients for exceptional flavor and quality.</p>
-                        </div>
-                        <div class="feature-card">
-                            <div class="feature-icon">
-                                <i class="fas fa-truck"></i>
-                            </div>
-                            <h3>Fast Delivery</h3>
-                            <p>Freshly baked cookies delivered to your door, still warm when possible.</p>
-                        </div>
-                        <div class="feature-card">
-                            <div class="feature-icon">
-                                <i class="fas fa-star"></i>
-                            </div>
-                            <h3>Custom Orders</h3>
-                            <p>Special occasions? We create custom cookie boxes for your events.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-
-
-
-
         </div>
 
         <!-- Boxes Tab -->
@@ -462,7 +475,286 @@
             </section>
         </div>
 
+        <div class="tab-content" id="our-story-tab">
+            <section class="our-story-tab-section">
+                <div class="container">
+                    <!-- Hidden Story Tabs Navigation -->
+                    <div class="story-tabs-nav" style="display: none;">
+                        <button class="story-tab-btn active" data-story-tab="our-story">Our Story</button>
+                        <button class="story-tab-btn" data-story-tab="vision">Our Vision</button>
+                        <button class="story-tab-btn" data-story-tab="mission">Our Mission</button>
+                    </div>
+
+                    <!-- Story Tabs Content -->
+                    <div class="story-tabs-content">
+                        <!-- Our Story Sub-tab -->
+                        <div class="story-tab-pane active" id="our-story-pane">
+                            <div class="story-hero">
+                                <div class="story-hero-content">
+                                    <h1>Welcome to Syrine's Crumble</h1>
+                                    <p class="hero-subtitle">A story of two cultures, countless late-night baking
+                                        experiments, and a shared passion for creating indulgent moments</p>
+                                </div>
+                                <div class="story-hero-visual">
+                                    <div class="floating-cookies">
+                                        <div class="cookie-floating">🍪</div>
+                                        <div class="cookie-floating">❤️</div>
+                                        <div class="cookie-floating">🏠</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="story-content">
+                                <div class="story-intro">
+                                    <p>We're Syrine and Islam — a Tunisian–Egyptian couple who believe that love is best
+                                        expressed through something warm, sweet, and homemade.</p>
+                                    <p>Born from our kitchen in Maadi, Syrine's Crumble is more than just a cookie brand
+                                        — it's our story of two cultures coming together through a shared passion for
+                                        baking.</p>
+                                </div>
+
+                                <div class="cookie-philosophy">
+                                    <h2>Our Cookie Philosophy</h2>
+                                    <p>At Syrine's Crumble, we believe cookies should match your personality. That's why
+                                        we created two distinct styles, each with its own unique vibe:</p>
+
+                                    <div class="cookie-styles">
+                                        <div class="cookie-style-card chewy">
+                                            <div class="cookie-icon">🍪</div>
+                                            <h3>The Chewy Side</h3>
+                                            <p>Soft, gooey, and melt-in-your-mouth. Perfect for those who love comfort,
+                                                warmth, and that slow, indulgent bite that feels like a hug.</p>
+                                        </div>
+
+                                        <div class="cookie-style-card crumble">
+                                            <div class="cookie-icon">🍪</div>
+                                            <h3>The Crumble Side</h3>
+                                            <p>Crunchy edges, rich bite, and bold flavors. Made for those who like
+                                                excitement, a little crunch, and a cookie that keeps things interesting.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="team-concept">
+                                        <h3>Join the Cookie Rivalry</h3>
+                                        <p>The best part? You don't just eat our cookies... you join a team. Are you
+                                            <strong>Team Chewy</strong> or <strong>Team Crumble</strong>?
+                                        </p>
+                                        <p>It's fun, it's delicious, and it sparks a little friendly rivalry among
+                                            friends and family.</p>
+                                        <p class="team-note">And if you can't decide? Well... you can always enjoy both
+                                            😊</p>
+                                    </div>
+                                </div>
+
+                                <div class="mystery-box-section">
+                                    <h2>The Mystery Box Adventure</h2>
+                                    <div class="mystery-box-content">
+                                        <div class="mystery-text">
+                                            <p>At Syrine's Crumble, we love surprises — and that's why we created the
+                                                Mystery Box.</p>
+                                            <p>Each box contains 6 cookies (Chewy, Crumble, or a mix). But here's the
+                                                twist: hidden inside, you'll find 1–2 secret premium flavors that aren't
+                                                on our regular menu.</p>
+                                            <ul>
+                                                <li>Every month, we bake something bold, new, and unexpected — flavors
+                                                    that keep you guessing and keep the experience exciting.</li>
+                                                <li>If you guess the secret flavor correctly, you win 15% off your next
+                                                    order!</li>
+                                            </ul>
+                                            <p>It's more than just a cookie — it's a game, a challenge, and a sweet
+                                                little adventure every time you order.</p>
+                                            <p class="mystery-cta">So... are you brave enough to take the mystery bite?
+                                            </p>
+                                        </div>
+                                        <div class="mystery-visual">
+                                            <div class="mystery-box-icon">📦</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="founders-spotlight">
+                                <div class="founder-card">
+                                    <div class="founder-avatar tunisia">
+                                        <i class="fas fa-crown"></i>
+                                    </div>
+                                    <h4>Syrine</h4>
+                                    <p class="founder-role">Tunisian Heritage & Flavor Expert</p>
+                                    <p class="founder-desc">Brings authentic North African flavors and traditional
+                                        baking techniques passed down through generations.</p>
+                                </div>
+
+                                <div class="founder-card">
+                                    <div class="founder-avatar egypt">
+                                        <i class="fas fa-hands-helping"></i>
+                                    </div>
+                                    <h4>Islam</h4>
+                                    <p class="founder-role">Egyptian Roots & Operations</p>
+                                    <p class="founder-desc">Adds warm Egyptian hospitality and ensures every cookie
+                                        reaches you with love and care.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="story-tab-pane" id="vision-pane">
+                            <div class="vision-hero">
+                                <h2>Our Vision</h2>
+                                <p class="vision-subtitle">Building a family that loves life, kindness, and sweet
+                                    connections.</p>
+                            </div>
+
+                            <div class="vision-grid">
+                                <div class="vision-card">
+                                    <div class="vision-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <h3>One Big Family</h3>
+                                    <p>We dream of building a warm and supportive community where everyone feels like
+                                        part of a big loving family.</p>
+                                </div>
+
+                                <div class="vision-card">
+                                    <div class="vision-icon">
+                                        <i class="fas fa-hand-holding-heart"></i>
+                                    </div>
+                                    <h3>Helping Each Other Grow</h3>
+                                    <p>We believe in kindness, collaboration, and lifting each other up — inside and
+                                        outside the kitchen.</p>
+                                </div>
+
+                                <div class="vision-card">
+                                    <div class="vision-icon">
+                                        <i class="fas fa-cookie-bite"></i>
+                                    </div>
+                                    <h3>Sweet Moments</h3>
+                                    <p>We’re not just selling cookies — we’re creating memories, friendships, and joyful
+                                        experiences.</p>
+                                </div>
+
+                                <div class="vision-card">
+                                    <div class="vision-icon">
+                                        <i class="fas fa-lightbulb"></i>
+                                    </div>
+                                    <h3>Growing Together</h3>
+                                    <p>Through shared activities, learning, and creativity, we aim to grow and inspire
+                                        one another every day.</p>
+                                </div>
+                            </div>
+
+                            <div class="vision-quote">
+                                <blockquote>
+                                    "We’re more than a cookie brand — we’re a community of dreamers, doers, and friends
+                                    who believe in the power of sweetness and connection."
+                                </blockquote>
+                            </div>
+                        </div>
+
+
+                        <div class="story-tab-pane" id="mission-pane">
+                            <div class="mission-hero">
+                                <h2>Our Mission</h2>
+                                <p class="mission-subtitle">To spread joy, connection, and growth through every cookie
+                                    and every smile.</p>
+                            </div>
+
+                            <div class="mission-content">
+                                <div class="mission-statement">
+                                    <h3>Our Core Mission</h3>
+                                    <p class="mission-text">
+                                        Our mission is to build a community that shares love, supports one another, and
+                                        grows together —
+                                        not just through cookies, but through kindness, friendship, and shared
+                                        experiences.
+                                        We’re here to make life a little sweeter, one connection at a time.
+                                    </p>
+                                </div>
+
+                                <div class="promises-grid">
+                                    <div class="promise-card">
+                                        <div class="promise-icon">
+                                            <i class="fas fa-heart"></i>
+                                        </div>
+                                        <h4>Community First</h4>
+                                        <p>We focus on people — creating friendships, sharing skills, and building
+                                            something meaningful together.</p>
+                                    </div>
+
+                                    <div class="promise-card">
+                                        <div class="promise-icon">
+                                            <i class="fas fa-cookie"></i>
+                                        </div>
+                                        <h4>Authentic Taste</h4>
+                                        <p>Every cookie is made with care, passion, and a personal touch that reflects
+                                            who we are.</p>
+                                    </div>
+
+                                    <div class="promise-card">
+                                        <div class="promise-icon">
+                                            <i class="fas fa-hands-helping"></i>
+                                        </div>
+                                        <h4>Growth Together</h4>
+                                        <p>We learn, improve, and create together — helping our clients and our team
+                                            grow with every experience.</p>
+                                    </div>
+
+                                    <div class="promise-card">
+                                        <div class="promise-icon">
+                                            <i class="fas fa-smile-beam"></i>
+                                        </div>
+                                        <h4>Spreading Positivity</h4>
+                                        <p>Our goal is to inspire joy and connection in every moment — because life is
+                                            sweeter when shared.</p>
+                                    </div>
+                                </div>
+
+                                <div class="mission-values">
+                                    <h3>Our Values</h3>
+                                    <div class="values-list">
+                                        <div class="value-item">
+                                            <span class="value-number">01</span>
+                                            <div class="value-content">
+                                                <h5>Love</h5>
+                                                <p>Everything we do starts and ends with love.</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="value-item">
+                                            <span class="value-number">02</span>
+                                            <div class="value-content">
+                                                <h5>Connection</h5>
+                                                <p>We believe in building genuine, lasting relationships.</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="value-item">
+                                            <span class="value-number">03</span>
+                                            <div class="value-content">
+                                                <h5>Growth</h5>
+                                                <p>Always learning, improving, and growing together as one family.</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="value-item">
+                                            <span class="value-number">04</span>
+                                            <div class="value-content">
+                                                <h5>Joy</h5>
+                                                <p>Bringing happiness and positivity to every experience.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+        </div>
+
     </div>
+
+
 
     <!-- Updated Flavor Selection Popup -->
     <div class="flavor-popup-overlay" id="flavor-popup-overlay"></div>
@@ -624,7 +916,7 @@
             <div class="powered-by">
                 <span>Powered by </span>
                 <a href="https://www.linkedin.com/in/nourmhmed/" target="_blank" rel="noopener noreferrer"
-                    class="developer-link">INJECTION
+                    class="developer-link">NOUR
                 </a>
             </div>
 
