@@ -8016,6 +8016,8 @@ footer {
         border: none;
         cursor: pointer;
         padding: 8px;
+                right: 160px;
+
         gap: 4px;
     }
     
@@ -8182,6 +8184,7 @@ footer {
         height: 44px;
         align-items: center;
         justify-content: center;
+        left: 160px;
         color: var(--primary);
         font-size: 1.2rem;
     }
@@ -8431,7 +8434,7 @@ footer {
         border-bottom: 1px solid var(--secondary);
         margin-bottom: 1.5rem;
         position: sticky;
-        top: 0;
+        top: -16px;
         background: var(--background);
         z-index: 10;
     }
@@ -8465,7 +8468,7 @@ footer {
         padding: 1rem;
         background: var(--background);
         position: sticky;
-        top: 0;
+        top: -9px;
         z-index: 10;
         border-bottom: 1px solid var(--secondary);
     }
@@ -8531,15 +8534,16 @@ footer {
 
 .sale-ribbon {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    background: var(--danger);
+    top: 1rem;
+    right: 1rem;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
     color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: bold;
-    z-index: 2;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    z-index: 5;
+    box-shadow: 0 4px 12px rgba(192, 57, 79, 0.3);
 }
 
 /* For popup sale prices */
@@ -8617,4 +8621,8 @@ footer {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-3px); }
 }
+
+
+
+
 

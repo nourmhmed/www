@@ -16,57 +16,7 @@ let loadingTimeout;
 // Global variables for detail page
 let currentDetailCookie = null;
 let currentDetailStyle = 'chewy';
-// Add these global variables at the top
-const CACHE_KEYS = {
-    COOKIES: 'syrines_crumble_cookies_cache',
-    BOXES: 'syrines_crumble_boxes_cache',
-    MYSTERY: 'syrines_crumble_mystery_cache',
-    PRICES: 'syrines_crumble_prices_cache'
-};
 
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
-// Enhanced cache service
-const cacheService = {
-    set(key, data) {
-        const cacheData = {
-            data: data,
-            timestamp: Date.now()
-        };
-        localStorage.setItem(key, JSON.stringify(cacheData));
-    },
-
-    get(key) {
-        const cached = localStorage.getItem(key);
-        if (!cached) return null;
-        
-        try {
-            const cacheData = JSON.parse(cached);
-            const isExpired = Date.now() - cacheData.timestamp > CACHE_DURATION;
-            
-            if (isExpired) {
-                localStorage.removeItem(key);
-                return null;
-            }
-            
-            return cacheData.data;
-        } catch (error) {
-            console.warn('Cache corrupted for key:', key);
-            localStorage.removeItem(key);
-            return null;
-        }
-    },
-
-    clear(key) {
-        localStorage.removeItem(key);
-    },
-
-    clearAll() {
-        Object.values(CACHE_KEYS).forEach(key => {
-            localStorage.removeItem(key);
-        });
-    }
-};
 
 // Add these with your other global variables
 let boxesData = [];
@@ -487,21 +437,13 @@ async function ensureSupabaseInitialized() {
 let selectedFlavors = {};
 
 
+// Function to fetch boxes data
 async function fetchBoxesData() {
-    // Try cache first
-    const cached = cacheService.get(CACHE_KEYS.BOXES);
-    if (cached) {
-        console.log('Using cached boxes data');
-        return cached;
-    }
-
     try {
         const initialized = await ensureSupabaseInitialized();
         if (!initialized) {
             console.warn('Supabase not initialized, using fallback boxes data');
-            const fallbackData = getFallbackBoxesData();
-            cacheService.set(CACHE_KEYS.BOXES, fallbackData);
-            return fallbackData;
+            return getFallbackBoxesData();
         }
 
         const { data, error } = await supabase
@@ -512,21 +454,15 @@ async function fetchBoxesData() {
 
         if (error) {
             console.error('Error fetching boxes:', error);
-            const fallbackData = getFallbackBoxesData();
-            cacheService.set(CACHE_KEYS.BOXES, fallbackData);
-            return fallbackData;
+            return getFallbackBoxesData();
         }
 
-        cacheService.set(CACHE_KEYS.BOXES, data || []);
         return data || [];
     } catch (error) {
         console.error('Error in fetchBoxesData:', error);
-        const fallbackData = getFallbackBoxesData();
-        cacheService.set(CACHE_KEYS.BOXES, fallbackData);
-        return fallbackData;
+        return getFallbackBoxesData();
     }
 }
-
 
 // Function to fetch mystery box data
 async function fetchMysteryBoxData() {
@@ -628,21 +564,14 @@ function getCookieDisplayPrice(cookie, style = 'chewy') {
     };
 }
 
+// Enhanced fetch functions with loading states
+// Update the fetchCookiesData function to include sale information
 async function fetchCookiesData() {
-    // Try cache first
-    const cached = cacheService.get(CACHE_KEYS.COOKIES);
-    if (cached) {
-        console.log('Using cached cookies data');
-        allCookiesData = cached;
-        return cached;
-    }
-
     try {
         const initialized = await ensureSupabaseInitialized();
         if (!initialized) {
             console.warn('Supabase not initialized, using fallback data');
             allCookiesData = getFallbackCookiesData();
-            cacheService.set(CACHE_KEYS.COOKIES, allCookiesData);
             return allCookiesData;
         }
 
@@ -655,12 +584,12 @@ async function fetchCookiesData() {
         if (error) {
             console.error('Error fetching cookies:', error);
             allCookiesData = getFallbackCookiesData();
-            cacheService.set(CACHE_KEYS.COOKIES, allCookiesData);
             return allCookiesData;
         }
 
-        // Transform the data
+        // Transform the data and store globally with sale information
         const transformedData = {};
+        console.log("data", data)
         data.forEach(cookie => {
             transformedData[cookie.slug] = {
                 title: cookie.name,
@@ -676,6 +605,7 @@ async function fetchCookiesData() {
                 tags: cookie.tags || [],
                 chewy_price: cookie.chewy_price,
                 crumble_price: cookie.crumble_price,
+                // Add sale information
                 is_on_sale: cookie.is_on_sale,
                 chewy_discount_rate: cookie.chewy_discount_rate || 0,
                 crumble_discount_rate: cookie.crumble_discount_rate || 0,
@@ -687,13 +617,11 @@ async function fetchCookiesData() {
         });
 
         allCookiesData = transformedData;
-        cacheService.set(CACHE_KEYS.COOKIES, allCookiesData);
-        console.log('Cookies data loaded and cached');
+        console.log('Cookies data loaded with sale info:', Object.keys(allCookiesData));
         return allCookiesData;
     } catch (error) {
         console.error('Error in fetchCookiesData:', error);
         allCookiesData = getFallbackCookiesData();
-        cacheService.set(CACHE_KEYS.COOKIES, allCookiesData);
         return allCookiesData;
     }
 }
@@ -1039,195 +967,13 @@ function setupImageHandlers(img) {
 const mobileMenuBtn = document.getElementById('mobile-menu-btn');
 const mainNav = document.querySelector('.main-nav');
 
-// Progressive loading for critical content
-async function initializeCriticalContent() {
-    try {
-        // Load essential data first
-        await Promise.all([
-            fetchCookiesData(),
-            fetchBoxesData()
-        ]);
-
-        // Initialize prices in background
-        priceService.getCurrentPrices().then(prices => {
-            currentPrices = prices;
-        });
-
-        // Render critical UI immediately
-        await renderCriticalUI();
-
-        // Load non-critical content after
-        setTimeout(() => {
-            loadNonCriticalContent();
-        }, 100);
-
-    } catch (error) {
-        console.error('Critical content initialization failed:', error);
-        // Fallback to basic functionality
-        renderFallbackUI();
-    }
-}
-
-async function renderCriticalUI() {
-    // Show home tab immediately with basic content
-    const homeTab = document.getElementById('home-tab');
-    if (homeTab) {
-        homeTab.innerHTML = `
-            <section class="logo-section">
-                <div class="container">
-                    <div class="logo-animation-container">
-                        <div class="logo-with-animation">
-                            <img src="images/logo.svg" alt="Syrine's Crumble" class="animated-logo">
-                            <div class="logo-crumbs">
-                                <div class="crumb crumb-1"></div>
-                                <div class="crumb crumb-2"></div>
-                                <div class="crumb crumb-3"></div>
-                                <div class="crumb crumb-4"></div>
-                            </div>
-                        </div>
-                        <div class="logo-tagline">
-                            <h2>Chewy. Crumbly. Made with love.</h2>
-                            <p>Freshly baked artisanal cookies delivered to your door</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="hero">
-                <div class="hero-content">
-                    <div class="brand-story">
-                        <h1>Welcome to Syrine's Crumble</h1>
-                        <p class="story-text">
-                            We're Syrine and Islam — a Tunisian-Egyptian couple turning our love story into extraordinary cookies,
-                            baked with passion in our Maadi kitchen.
-                        </p>
-                    </div>
-                    <div class="svg-container">
-                        <!-- Basic hero content without heavy images -->
-                        <div class="team-container">
-                            <div class="team-label">Crumble</div>
-                        </div>
-                        <div class="vs-battle" id="vs-battle">
-                            <div class="vs-circle" id="vs-circle">
-                                <span class="vs-text">VS</span>
-                            </div>
-                        </div>
-                        <div class="team-container">
-                            <div class="team-label">Chewy</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <div class="loading-placeholder">
-                <div class="loading-spinner"></div>
-                <p>Loading our delicious cookies...</p>
-            </div>
-        `;
-    }
-
-    // Initialize basic interactions
-    initializeVSBattle();
-    setupMobileMenu();
-    updateCartUI(); // Cart should work immediately
-}
-
-async function loadNonCriticalContent() {
-    try {
-        // Load images and heavy content
-        await Promise.all([
-            renderCookieShowcase(),
-            renderBoxShowcase(),
-            loadHeroImages()
-        ]);
-
-        // Replace loading placeholder with actual content
-        const placeholder = document.querySelector('.loading-placeholder');
-        if (placeholder) {
-            placeholder.remove();
-        }
-
-    } catch (error) {
-        console.error('Non-critical content loading failed:', error);
-    }
-}
-
-async function loadHeroImages() {
-    // Lazy load hero images
-    const heroImages = [
-        'images/crumble.svg',
-        'images/chewy.svg'
-    ];
-
-    heroImages.forEach(src => {
-        const img = new Image();
-        img.src = src;
-        img.onload = () => {
-            // Image is loaded and cached
-            console.log('Hero image loaded:', src);
-        };
-    });
-}
-
-function renderFallbackUI() {
-    // Basic fallback when everything fails
-    const homeTab = document.getElementById('home-tab');
-    if (homeTab) {
-        homeTab.innerHTML += `
-            <section class="cookie-showcase">
-                <div class="container">
-                    <h2 class="section-title">Our Signature Cookies</h2>
-                    <div class="fallback-message">
-                        <p>We're having trouble loading our menu right now.</p>
-                        <p>Please refresh the page or contact us directly.</p>
-                        <button onclick="location.reload()" class="btn">Try Again</button>
-                    </div>
-                </div>
-            </section>
-        `;
-    }
-}
-
-// Enhanced image loading with Intersection Observer
-function setupLazyLoading() {
-    if ('IntersectionObserver' in window) {
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    img.src = img.dataset.src;
-                    img.classList.remove('lazy');
-                    imageObserver.unobserve(img);
-                }
-            });
-        });
-
-        document.querySelectorAll('img[data-src]').forEach(img => {
-            imageObserver.observe(img);
-        });
-    } else {
-        // Fallback for older browsers
-        document.querySelectorAll('img[data-src]').forEach(img => {
-            img.src = img.dataset.src;
-        });
-    }
-}
-
-
+// Price service to handle database operations
+// Update the priceService.validateCart function to handle sale prices
 const priceService = {
     async getCurrentPrices() {
-        // Try cache first
-        const cached = cacheService.get(CACHE_KEYS.PRICES);
-        if (cached) {
-            console.log('Using cached prices');
-            return cached;
-        }
-
         const initialized = await ensureSupabaseInitialized();
         if (!initialized) {
-            const fallbackPrices = this.getFallbackPrices();
-            cacheService.set(CACHE_KEYS.PRICES, fallbackPrices);
-            return fallbackPrices;
+            return this.getFallbackPrices();
         }
 
         try {
@@ -1248,19 +994,14 @@ const priceService = {
             if (boxesResponse.error) throw boxesResponse.error;
             if (mysteryResponse.error) throw mysteryResponse.error;
 
-            const prices = {
+            return {
                 cookies: cookiesResponse.data || [],
                 boxes: boxesResponse.data || [],
                 mystery: mysteryResponse.data?.price || 450
             };
-
-            cacheService.set(CACHE_KEYS.PRICES, prices);
-            return prices;
         } catch (error) {
             console.error('Error fetching prices:', error);
-            const fallbackPrices = this.getFallbackPrices();
-            cacheService.set(CACHE_KEYS.PRICES, fallbackPrices);
-            return fallbackPrices;
+            return this.getFallbackPrices();
         }
     },
 
@@ -2815,140 +2556,38 @@ function showFlavorPopup(size, cookieCount, boxElement) {
 
 async function initializeApp() {
     try {
-        // Show loading progress
-        updateLoadingProgress(10);
-        
-        // Initialize Supabase with timeout
+        // Initialize Supabase
         await initializeSupabaseWithTimeout();
         updateLoadingProgress(20);
         
-        // Load critical content first
-        await initializeCriticalContent();
-        updateLoadingProgress(60);
+        // Fetch cookies data
+        await fetchCookiesData();
+        updateLoadingProgress(20);
         
-        // Setup lazy loading
-        setupLazyLoading();
-        updateLoadingProgress(80);
+        // Fetch boxes data
+        await fetchBoxesData();
+        updateLoadingProgress(20);
         
-        // Final initialization
-        await Promise.all([
-            renderCookiesGrid(),
-            renderBoxes(),
-            renderMysteryBox()
-        ]);
+        // Fetch mystery box data
+        await fetchMysteryBoxData();
+        updateLoadingProgress(20);
         
-        updateLoadingProgress(100);
+        // Initialize prices
+        currentPrices = await priceService.getCurrentPrices();
+        updateLoadingProgress(20);
+        
+        // Render all components
+        await renderAllComponents();
         
     } catch (error) {
         console.error('App initialization failed:', error);
+        // Even if there's an error, hide the loading screen
         updateLoadingProgress(100);
-        showNotification('Some content failed to load. Please refresh.');
-    }
-}
-
-// Add CSS for loading states
-const performanceCSS = `
-.loading-placeholder {
-    text-align: center;
-    padding: 4rem 2rem;
-    color: var(--primary);
-}
-
-.loading-placeholder .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid var(--secondary);
-    border-top: 3px solid var(--primary);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 1rem;
-}
-
-.fallback-message {
-    text-align: center;
-    padding: 3rem 2rem;
-    background: var(--secondary);
-    border-radius: 15px;
-    margin: 2rem 0;
-}
-
-.fallback-message p {
-    margin-bottom: 1rem;
-    color: var(--text);
-}
-
-img.lazy {
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-img.lazy.loaded {
-    opacity: 1;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-`;
-
-const styleSheet = document.createElement('style');
-styleSheet.textContent = performanceCSS;
-document.head.appendChild(styleSheet);
-
-// Update image setup to use lazy loading
-function setupImageHandlers(img) {
-    if (!img) return;
-
-    // Convert to lazy loading if not already loaded
-    if (img.hasAttribute('data-src') && !img.src) {
-        img.classList.add('lazy');
-        return;
-    }
-
-    const container = img.closest('.image-loading-container');
-    const loading = container ? container.querySelector('.image-loading') : null;
-
-    img.onload = function() {
-        if (loading) loading.style.display = 'none';
-        img.classList.add('loaded');
-        img.onload = null;
-        img.onerror = null;
-    };
-
-    img.onerror = function() {
-        if (img.hasAttribute('data-error-handled')) return;
-        img.setAttribute('data-error-handled', 'true');
-
-        if (img.classList.contains('box-img') || img.closest('.box-image') || img.closest('.mystery-image')) {
-            img.src = 'images/fallback-box.svg';
-        } else {
-            img.src = 'images/fallback-cookie.svg';
-        }
         
-        img.alt = 'Image not available';
-
-        if (loading) loading.style.display = 'none';
-        img.classList.add('loaded');
-
-        img.onload = null;
-        img.onerror = null;
-    };
-}
-
-// Clear cache on new version (optional)
-function setupCacheManagement() {
-    // Clear cache if this is a new version
-    const version = '1.0.1'; // Update this when you deploy changes
-    const lastVersion = localStorage.getItem('app_version');
-    
-    if (lastVersion !== version) {
-        cacheService.clearAll();
-        localStorage.setItem('app_version', version);
+        // Show error notification
+        showNotification('Failed to load some content. Please refresh the page.');
     }
 }
-
-
 
 async function renderAllComponents() {
     try {
@@ -3565,7 +3204,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 // Start with 0% progress
     updateLoadingProgress(0);
     setupImageErrorHandling();
-    setupCacheManagement();
     
     // Initialize Supabase and load data
     initializeApp();
