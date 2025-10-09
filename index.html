@@ -3,30 +3,41 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Syrine's Crumble | Artisanal Cookies</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- <link rel="stylesheet" href="index.css"> -->
-
-    <!-- Non-critical CSS deferred -->
-    <link rel="preload" href="index.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript>
-        <link rel="stylesheet" href="index.css">
-    </noscript>
-
-    <!-- Optimized preload for critical images only -->
-    <link rel="preload" href="images/logo.svg" as="image" type="image/svg+xml">
-    <link rel="preload" href="images/crumble.svg" as="image" type="image/svg+xml">
-    <link rel="preload" href="images/chewy.svg" as="image" type="image/svg+xml">
-
-    <!-- Font Awesome with performance optimization -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syrine's Crumble | Artisanal Cookies & Baked Goods</title>
+    <meta name="description" content="Handcrafted artisanal cookies and baked goods from Syrine's Crumble. Fresh, delicious treats made with premium ingredients.">
+    
+    
+    <!-- DNS prefetch for external domains -->
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    
+    <!-- Preconnect to critical third-party origins -->
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        media="print" onload="this.media='all'">
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- CSS with fallback -->
+    <link rel="stylesheet" href="index.css" media="all">
+    
+    <!-- Non-critical CSS loaded asynchronously -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+          media="print" onload="this.media='all'">
+    
+    <!-- Google Fonts with display swap -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800&display=swap" rel="stylesheet">
+    
+    <!-- Additional meta tags for SEO and social sharing -->
+    <meta name="robots" content="index, follow">
+    <meta name="keywords" content="artisanal cookies, baked goods, handmade cookies, gourmet cookies">
+    <meta property="og:title" content="Syrine's Crumble | Artisanal Cookies">
+    <meta property="og:description" content="Handcrafted artisanal cookies and baked goods from Syrine's Crumble.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    
+
+</head>
 
 <body>
     <!-- <div class="announcement">Next day delivery / Free Shipping for orders over 500 EGP</div> -->
@@ -142,7 +153,7 @@
                         </div>
 
                         <div class="logo-tagline">
-                            <h2>Chewy. Crumbly. Made with love.</h2>
+                            <h2>Chewy, Crumbly, and Made with love.</h2>
                             <p>Freshly baked artisanal cookies delivered to your door</p>
                         </div>
                     </div>
@@ -226,8 +237,7 @@
             <section class="cookie-showcase">
                 <div class="container">
                     <h2 class="section-title">Our Signature Cookies</h2>
-                    <p class="section-subtitle">Discover our most loved flavors - perfect for any occasion</p>
-
+                    <br>
                     <div class="cookie-showcase-grid" id="cookie-showcase-grid">
                         <!-- Dynamic content will be inserted here by JavaScript -->
                     </div>
@@ -242,8 +252,8 @@
             <section class="box-showcase">
                 <div class="container">
                     <h2 class="section-title">Our Popular Boxes</h2>
-                    <p class="section-subtitle">Perfect for sharing, gifting, or treating yourself</p>
 
+                    <br>
                     <div class="box-showcase-grid" id="box-showcase-grid">
                         <!-- Dynamic content will be inserted here by JavaScript -->
                     </div>

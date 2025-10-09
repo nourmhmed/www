@@ -43,9 +43,9 @@ function clearLoadingTimeout() {
 }
 
 // Ensure mobile menu setup runs once after DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    setupMobileMenu();
-});
+// document.addEventListener('DOMContentLoaded', function() {
+//     setupMobileMenu();
+// });
 
 // Update the updateLoadingProgress function to clear timeout
 function updateLoadingProgress(increment = 20) {
@@ -429,7 +429,7 @@ let supabaseInitialized = false;
 
 async function ensureSupabaseInitialized() {
     if (!supabaseInitialized) {
-        supabaseInitialized = await initializeSupabase();
+        supabaseInitialized = initializeSupabase();
     }
     return supabaseInitialized;
 }
@@ -705,7 +705,7 @@ async function renderBoxes() {
 
             // Add individual image load/error handlers
             const img = boxOption.querySelector('img');
-            setupImageHandlers(img);
+            //setupImageHandlers(img);
 
             // Add click event
             boxOption.addEventListener('click', function() {
@@ -829,6 +829,7 @@ async function renderMysteryBox() {
 
 // Update renderCookiesGrid to show sale prices
 async function renderCookiesGrid() {
+    console.log("GGGGGGGGGGGG")
     try {
         console.log('Rendering cookies grid...');
         const cookiesGrid = document.querySelector('.cookies-grid');
@@ -888,7 +889,7 @@ async function renderCookiesGrid() {
 
             // Setup image handlers for this cookie
             const img = cookieCard.querySelector('img');
-            setupImageHandlers(img);
+            //setupImageHandlers(img);
 
             cookiesGrid.appendChild(cookieCard);
         });
@@ -1269,69 +1270,6 @@ function closeMobileNav() {
     document.body.style.overflow = 'auto';
 }
 
-// Cookie data with different images for Chewy and Crumble styles
-const cookieData = {
-    'chocolate-chip': {
-        title: 'The Original Chocolate Chips',
-        description: 'Classic chocolate chip cookie with premium Belgian chocolate',
-        images: {
-            chewy: 'images/original_chewy_cookie.svg',
-            crumble: 'images/original_crumble_cookie.svg'
-        },
-        price: '80 LE',
-        ingredients: 'Flour, Belgian chocolate chunks, butter, brown sugar, eggs, vanilla extract, baking soda, salt',
-        specialty: 'Made with premium Belgian chocolate for a rich, authentic flavor',
-        perfectFor: 'Chocolate lovers, classic cookie enthusiasts, and family gatherings'
-    },
-    'chocolate-crispy': {
-        title: 'Chocolate Crispy Affair',
-        description: 'Chocolate cookie with crispy rice and chocolate chunks',
-        images: {
-            chewy: 'images/chocolate_crispy_affair_chewy.svg',
-            crumble: 'images/chocolate_crispy_affair_crumble.svg'
-        },
-        price: '90 LE',
-        ingredients: 'Flour, cocoa powder, crispy rice cereal, chocolate chunks, butter, sugar, eggs, vanilla extract',
-        specialty: 'Combination of rich chocolate and satisfying crispy texture',
-        perfectFor: 'Those who enjoy texture contrast, kids, and as a snack with coffee'
-    },
-    'caramel': {
-        title: 'The Caramel Bad Girl',
-        description: 'Buttery cookie with swirls of caramel and sea salt',
-        images: {
-            chewy: 'images/caramel_chewy_cookie.svg',
-            crumble: 'images/caramel_crumble_cookie.svg'
-        },
-        price: '85 LE',
-        ingredients: 'Flour, butter, caramel swirls, sea salt, brown sugar, eggs, vanilla extract, baking soda',
-        specialty: 'Sweet and salty combination with gooey caramel centers',
-        perfectFor: 'Those with a sophisticated palate, dessert lovers, and special occasions'
-    },
-    'hazelnut': {
-        title: 'The Hazelnut Mommy',
-        description: 'Nutty cookie with roasted hazelnuts and chocolate chunks',
-        images: {
-            chewy: 'images/hazelnuts_chewy_cookie.svg',
-            crumble: 'images/hazelnuts_crumble_cookie.svg'
-        },
-        price: '95 LE',
-        ingredients: 'Flour, roasted hazelnuts, chocolate chunks, butter, sugar, eggs, vanilla extract',
-        specialty: 'Premium roasted hazelnuts and quality chocolate create a comforting flavor',
-        perfectFor: 'Nut lovers, comforting treats, and pairing with milk or hot beverages'
-    },
-    'lotus': {
-        title: 'Lotus Obsession',
-        description: 'Cookie with lotus biscuit spread and white chocolate',
-        images: {
-            chewy: 'images/lotus_chewy_cookie.svg',
-            crumble: 'images/lotus_crumble_cookie.svg'
-        },
-        price: '85 LE',
-        ingredients: 'Flour, lotus biscuit spread, white chocolate chunks, butter, sugar, eggs, cinnamon',
-        specialty: 'Unique flavor combination of lotus spread and white chocolate',
-        perfectFor: 'Lotus biscuit fans, those who enjoy unique flavor combinations, and as a dessert'
-    }
-};
 
 // Global variables
 let currentCookie = null;
@@ -2063,7 +2001,7 @@ async function initializeSupabaseWithTimeout() {
     );
     
     try {
-        await Promise.race([initializeSupabase(), timeoutPromise]);
+        Promise.race([initializeSupabase(), timeoutPromise]);
         console.log('Supabase initialized successfully');
     } catch (error) {
         console.warn('Supabase initialization timed out, using fallback prices');
@@ -2131,7 +2069,7 @@ async function renderCookieShowcase() {
 
             // Setup image handlers for this cookie
             const img = cookieCard.querySelector('img');
-            setupImageHandlers(img);
+            //setupImageHandlers(img);
 
             showcaseGrid.appendChild(cookieCard);
         });
@@ -2556,28 +2494,30 @@ function showFlavorPopup(size, cookieCount, boxElement) {
 
 async function initializeApp() {
     try {
+        // Render all components
+        renderAllComponents();
         // Initialize Supabase
-        await initializeSupabaseWithTimeout();
+        //  initializeSupabaseWithTimeout();
+        initializeSupabase();
         updateLoadingProgress(20);
         
         // Fetch cookies data
-        await fetchCookiesData();
+        fetchCookiesData();
         updateLoadingProgress(20);
         
         // Fetch boxes data
-        await fetchBoxesData();
+        fetchBoxesData();
         updateLoadingProgress(20);
         
         // Fetch mystery box data
-        await fetchMysteryBoxData();
+        fetchMysteryBoxData();
         updateLoadingProgress(20);
         
         // Initialize prices
-        currentPrices = await priceService.getCurrentPrices();
+        currentPrices = priceService.getCurrentPrices();
         updateLoadingProgress(20);
         
-        // Render all components
-        await renderAllComponents();
+        
         
     } catch (error) {
         console.error('App initialization failed:', error);
@@ -2592,11 +2532,11 @@ async function initializeApp() {
 async function renderAllComponents() {
     try {
         // Render all components in sequence
-        await renderCookiesGrid();
-        await renderBoxes();
-        await renderMysteryBox();
-        await renderCookieShowcase();
-        await renderBoxShowcase();
+        renderCookiesGrid();
+        renderBoxes();
+        renderMysteryBox();
+        renderCookieShowcase();
+        renderBoxShowcase();
         
         // Initialize interactive elements
         initializeVSBattle();

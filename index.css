@@ -1042,6 +1042,8 @@ footer {
             min-height: 100vh;
             display: flex;
             align-items: center;
+                margin-bottom: -159px;
+
             position: relative;
             overflow: hidden;
             background: #fdd1d1;
@@ -2822,7 +2824,7 @@ footer {
 .section-title {
     font-size: 3.2rem;
     font-weight: 300;
-    color: #2c3e50;
+    color: var(--primary);
     margin-bottom: 1rem;
     letter-spacing: -0.5px;
 }
@@ -2970,7 +2972,7 @@ footer {
     }
     
     .container {
-        padding: 50px 15px;
+        padding: 80px 15px;
     }
     
     /* Header mobile styles - Logo centered with menu/cart on sides */
@@ -3828,7 +3830,8 @@ footer {
     
     .team-label {
         font-size: 1rem;
-        margin-top: 8px;
+                margin-top: -100px;
+
     }
     
     /* Section titles */
@@ -5483,7 +5486,7 @@ footer {
 
 /* Cookie Showcase Section */
 .cookie-showcase {
-    padding: 5rem 0;
+    /* padding: 5rem 0; */
     background: #fdd1d1;
 }
 
@@ -8621,7 +8624,64 @@ footer {
     50% { transform: translateY(-3px); }
 }
 
-
-
-
-
+@media (max-width: 768px) {
+    .svg-container {
+        flex-direction: row; /* Change from column to row */
+        gap: 1rem; /* Reduce gap for mobile */
+        justify-content: center;
+        align-items: center;
+        flex-wrap: nowrap; /* Prevent wrapping */
+    }
+    
+    .team-container {
+        flex: 1;
+        max-width: 45%; /* Allow two containers to fit side by side */
+        margin: 0;
+    }
+    
+    .cookie-img {
+        max-width: 120px; /* Adjust size for mobile */
+    }
+    
+    .vs-battle {
+        margin: 0 1rem; /* Reduce margin for mobile */
+        order: 0; /* Keep VS in the middle */
+    }
+    
+    .vs-circle {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .vs-text {
+        font-size: 1.2rem;
+    }
+    
+    .vs-subtitle {
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+    }
+    
+    /* Adjust speech bubbles for mobile side-by-side layout */
+    .speech-bubble {
+        max-width: 140px;
+        font-size: 0.7rem;
+        padding: 0.6rem 0.8rem;
+    }
+    
+    .crumble-bubble {
+        top: -80px;
+        left: -120px;
+    }
+    
+    .chewy-bubble {
+        top: -80px;
+        right: -120px;
+    }
+    
+    /* Adjust team labels */
+    .team-label {
+        font-size: 1rem;
+        margin-top: -100px;
+    }
+}
