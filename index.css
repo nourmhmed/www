@@ -5926,7 +5926,7 @@ footer {
 
 /* Logo Section Styles */
 .logo-section {
-    padding: 4rem 0;
+    /* padding: 4rem 0; */
     /* background: linear-gradient(135deg, #fdd1d1 0%, #ffebee 50%, #fdd1d1 100%); */
     position: relative;
     overflow: hidden;
@@ -7894,6 +7894,8 @@ footer {
 
     .tab-content-area {
         padding-bottom: 60px;
+        margin-top: 70px;
+
     }
 }
 
@@ -8016,8 +8018,6 @@ footer {
         border: none;
         cursor: pointer;
         padding: 8px;
-                right: 160px;
-
         gap: 4px;
     }
     
@@ -8184,7 +8184,6 @@ footer {
         height: 44px;
         align-items: center;
         justify-content: center;
-        left: 160px;
         color: var(--primary);
         font-size: 1.2rem;
     }
