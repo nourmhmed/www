@@ -535,7 +535,37 @@ function getFallbackMysteryBoxData() {
 }
 
 
+// Add this helper function to format prices with discounts
+function formatPriceWithSale(originalPrice, finalPrice, isOnSale) {
+    if (!isOnSale || originalPrice === finalPrice) {
+        return `<div class="cookie-price">${originalPrice} LE</div>`;
+    }
+    
+    return `
+        <div class="cookie-price-sale">
+            <span class="original-price">${originalPrice} LE</span>
+            <span class="final-price">${finalPrice} LE</span>
+            <div class="sale-badge">SALE</div>
+        </div>
+    `;
+}
+
+// Function to get the appropriate price based on context
+function getCookieDisplayPrice(cookie, style = 'chewy') {
+    const isOnSale = cookie.is_on_sale;
+    const originalPrice = style === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
+    const finalPrice = style === 'chewy' ? cookie.chewy_final_price : cookie.crumble_final_price;
+    
+    return {
+        originalPrice,
+        finalPrice,
+        isOnSale,
+        displayHTML: formatPriceWithSale(originalPrice, finalPrice, isOnSale)
+    };
+}
+
 // Enhanced fetch functions with loading states
+// Update the fetchCookiesData function to include sale information
 async function fetchCookiesData() {
     try {
         const initialized = await ensureSupabaseInitialized();
@@ -557,8 +587,9 @@ async function fetchCookiesData() {
             return allCookiesData;
         }
 
-        // Transform the data and store globally
+        // Transform the data and store globally with sale information
         const transformedData = {};
+        console.log("data", data)
         data.forEach(cookie => {
             transformedData[cookie.slug] = {
                 title: cookie.name,
@@ -573,12 +604,20 @@ async function fetchCookiesData() {
                 perfectFor: cookie.perfect_for,
                 tags: cookie.tags || [],
                 chewy_price: cookie.chewy_price,
-                crumble_price: cookie.crumble_price
+                crumble_price: cookie.crumble_price,
+                // Add sale information
+                is_on_sale: cookie.is_on_sale,
+                chewy_discount_rate: cookie.chewy_discount_rate || 0,
+                crumble_discount_rate: cookie.crumble_discount_rate || 0,
+                chewy_discount_amount: cookie.chewy_discount_amount || 0,
+                crumble_discount_amount: cookie.crumble_discount_amount || 0,
+                chewy_final_price: cookie.chewy_final_price || cookie.chewy_price,
+                crumble_final_price: cookie.crumble_final_price || cookie.crumble_price
             };
         });
 
         allCookiesData = transformedData;
-        console.log('Cookies data loaded:', Object.keys(allCookiesData));
+        console.log('Cookies data loaded with sale info:', Object.keys(allCookiesData));
         return allCookiesData;
     } catch (error) {
         console.error('Error in fetchCookiesData:', error);
@@ -788,7 +827,7 @@ async function renderMysteryBox() {
     }
 }
 
-// Update renderCookiesGrid to use global data
+// Update renderCookiesGrid to show sale prices
 async function renderCookiesGrid() {
     try {
         console.log('Rendering cookies grid...');
@@ -826,6 +865,9 @@ async function renderCookiesGrid() {
                 });
             }
 
+            // Get price display with sale information
+            const priceInfo = getCookieDisplayPrice(cookie, 'chewy');
+
             cookieCard.innerHTML = `
                 <div class="cookie-image">
                     <div class="image-loading-container">
@@ -833,13 +875,14 @@ async function renderCookiesGrid() {
                         <img src="${cookie.images.chewy}" alt="${cookie.title}" loading="lazy">
                     </div>
                     ${tagsHTML}
+                    ${cookie.is_on_sale ? '<div class="sale-ribbon">SALE</div>' : ''}
                     <button class="cookie-overlay-btn" onclick="event.stopPropagation(); openPopup('${slug}')">
                         <i class="fas fa-plus"></i> Add to Cart
                     </button>
                 </div>
                 <div class="cookie-details">
                     <h3>${cookie.title}</h3>
-                    <div class="cookie-price">${cookie.chewy_price} LE</div>
+                    ${priceInfo.displayHTML}
                 </div>
             `;
 
@@ -925,45 +968,64 @@ const mobileMenuBtn = document.getElementById('mobile-menu-btn');
 const mainNav = document.querySelector('.main-nav');
 
 // Price service to handle database operations
+// Update the priceService.validateCart function to handle sale prices
 const priceService = {
-    
-async getCurrentPrices() {
-    const initialized = await ensureSupabaseInitialized();
-    if (!initialized) {
-        return this.getFallbackPrices();
-    }
+    async getCurrentPrices() {
+        const initialized = await ensureSupabaseInitialized();
+        if (!initialized) {
+            return this.getFallbackPrices();
+        }
 
-    try {
-        const [cookiesResponse, boxesResponse, mysteryResponse] = await Promise.all([
-            supabase.from('cookies').select('slug, chewy_price, crumble_price').eq('is_active', true),
-            supabase.from('boxes').select('size, chewy_price, crumble_price, mix_price, cookie_count').eq('is_active', true),
-            supabase.from('mystery_boxes').select('price').eq('is_active', true).single()
-        ]);
+        try {
+            const [cookiesResponse, boxesResponse, mysteryResponse] = await Promise.all([
+                supabase.from('cookies')
+                    .select('slug, chewy_price, crumble_price, is_on_sale, chewy_final_price, crumble_final_price, chewy_discount_rate, crumble_discount_rate, chewy_discount_amount, crumble_discount_amount')
+                    .eq('is_active', true),
+                supabase.from('boxes')
+                    .select('size, chewy_price, crumble_price, mix_price, cookie_count')
+                    .eq('is_active', true),
+                supabase.from('mystery_boxes')
+                    .select('price')
+                    .eq('is_active', true)
+                    .single()
+            ]);
 
-        if (cookiesResponse.error) throw cookiesResponse.error;
-        if (boxesResponse.error) throw boxesResponse.error;
-        if (mysteryResponse.error) throw mysteryResponse.error;
+            if (cookiesResponse.error) throw cookiesResponse.error;
+            if (boxesResponse.error) throw boxesResponse.error;
+            if (mysteryResponse.error) throw mysteryResponse.error;
 
-        return {
-            cookies: cookiesResponse.data || [],
-            boxes: boxesResponse.data || [],
-            mystery: mysteryResponse.data?.price || 450
-        };
-    } catch (error) {
-        console.error('Error fetching prices:', error);
-        return this.getFallbackPrices();
-    }
-},
+            return {
+                cookies: cookiesResponse.data || [],
+                boxes: boxesResponse.data || [],
+                mystery: mysteryResponse.data?.price || 450
+            };
+        } catch (error) {
+            console.error('Error fetching prices:', error);
+            return this.getFallbackPrices();
+        }
+    },
 
     // Fallback prices in case database is unavailable
     getFallbackPrices() {
         return {
             cookies: [
-                { slug: 'chocolate-chip', chewy_price: 80, crumble_price: 80 },
-                { slug: 'chocolate-crispy', chewy_price: 90, crumble_price: 90 },
-                { slug: 'caramel', chewy_price: 85, crumble_price: 85 },
-                { slug: 'hazelnut', chewy_price: 95, crumble_price: 95 },
-                { slug: 'lotus', chewy_price: 85, crumble_price: 85 }
+                { 
+                    slug: 'chocolate-chip', 
+                    chewy_price: 80, 
+                    crumble_price: 80,
+                    is_on_sale: false,
+                    chewy_final_price: 80,
+                    crumble_final_price: 80
+                },
+                { 
+                    slug: 'chocolate-crispy', 
+                    chewy_price: 90, 
+                    crumble_price: 90,
+                    is_on_sale: false,
+                    chewy_final_price: 90,
+                    crumble_final_price: 90
+                },
+                // ... include all other cookies with sale info
             ],
             boxes: [
                 { size: 'duo', chewy_price: 155, crumble_price: 155, mix_price: 165, cookie_count: 2 },
@@ -976,24 +1038,50 @@ async getCurrentPrices() {
         };
     },
 
-
-    // Validate cart items against current prices
+    // Validate cart items against current prices with sale support
     async validateCart(cartItems) {
         const currentPrices = await this.getCurrentPrices();
         const validItems = [];
         let total = 0;
         let hasChanges = false;
+        let priceUpdates = [];
 
         for (const item of cartItems) {
             let isValid = false;
             let correctUnitPrice = 0;
+            let priceChangeType = null;
 
             // Validate single cookies
             if (item.cookieType) {
                 const cookiePrice = currentPrices.cookies.find(c => c.slug === item.cookieType);
                 if (cookiePrice) {
-                    correctUnitPrice = cookiePrice[`${item.style}_price`];
+                    // Check if cookie is on sale for the selected style
+                    const styleKey = `${item.style}_price`;
+                    const finalPriceKey = `${item.style}_final_price`;
+                    
+                    const originalPrice = cookiePrice[styleKey];
+                    const finalPrice = cookiePrice[finalPriceKey];
+                    const isOnSale = cookiePrice.is_on_sale;
+                    
+                    // Determine correct price (use final price if on sale, otherwise original price)
+                    correctUnitPrice = isOnSale ? finalPrice : originalPrice;
+                    
+                    // Check if price matches
                     isValid = item.unitPrice === correctUnitPrice;
+                    
+                    // If price doesn't match, determine why
+                    if (!isValid) {
+                        if (isOnSale && item.unitPrice === originalPrice) {
+                            // Item was purchased at original price but now it's on sale
+                            priceChangeType = 'sale_applied';
+                        } else if (!isOnSale && item.unitPrice === finalPrice && finalPrice !== originalPrice) {
+                            // Item was purchased at sale price but sale ended
+                            priceChangeType = 'sale_ended';
+                        } else {
+                            // Regular price change
+                            priceChangeType = 'price_changed';
+                        }
+                    }
                 }
             }
             // Validate boxes
@@ -1003,26 +1091,85 @@ async getCurrentPrices() {
                     const priceKey = item.style === 'mix' ? 'mix_price' : `${item.style}_price`;
                     correctUnitPrice = boxPrice[priceKey];
                     isValid = item.unitPrice === correctUnitPrice;
+                    if (!isValid) {
+                        priceChangeType = 'price_changed';
+                    }
                 }
             }
             // Validate mystery box
             else if (item.size === 'mystery') {
                 correctUnitPrice = currentPrices.mystery;
                 isValid = item.unitPrice === correctUnitPrice;
+                if (!isValid) {
+                    priceChangeType = 'price_changed';
+                }
             }
 
-            if (isValid) {
-                // Update price based on current quantity
-                item.price = correctUnitPrice * item.quantity;
-                total += item.price;
-                validItems.push(item);
+            if (isValid || correctUnitPrice > 0) {
+                // Update price based on current quantity and correct unit price
+                const newPrice = correctUnitPrice * item.quantity;
+                const oldPrice = item.price;
+                
+                // Create updated item
+                const updatedItem = {
+                    ...item,
+                    unitPrice: correctUnitPrice,
+                    price: newPrice,
+                    originalPrice: item.unitPrice, // Store old price for comparison
+                    priceChangeType: priceChangeType
+                };
+
+                // Remove temporary fields if no change
+                if (!priceChangeType) {
+                    delete updatedItem.originalPrice;
+                    delete updatedItem.priceChangeType;
+                }
+
+                validItems.push(updatedItem);
+                total += newPrice;
+
+                // Track if there were changes
+                if (!isValid || oldPrice !== newPrice) {
+                    hasChanges = true;
+                    priceUpdates.push({
+                        name: item.name,
+                        oldPrice: oldPrice,
+                        newPrice: newPrice,
+                        changeType: priceChangeType || 'price_changed'
+                    });
+                }
             } else {
                 hasChanges = true;
                 console.warn('Invalid item removed from cart:', item);
             }
         }
 
-        return { validItems, total, hasChanges };
+        return { 
+            validItems, 
+            total, 
+            hasChanges,
+            priceUpdates 
+        };
+    },
+
+    // Generate user-friendly message for price changes
+    generatePriceUpdateMessage(priceUpdates) {
+        if (priceUpdates.length === 0) return null;
+
+        const messages = priceUpdates.map(update => {
+            switch (update.changeType) {
+                case 'sale_applied':
+                    return `🎉 Sale applied to ${update.name}! Price reduced from ${update.oldPrice} to ${update.newPrice}`;
+                case 'sale_ended':
+                    return `📈 Sale ended for ${update.name}. Price updated from ${update.oldPrice} to ${update.newPrice}`;
+                case 'price_changed':
+                    return `💰 Price updated for ${update.name}: ${update.oldPrice} → ${update.newPrice}`;
+                default:
+                    return `💰 Price updated for ${update.name}: ${update.oldPrice} → ${update.newPrice}`;
+            }
+        });
+
+        return messages.join('\n');
     }
 };
 
@@ -1288,13 +1435,17 @@ function openCookieDetail(cookieType) {
         return;
     }
     
+    // Get price information
+    const priceInfo = getCookieDisplayPrice(cookie, currentDetailStyle);
+    
     // Update detail page content
     document.getElementById('detail-title').textContent = cookie.title;
     document.getElementById('detail-description').textContent = cookie.description;
     document.getElementById('detail-image').style.backgroundImage = `url(${cookie.images.chewy})`;
     
-    const currentPrice = currentDetailStyle === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
-    document.getElementById('detail-price').textContent = `${currentPrice} LE`;
+    // Update price with sale information
+    const priceContainer = document.getElementById('detail-price');
+    priceContainer.innerHTML = priceInfo.displayHTML;
     
     document.getElementById('detail-ingredients').textContent = cookie.ingredients || 'Premium ingredients carefully selected for the best flavor';
     document.getElementById('detail-specialty').textContent = cookie.specialty || 'Handcrafted with care for exceptional taste and texture';
@@ -1318,6 +1469,7 @@ function closeCookieDetail() {
 }
 
 // Change style in mobile detail page
+// Update changeDetailStyle for mobile
 function changeDetailStyle(style) {
     currentDetailStyle = style;
     
@@ -1330,8 +1482,10 @@ function changeDetailStyle(style) {
         const cookie = allCookiesData[currentDetailCookie];
         document.getElementById('detail-image').style.backgroundImage = `url(${cookie.images[style]})`;
         
-        const currentPrice = style === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
-        document.getElementById('detail-price').textContent = `${currentPrice} LE`;
+        // Update price with sale information
+        const priceInfo = getCookieDisplayPrice(cookie, style);
+        const priceContainer = document.getElementById('detail-price');
+        priceContainer.innerHTML = priceInfo.displayHTML;
     }
 }
 
@@ -1391,13 +1545,17 @@ function openDesktopPopup(cookieType) {
         return;
     }
     
+    // Get price information based on current style
+    const priceInfo = getCookieDisplayPrice(cookie, currentStyle);
+    
     // Update popup content
     document.getElementById('popupTitle').textContent = cookie.title;
     document.getElementById('popupDescription').textContent = cookie.description;
     document.getElementById('popupImage').style.backgroundImage = `url(${cookie.images.chewy})`;
     
-    const currentPrice = currentStyle === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
-    document.getElementById('popupPrice').textContent = `${currentPrice} LE`;
+    // Update price with sale information
+    const priceContainer = document.getElementById('popupPrice');
+    priceContainer.innerHTML = priceInfo.displayHTML;
     
     document.getElementById('popupIngredients').textContent = cookie.ingredients || 'Premium ingredients carefully selected for the best flavor';
     document.getElementById('popupSpecialty').textContent = cookie.specialty || 'Handcrafted with care for exceptional taste and texture';
@@ -1446,9 +1604,10 @@ function changeStyle(style) {
         const cookie = allCookiesData[currentCookie];
         document.getElementById('popupImage').style.backgroundImage = `url(${cookie.images[style]})`;
         
-        // Update price based on style
-        const currentPrice = style === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
-        document.getElementById('popupPrice').textContent = `${currentPrice} LE`;
+        // Update price with sale information
+        const priceInfo = getCookieDisplayPrice(cookie, style);
+        const priceContainer = document.getElementById('popupPrice');
+        priceContainer.innerHTML = priceInfo.displayHTML;
     }
 }
 
@@ -1465,14 +1624,13 @@ function decreaseQuantity() {
     }
 }
 
-// Add single cookie from popup - SECURE VERSION
+// Update addToCartFromPopup to use final prices
 async function addToCartFromPopup() {
     if (!currentCookie) {
         showNotification('Error: No cookie selected');
         return;
     }
 
-    // Use allCookiesData instead of cookiesData
     const cookie = allCookiesData[currentCookie];
     if (!cookie) {
         showNotification('Error: Cookie data not available');
@@ -1481,11 +1639,12 @@ async function addToCartFromPopup() {
         return;
     }
 
-    // Get price from database instead of static data
-    const cookiePrice = await getCookiePrice(currentCookie, currentStyle);
-    if (!cookiePrice) {
-        showNotification('Error: Could not verify price. Please try again.');
-        return;
+    // Use final price if on sale, otherwise use original price
+    let cookiePrice;
+    if (cookie.is_on_sale) {
+        cookiePrice = currentStyle === 'chewy' ? cookie.chewy_final_price : cookie.crumble_final_price;
+    } else {
+        cookiePrice = currentStyle === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
     }
 
     const unitPrice = cookiePrice;
@@ -1494,7 +1653,6 @@ async function addToCartFromPopup() {
     
     const name = `${cookieName} (${currentStyle.charAt(0).toUpperCase() + currentStyle.slice(1)})`;
 
-    // Build cart object with dynamic data
     const cart = getCart();
     cart.push({
         id: Date.now(),
@@ -1504,7 +1662,8 @@ async function addToCartFromPopup() {
         img: cookie.images[currentStyle] || 'images/default_cookie.svg',
         quantity: qty,
         style: currentStyle,
-        cookieType: currentCookie
+        cookieType: currentCookie,
+        isOnSale: cookie.is_on_sale // Store sale status for reference
     });
 
     saveCart(cart);
@@ -1519,13 +1678,23 @@ async function addToCartFromPopup() {
 }
 
 // Helper function to get cookie price from database
+// Update getCookiePrice to handle sale prices
 async function getCookiePrice(cookieSlug, style) {
     if (!currentPrices) {
         currentPrices = await priceService.getCurrentPrices();
     }
     
     const cookie = currentPrices.cookies.find(c => c.slug === cookieSlug);
-    return cookie ? cookie[`${style}_price`] : null;
+    if (!cookie) return null;
+    
+    // Return final price if on sale, otherwise original price
+    if (cookie.is_on_sale) {
+        const finalPriceKey = `${style}_final_price`;
+        return cookie[finalPriceKey];
+    } else {
+        const priceKey = `${style}_price`;
+        return cookie[priceKey];
+    }
 }
 
 // Helper function to get box price from database
@@ -1560,15 +1729,25 @@ function saveCart(cart) {
 }
 
 // Update cart UI with validation
+// Update cart UI with enhanced validation and sale support
 async function updateCartUI() {
     const cart = getCart();
     
-    // Validate cart against current prices
+    // Validate cart against current prices with sale support
     const validation = await priceService.validateCart(cart);
     
     if (validation.hasChanges) {
         saveCart(validation.validItems);
-        showNotification('Cart updated with current prices');
+        
+        // Show detailed notification about price changes
+        if (validation.priceUpdates && validation.priceUpdates.length > 0) {
+            const message = priceService.generatePriceUpdateMessage(validation.priceUpdates);
+            if (message) {
+                showNotification(message, 4000); // Show for longer duration
+            }
+        } else {
+            showNotification('Cart updated with current prices');
+        }
     }
 
     const validatedCart = validation.validItems;
@@ -1611,15 +1790,30 @@ async function updateCartUI() {
                 `;
             }
 
+            // Check if this item had a price change
+            const hasPriceChange = item.priceChangeType;
+            const priceChangeClass = hasPriceChange ? 'price-updated' : '';
+            const priceChangeIcon = hasPriceChange ? 
+                (item.priceChangeType === 'sale_applied' ? '🎉' : 
+                 item.priceChangeType === 'sale_ended' ? '📈' : '💰') : '';
+
             const cartItem = document.createElement('div');
-            cartItem.className = 'cart-item';
+            cartItem.className = `cart-item ${priceChangeClass}`;
             cartItem.innerHTML = `
                 <div class="cart-item-image">
                     <img src="${item.img}" alt="${item.name}">
+                    ${item.isOnSale ? '<div class="cart-sale-badge">SALE</div>' : ''}
                 </div>
                 <div class="cart-item-details">
-                    <div class="cart-item-name">${item.name}</div>
-                    <div class="cart-item-price">EGP ${itemTotal}</div>
+                    <div class="cart-item-name">
+                        ${item.name}
+                        ${hasPriceChange ? `<span class="price-change-indicator">${priceChangeIcon}</span>` : ''}
+                    </div>
+                    <div class="cart-item-price ${hasPriceChange ? 'price-updated' : ''}">
+                        EGP ${itemTotal}
+                        ${hasPriceChange && item.originalPrice ? 
+                            `<span class="original-cart-price">was EGP ${item.originalPrice * item.quantity}</span>` : ''}
+                    </div>
                     
                     ${flavorHTML}
                     
@@ -1637,7 +1831,30 @@ async function updateCartUI() {
         });
 
         // Update total
-        if (cartTotal) cartTotal.textContent = `EGP ${total}`;
+        if (cartTotal) {
+            cartTotal.textContent = `EGP ${total}`;
+            
+            // Show total savings if any items are on sale
+            const saleItems = validatedCart.filter(item => item.isOnSale);
+            if (saleItems.length > 0) {
+                const savings = saleItems.reduce((total, item) => {
+                    const cookie = allCookiesData[item.cookieType];
+                    if (cookie && cookie.is_on_sale) {
+                        const originalPrice = item.style === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
+                        const savingsPerItem = originalPrice - item.unitPrice;
+                        return total + (savingsPerItem * item.quantity);
+                    }
+                    return total;
+                }, 0);
+                
+                // if (savings > 0) {
+                //     const savingsElement = document.createElement('div');
+                //     savingsElement.className = 'cart-savings';
+                //     // savingsElement.textContent = `You save: EGP ${savings}`;
+                //     cartTotal.parentNode.appendChild(savingsElement);
+                // }
+            }
+        }
 
         // Add event listeners to cart items
         document.querySelectorAll('.increase-quantity').forEach(button => {
@@ -1646,10 +1863,11 @@ async function updateCartUI() {
                 const cart = getCart();
                 cart[index].quantity++;
                 
-                // Revalidate price
+                // Revalidate price with sale support
                 const validation = await priceService.validateCart([cart[index]]);
                 if (validation.validItems.length > 0) {
-                    cart[index].price = validation.validItems[0].price;
+                    // Update the item with validated price
+                    Object.assign(cart[index], validation.validItems[0]);
                 }
                 
                 saveCart(cart);
@@ -1664,10 +1882,11 @@ async function updateCartUI() {
                 if (cart[index].quantity > 1) {
                     cart[index].quantity--;
                     
-                    // Revalidate price
+                    // Revalidate price with sale support
                     const validation = await priceService.validateCart([cart[index]]);
                     if (validation.validItems.length > 0) {
-                        cart[index].price = validation.validItems[0].price;
+                        // Update the item with validated price
+                        Object.assign(cart[index], validation.validItems[0]);
                     }
                 } else {
                     cart.splice(index, 1);
@@ -1855,6 +2074,7 @@ async function initializeSupabaseWithTimeout() {
 }
 
 
+// Update renderCookieShowcase to show sale prices
 async function renderCookieShowcase() {
     const showcaseGrid = document.getElementById('cookie-showcase-grid');
     if (!showcaseGrid) return;
@@ -1888,6 +2108,9 @@ async function renderCookieShowcase() {
                 });
             }
 
+            // Get price display with sale information
+            const priceInfo = getCookieDisplayPrice(cookie, 'chewy');
+
             cookieCard.innerHTML = `
                 <div class="cookie-image">
                     <div class="image-loading-container">
@@ -1895,13 +2118,14 @@ async function renderCookieShowcase() {
                         <img src="${cookie.images.chewy}" alt="${cookie.title}" loading="lazy">
                     </div>
                     ${tagsHTML}
+                    ${cookie.is_on_sale ? '<div class="sale-ribbon">SALE</div>' : ''}
                     <button class="cookie-overlay-btn" onclick="event.stopPropagation(); openPopup('${slug}')">
                         <i class="fas fa-plus"></i> Add to Cart
                     </button>
                 </div>
                 <div class="cookie-details">
                     <h3>${cookie.title}</h3>
-                    <div class="cookie-price">${cookie.chewy_price} LE</div>
+                    ${priceInfo.displayHTML}
                 </div>
             `;
 
@@ -3173,36 +3397,52 @@ boxOptions.forEach(box => {
         document.getElementById('flavor-popup').classList.remove('active');
     }
 
-    // Secure checkout process
-    document.getElementById("start-checkout").addEventListener("click", async function (e) {
-        e.preventDefault();
-        
-        const cart = getCart();
-        if (cart.length === 0) {
-            showNotification('Your cart is empty!');
-            return;
-        }
+    // Update the checkout process to handle sale prices
+document.getElementById("start-checkout").addEventListener("click", async function (e) {
+    e.preventDefault();
+    
+    const cart = getCart();
+    if (cart.length === 0) {
+        showNotification('Your cart is empty!');
+        return;
+    }
 
-        // Final price validation before checkout
-        const validation = await priceService.validateCart(cart);
-        
-        if (validation.validItems.length === 0) {
-            showNotification('Your cart items are no longer available. Please refresh the page.');
-            return;
-        }
+    // Final price validation with sale support
+    const validation = await priceService.validateCart(cart);
+    
+    if (validation.validItems.length === 0) {
+        showNotification('Your cart items are no longer available. Please refresh the page.');
+        return;
+    }
 
-        if (validation.hasChanges) {
-            // Update cart with current prices
-            saveCart(validation.validItems);
-            updateCartUI();
-            
+    if (validation.hasChanges) {
+        // Update cart with current prices including sale prices
+        saveCart(validation.validItems);
+        updateCartUI();
+        
+        // Show detailed message about what changed
+        if (validation.priceUpdates && validation.priceUpdates.length > 0) {
+            const message = priceService.generatePriceUpdateMessage(validation.priceUpdates);
+            showNotification('Cart updated with current prices:\n' + message, 5000);
+        } else {
             showNotification('Cart updated with current prices. Please review before checkout.');
-            return;
         }
+        return;
+    }
 
-        // All good - proceed to checkout
-        window.location.href = "checkout.html";
-    });
+    // All good - proceed to checkout
+    // You might want to pass sale information to checkout
+    const checkoutData = {
+        items: validation.validItems,
+        total: validation.total,
+        hasSaleItems: validation.validItems.some(item => item.isOnSale)
+    };
+    
+    // Store checkout data temporarily
+    localStorage.setItem('checkout_data', JSON.stringify(checkoutData));
+    
+    window.location.href = "checkout.html";
+});
 
     // Add box from popup - SECURE VERSION
     document.getElementById('add-box-from-popup').addEventListener('click', async function () {

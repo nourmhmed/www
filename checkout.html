@@ -2376,6 +2376,73 @@
         transform: scale(1.05);
       }
     }
+
+    /* OTP Step Styles */
+    .otp-container {
+      text-align: center;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .otp-inputs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 2rem 0;
+    }
+
+    .otp-input {
+      width: 50px;
+      height: 60px;
+      text-align: center;
+      font-size: 1.5rem;
+      border: 2px solid var(--primary);
+      border-radius: 10px;
+      background: white;
+    }
+
+    .otp-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--secondary);
+    }
+
+    .otp-message {
+      margin: 1rem 0;
+      min-height: 1.5rem;
+      font-weight: 500;
+    }
+
+    .otp-success {
+      color: var(--success);
+    }
+
+    .otp-error {
+      color: #e74c3c;
+    }
+
+    .resend-otp {
+      margin-top: 1rem;
+      color: var(--primary);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .resend-otp:hover {
+      color: var(--accent);
+    }
+
+    .resend-otp.disabled {
+      color: #999;
+      cursor: not-allowed;
+      text-decoration: none;
+    }
+
+    .otp-timer {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #666;
+    }
   </style>
 </head>
 
@@ -2405,6 +2472,10 @@
       <div class="progress-step active">
         <div class="step-icon"><i class="fas fa-truck"></i></div>
         <div class="step-label">Shipping</div>
+      </div>
+      <div class="progress-step">
+        <div class="step-icon"><i class="fas fa-mobile-alt"></i></div>
+        <div class="step-label">OTP</div>
       </div>
       <div class="progress-step">
         <div class="step-icon"><i class="fas fa-credit-card"></i></div>
@@ -2499,7 +2570,38 @@
         </form>
       </div>
 
-      <!-- Step 2: Payment -->
+      <!-- Step 2: OTP Verification -->
+      <div id="step-otp" class="checkout-step" style="display:none;">
+        <h2 class="section-title">Verify Your Phone Number</h2>
+        <div class="otp-container">
+          <p>We've sent a 6-digit verification code to <span id="otp-phone-display"></span></p>
+
+          <div class="otp-inputs">
+            <input type="text" class="otp-input" maxlength="1" data-index="1">
+            <input type="text" class="otp-input" maxlength="1" data-index="2">
+            <input type="text" class="otp-input" maxlength="1" data-index="3">
+            <input type="text" class="otp-input" maxlength="1" data-index="4">
+            <input type="text" class="otp-input" maxlength="1" data-index="5">
+            <input type="text" class="otp-input" maxlength="1" data-index="6">
+          </div>
+
+          <div class="otp-message" id="otp-message"></div>
+
+          <div class="otp-timer" id="otp-timer">Resend code in <span id="countdown">60</span> seconds</div>
+          <div class="resend-otp disabled" id="resend-otp">Resend Code</div>
+
+          <div class="checkout-nav">
+            <button type="button" class="btn btn-prev" id="back-to-shipping-from-otp">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <button type="button" class="btn btn-next" id="verify-otp" disabled>
+              Verify & Continue <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Payment -->
       <div id="step-payment" class="checkout-step" style="display:none;">
         <h2 class="section-title">Payment Method</h2>
         <div class="payment-methods">
@@ -2571,6 +2673,10 @@
     let summaryItems = null;
     let shippingCities = [];
     let shippingZones = [];
+    let otpCode = '';
+    let otpTimer = null;
+    let canResendOtp = false;
+
 
 
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
@@ -2855,12 +2961,20 @@
         return;
       }
     });
+
     // Move from Shipping → Payment
     document.getElementById('to-payment-step').addEventListener('click', () => {
       const form = document.getElementById('shipping-form');
       if (form.checkValidity()) {
+        // Get phone number for OTP
+        const phone = document.getElementById('phone').value;
+
+        // Send OTP (simulate API call)
+        sendOTP(phone);
+
+        // Show OTP step
         shippingStep.style.display = "none";
-        paymentStep.style.display = "block";
+        document.getElementById('step-otp').style.display = "block";
 
         // Update progress bar
         progressSteps[1].classList.remove("active");
@@ -2870,6 +2984,7 @@
         form.reportValidity();
       }
     });
+
 
     // Update the voucher application button to check for city first
     document.getElementById('apply-voucher').addEventListener('click', function () {
@@ -3172,6 +3287,178 @@
       console.log('Voucher input blurred');
     });
 
+    // Back from OTP → Shipping
+    document.getElementById('back-to-shipping-from-otp').addEventListener('click', () => {
+      document.getElementById('step-otp').style.display = "none";
+      shippingStep.style.display = "block";
+
+      // Update progress bar
+      progressSteps[2].classList.remove("active");
+      progressSteps[1].classList.remove("completed");
+      progressSteps[1].classList.add("active");
+
+      // Clear OTP inputs and timer
+      clearOTP();
+    });
+
+
+    function sendOTP(phone) {
+      // Display phone number
+      document.getElementById('otp-phone-display').textContent = phone;
+
+      // Simulate sending OTP (in real app, call your backend API)
+      console.log('Sending OTP to:', phone);
+
+      // Generate random 6-digit OTP
+      otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      console.log('Generated OTP:', otpCode); // For testing
+
+      // Start resend timer
+      startOTPTimer();
+
+      // In a real implementation, you would:
+      // 1. Call your backend API to send OTP via SMS
+      // 2. Handle success/error responses
+      // 3. Update UI accordingly
+    }
+
+    function startOTPTimer() {
+      let timeLeft = 60;
+      const timerElement = document.getElementById('countdown');
+      const resendButton = document.getElementById('resend-otp');
+
+      // Disable resend button initially
+      resendButton.classList.add('disabled');
+      canResendOtp = false;
+
+      otpTimer = setInterval(() => {
+        timeLeft--;
+        timerElement.textContent = timeLeft;
+
+        if (timeLeft <= 0) {
+          clearInterval(otpTimer);
+          resendButton.classList.remove('disabled');
+          canResendOtp = true;
+          timerElement.textContent = '0';
+        }
+      }, 1000);
+    }
+
+    function clearOTP() {
+      // Clear OTP inputs
+      document.querySelectorAll('.otp-input').forEach(input => {
+        input.value = '';
+      });
+
+      // Clear message
+      document.getElementById('otp-message').textContent = '';
+      document.getElementById('otp-message').className = 'otp-message';
+
+      // Clear timer
+      if (otpTimer) {
+        clearInterval(otpTimer);
+      }
+
+      // Disable verify button
+      document.getElementById('verify-otp').disabled = true;
+    }
+
+    // OTP Input Handling
+    document.querySelectorAll('.otp-input').forEach(input => {
+      input.addEventListener('input', function (e) {
+        const value = e.target.value;
+        const index = parseInt(this.dataset.index);
+
+        // Only allow numbers
+        if (!/^\d*$/.test(value)) {
+          this.value = '';
+          return;
+        }
+
+        // Auto-focus next input
+        if (value && index < 6) {
+          document.querySelector(`.otp-input[data-index="${index + 1}"]`).focus();
+        }
+
+        // Check if all inputs are filled
+        checkOTPCompletion();
+      });
+
+      input.addEventListener('keydown', function (e) {
+        // Handle backspace
+        if (e.key === 'Backspace' && !this.value && this.dataset.index > 1) {
+          document.querySelector(`.otp-input[data-index="${parseInt(this.dataset.index) - 1}"]`).focus();
+        }
+      });
+    });
+
+    function checkOTPCompletion() {
+      const inputs = document.querySelectorAll('.otp-input');
+      const isComplete = Array.from(inputs).every(input => input.value);
+
+      document.getElementById('verify-otp').disabled = !isComplete;
+    }
+
+    // Verify OTP
+    document.getElementById('verify-otp').addEventListener('click', () => {
+      const enteredOTP = Array.from(document.querySelectorAll('.otp-input'))
+        .map(input => input.value)
+        .join('');
+
+      const messageEl = document.getElementById('otp-message');
+
+      if (enteredOTP === otpCode) {
+        // OTP verified successfully
+        messageEl.textContent = 'Phone number verified successfully!';
+        messageEl.className = 'otp-message otp-success';
+
+        // Move to payment step after short delay
+        setTimeout(() => {
+          document.getElementById('step-otp').style.display = "none";
+          paymentStep.style.display = "block";
+
+          // Update progress bar
+          progressSteps[2].classList.remove("active");
+          progressSteps[2].classList.add("completed");
+          progressSteps[3].classList.add("active");
+        }, 1000);
+      } else {
+        // Invalid OTP
+        messageEl.textContent = 'Invalid verification code. Please try again.';
+        messageEl.className = 'otp-message otp-error';
+
+        // Clear OTP inputs
+        document.querySelectorAll('.otp-input').forEach(input => {
+          input.value = '';
+        });
+
+        // Refocus first input
+        document.querySelector('.otp-input[data-index="1"]').focus();
+
+        // Disable verify button
+        document.getElementById('verify-otp').disabled = true;
+      }
+    });
+
+    // Resend OTP
+    document.getElementById('resend-otp').addEventListener('click', function () {
+      if (!canResendOtp) return;
+
+      const phone = document.getElementById('phone').value;
+      sendOTP(phone);
+
+      // Clear previous OTP inputs
+      clearOTP();
+
+      // Show message
+      const messageEl = document.getElementById('otp-message');
+      messageEl.textContent = 'New verification code sent!';
+      messageEl.className = 'otp-message otp-success';
+
+      // Refocus first input
+      document.querySelector('.otp-input[data-index="1"]').focus();
+    });
+
     // Back from Payment → Shipping
     document.getElementById('back-to-shipping').addEventListener('click', () => {
       paymentStep.style.display = "none";
@@ -3440,10 +3727,11 @@
               };
 
               console.log('Sending payment data for card:', paymentData);
+              const verificationToken = localStorage.getItem('verification_token');
 
               const res = await fetch("https://backend-quiet-glitter-4571.fly.dev/create-online-payment", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "x-verification-token": verificationToken },
                 body: JSON.stringify(paymentData)
               });
 
@@ -3497,10 +3785,10 @@
               };
 
               console.log('Sending cash payment data:', paymentData);
-
+              const verificationToken = localStorage.getItem('verification_token');
               const res = await fetch("https://backend-quiet-glitter-4571.fly.dev/create-cash-payment", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", "x-verification-token": verificationToken },
                 body: JSON.stringify(paymentData)
               });
 

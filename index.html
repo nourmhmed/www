@@ -801,77 +801,7 @@
         </div>
     </div>
 
-    <!-- Cookie Detail Page for Mobile -->
-    <div class="cookie-detail-page" id="cookie-detail-page">
-        <div class="cookie-detail-header">
-            <button class="back-button" onclick="closeCookieDetail()">
-                <i class="fas fa-arrow-left"></i>
-                <span>Back</span>
-            </button>
-            <h3>Cookie Details</h3>
-            <div style="width: 60px;"></div> <!-- Spacer for alignment -->
-        </div>
-
-        <div class="cookie-detail-content">
-            <div class="cookie-detail-image" id="detail-image"></div>
-
-            <div class="cookie-detail-info">
-                <h2 id="detail-title">Cookie Name</h2>
-                <p id="detail-description">Cookie description will appear here.</p>
-
-                <div class="cookie-detail-style">
-                    <span class="style-label">Select Style:</span>
-                    <div class="cookie-detail-style-buttons">
-                        <button class="cookie-detail-style-btn active" data-style="chewy"
-                            onclick="changeDetailStyle('chewy')">
-                            <i class="fas fa-cookie"></i> Chewy
-                        </button>
-                        <button class="cookie-detail-style-btn" data-style="crumble"
-                            onclick="changeDetailStyle('crumble')">
-                            <i class="fas fa-cookie-bite"></i> Crumble
-                        </button>
-                    </div>
-                </div>
-
-                <div class="cookie-detail-details">
-                    <div class="detail-item">
-                        <div class="detail-icon">
-                            <i class="fas fa-leaf"></i>
-                        </div>
-                        <div class="detail-text">
-                            <strong>Ingredients:</strong> <span id="detail-ingredients">Premium ingredients list</span>
-                        </div>
-                    </div>
-
-                    <div class="detail-item">
-                        <div class="detail-icon">
-                            <i class="fas fa-award"></i>
-                        </div>
-                        <div class="detail-text">
-                            <strong>Specialty:</strong> <span id="detail-specialty">What makes this cookie
-                                special</span>
-                        </div>
-                    </div>
-
-                    <div class="detail-item">
-                        <div class="detail-icon">
-                            <i class="fas fa-heart"></i>
-                        </div>
-                        <div class="detail-text">
-                            <strong>Perfect For:</strong> <span id="detail-perfect-for">Occasions and preferences</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="cookie-detail-actions">
-                <div class="cookie-detail-price" id="detail-price">00 LE</div>
-                <button class="cookie-detail-add-btn" onclick="addToCartFromDetail()">
-                    <i class="fas fa-shopping-cart"></i> Add to Cart
-                </button>
-            </div>
-        </div>
-    </div>
+    
 
     <div class="popup-overlay" id="popupOverlay">
         <div class="cookie-popup">
@@ -977,6 +907,12 @@
                 </div>
             </div>
 
+            
+
+            <div class="copyright">
+                © 2025 Syrine's Crumble. All rights reserved.
+            </div>
+
             <!-- Powered By Section -->
             <div class="powered-by">
                 <span>Powered by </span>
@@ -984,13 +920,80 @@
                     class="developer-link">NOUR
                 </a>
             </div>
-
-            <div class="copyright">
-                © 2025 Syrine's Crumble. All rights reserved.
-            </div>
         </div>
     </footer>
 
+    <!-- Cookie Detail Page for Mobile -->
+    <div class="cookie-detail-page" id="cookie-detail-page">
+        <div class="cookie-detail-header">
+            <button class="back-button" onclick="closeCookieDetail()">
+                <i class="fas fa-arrow-down"></i>
+                <span>Close</span>
+            </button>
+            <h3>Cookie Details</h3>
+            <div style="width: 60px;"></div> <!-- Spacer for alignment -->
+        </div>
+
+        <div class="cookie-detail-content">
+            <div class="cookie-detail-image" id="detail-image"></div>
+
+            <div class="cookie-detail-info">
+                <h2 id="detail-title">Cookie Name</h2>
+                <p id="detail-description">Cookie description will appear here.</p>
+
+                <div class="cookie-detail-style">
+                    <span class="style-label">Select Style:</span>
+                    <div class="cookie-detail-style-buttons">
+                        <button class="cookie-detail-style-btn active" data-style="chewy"
+                            onclick="changeDetailStyle('chewy')">
+                            <i class="fas fa-cookie"></i> Chewy
+                        </button>
+                        <button class="cookie-detail-style-btn" data-style="crumble"
+                            onclick="changeDetailStyle('crumble')">
+                            <i class="fas fa-cookie-bite"></i> Crumble
+                        </button>
+                    </div>
+                </div>
+
+                <div class="cookie-detail-details">
+                    <div class="detail-item">
+                        <div class="detail-icon">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <div class="detail-text">
+                            <strong>Ingredients:</strong> <span id="detail-ingredients">Premium ingredients list</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-item">
+                        <div class="detail-icon">
+                            <i class="fas fa-award"></i>
+                        </div>
+                        <div class="detail-text">
+                            <strong>Specialty:</strong> <span id="detail-specialty">What makes this cookie
+                                special</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-item">
+                        <div class="detail-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="detail-text">
+                            <strong>Perfect For:</strong> <span id="detail-perfect-for">Occasions and preferences</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cookie-detail-actions">
+                <div class="cookie-detail-price" id="detail-price">00 LE</div>
+                <button class="cookie-detail-add-btn" onclick="addToCartFromDetail()">
+                    <i class="fas fa-shopping-cart"></i> Add to Cart
+                </button>
+            </div>
+        </div>
+    </div>
     <!-- Cart Sidebar -->
     <div class="cart-overlay" id="cart-overlay"></div>
     <div class="cart-sidebar" id="cart-sidebar">
