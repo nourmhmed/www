@@ -1049,7 +1049,7 @@ footer {
             position: relative;
             z-index: 2;
             text-align: center;
-            padding: 2rem;
+            padding: 10rem;
             /* max-width: 800px; */
             margin: 0 auto;
         }
