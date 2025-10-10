@@ -6137,7 +6137,7 @@ footer {
 
 .logo-tagline h2 {
     font-family: 'More Sugar', cursive;
-    font-size: 1.5rem;
+    font-size: 2.5rem;
     color: var(--primary);
     margin-bottom: 0.5rem;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
@@ -6145,7 +6145,7 @@ footer {
 
 .logo-tagline p {
     font-family: 'More Sugar', cursive;
-    font-size: 1.2rem;
+    font-size: 1.8rem;
     color: var(--text);
     opacity: 0.9;
 }
