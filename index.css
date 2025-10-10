@@ -79,7 +79,6 @@ html, body {
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 1.5rem;
 }
 
 .section-title {
@@ -276,9 +275,7 @@ header {
 }
 
 /* === TAB CONTENT AREA === */
-.tab-content-area {
-    min-height: calc(100vh - 150px);
-}
+
 
 .tab-content {
     display: none;
@@ -300,9 +297,7 @@ header {
 }
 
 /* === BOXES SECTION === */
-.boxes {
-    padding: 5rem 0;
-}
+
 
 .style-selection {
     display: flex;
@@ -1840,16 +1835,16 @@ footer {
 
         /* Mystery Section */
 .mystery {
-    padding: 60px 20px;
-    background: var(--background);
-    border-radius: 20px;
+    padding: 23px 6px;
+    background: var(--accent);
+    /* border-radius: 20px; */
     /* box-shadow: 0 6px 20px rgba(0,0,0,0.1); */
 }
 
 .mystery .section-title {
     text-align: center;
     font-size: 2rem;
-    color: #5c3d2e;
+    color: var(--primary);
     margin-bottom: 40px;
     font-weight: 700;
 }
@@ -1904,8 +1899,7 @@ footer {
 
 /* Details Section */
 .mystery-details {
-    max-width: 500px;
-    color: #3d2b1f;
+    color: var(--text);
 }
 
 .mystery-details h3 {
@@ -4541,9 +4535,10 @@ footer {
 
 /* Footer Styles */
 footer {
-    background: #2c2c2c;
+    background: var(--primary);
+
     color: var(--light);
-    padding: 4rem 0 2rem;
+    padding: 2rem 0 0rem;
     position: relative;
 }
 
@@ -4557,11 +4552,11 @@ footer {
 .footer-column h3 {
     font-size: 1.3rem;
     margin-bottom: 1.5rem;
-    color: var(--primary);
+    color: var(--background);
 }
 
 .footer-column p {
-    color: #ccc;
+    color: var(--background);
     line-height: 1.6;
     margin-bottom: 1.5rem;
 }
@@ -4574,6 +4569,7 @@ footer {
     margin-bottom: 0.8rem;
     display: flex;
     align-items: center;
+    color: var(--background);
 }
 
 .footer-column ul li i {
@@ -4620,12 +4616,12 @@ footer {
     padding: 1.5rem 0;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    color: #ccc;
+    color: var(--background);
     font-size: 0.95rem;
 }
 
 .developer-link {
-    color: var(--primary);
+    color: var(--text);
     text-decoration: none;
     font-weight: 600;
     transition: var(--transition);
@@ -4647,7 +4643,7 @@ footer {
     text-align: center;
     margin-top: 1.5rem;
     padding-top: 1.5rem;
-    color: #999;
+    color: var(--background);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     font-size: 0.9rem;
 }
@@ -5418,7 +5414,7 @@ footer {
 .hero-subtitle {
     color: var(--primary);
     text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8);
-    background: rgba(255, 255, 255, 0.7);
+    /* background: rgba(255, 255, 255, 0.7); */
     padding: 1rem;
     border-radius: 15px;
     display: inline-block;
@@ -6319,10 +6315,7 @@ footer {
     }
 }
 
-/* Our Story Tab Styles */
-.our-story-tab-section {
-    padding: 2rem 0 5rem;
-}
+
 
 /* Story Tabs Navigation */
 .story-tabs-nav {
@@ -6396,7 +6389,7 @@ footer {
 /* Our Story Pane Styles */
 .story-hero {
     text-align: center;
-    margin-bottom: 4rem;
+    /* margin-bottom: 4rem; */
     padding: 3rem 0;
     /* background: linear-gradient(135deg, #fffafafa 50%, #fff5f5f5 100%); */
     border-radius: 20px;
@@ -6578,7 +6571,6 @@ footer {
 /* Vision Pane Styles */
 .vision-hero {
     text-align: center;
-    margin-bottom: 4rem;
     padding: 3rem 0;
 }
 
@@ -7004,7 +6996,7 @@ footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 60px;
+    /* margin-bottom: 60px; */
     padding: 40px 0;
     /* border-bottom: 1px solid #f0f0f0; */
 }
@@ -7091,12 +7083,12 @@ footer {
 }
 
 .cookie-style-card {
-    background: #fff;
+    /* background: #fff; */
     border-radius: 10px;
     padding: 25px;
     width: 280px;
     text-align: center;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    /* box-shadow: 0 5px 15px rgba(0,0,0,0.1); */
     transition: transform 0.3s ease;
 }
 
@@ -7104,13 +7096,6 @@ footer {
     transform: translateY(-5px);
 }
 
-.cookie-style-card.chewy {
-    border-top: 4px solid var(--accent);
-}
-
-.cookie-style-card.crumble {
-    border-top: 4px solid var(--secondary);
-}
 
 .cookie-icon {
     font-size: 2.5rem;
@@ -7445,7 +7430,7 @@ footer {
 /* === MODERN COOKIE CARDS === */
 .cookies-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(3, minmax(280px, 1fr));
     gap: 2rem;
     max-width: 1400px;
     margin: 0 auto;
@@ -8684,4 +8669,39 @@ footer {
         font-size: 1rem;
         margin-top: -100px;
     }
+}
+
+#boxes-tab {
+    background-color: var(--accent);
+}
+
+#cookies-tab {
+    background-color: var(--accent);
+}
+
+.story-tabs-content{
+    background-color: var(--accent);
+}
+
+
+.brand-signature {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0,0,0,0.1);
+    text-align: center;
+    font-style: italic;
+    color: #666;
+}
+
+.brand-signature p {
+    margin: 0;
+    font-size: 0.9em;
+}
+
+.founder-avatar.tunisia i {
+    color: gold; /* Gold crown for Tunisia */
+}
+
+.founder-avatar.egypt i {
+    color: #ffd700; /* Different gold shade for Egypt */
 }

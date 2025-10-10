@@ -564,17 +564,20 @@ function getCookieDisplayPrice(cookie, style = 'chewy') {
     };
 }
 
-// Enhanced fetch functions with loading states
-// Update the fetchCookiesData function to include sale information
+// Fixed fetchCookiesData function
 async function fetchCookiesData() {
     try {
+        console.log('Starting to fetch cookies data...');
+        
         const initialized = await ensureSupabaseInitialized();
         if (!initialized) {
             console.warn('Supabase not initialized, using fallback data');
             allCookiesData = getFallbackCookiesData();
+            console.log('Using fallback data:', Object.keys(allCookiesData));
             return allCookiesData;
         }
 
+        console.log('Fetching from Supabase...');
         const { data, error } = await supabase
             .from('cookies')
             .select('*')
@@ -587,37 +590,45 @@ async function fetchCookiesData() {
             return allCookiesData;
         }
 
-        // Transform the data and store globally with sale information
+        console.log('Raw data from Supabase:', data);
+
+        // Transform the data properly
         const transformedData = {};
-        console.log("data", data)
-        data.forEach(cookie => {
-            transformedData[cookie.slug] = {
-                title: cookie.name,
-                description: cookie.description,
-                images: {
-                    chewy: cookie.image_url_chewy,
-                    crumble: cookie.image_url_crumble
-                },
-                price: `${cookie.chewy_price} LE`,
-                ingredients: cookie.ingredients,
-                specialty: cookie.specialty,
-                perfectFor: cookie.perfect_for,
-                tags: cookie.tags || [],
-                chewy_price: cookie.chewy_price,
-                crumble_price: cookie.crumble_price,
-                // Add sale information
-                is_on_sale: cookie.is_on_sale,
-                chewy_discount_rate: cookie.chewy_discount_rate || 0,
-                crumble_discount_rate: cookie.crumble_discount_rate || 0,
-                chewy_discount_amount: cookie.chewy_discount_amount || 0,
-                crumble_discount_amount: cookie.crumble_discount_amount || 0,
-                chewy_final_price: cookie.chewy_final_price || cookie.chewy_price,
-                crumble_final_price: cookie.crumble_final_price || cookie.crumble_price
-            };
-        });
+        
+        if (data && data.length > 0) {
+            data.forEach(cookie => {
+                transformedData[cookie.slug] = {
+                    title: cookie.name,
+                    description: cookie.description,
+                    images: {
+                        chewy: cookie.image_url_chewy || 'images/fallback-cookie.svg',
+                        crumble: cookie.image_url_crumble || 'images/fallback-cookie.svg'
+                    },
+                    price: `${cookie.chewy_price} LE`,
+                    ingredients: cookie.ingredients || 'Premium ingredients carefully selected for the best flavor',
+                    specialty: cookie.specialty || 'Handcrafted with care for exceptional taste and texture',
+                    perfectFor: cookie.perfect_for || 'Any occasion that calls for delicious homemade cookies',
+                    tags: cookie.tags || [],
+                    chewy_price: cookie.chewy_price,
+                    crumble_price: cookie.crumble_price,
+                    // Add sale information
+                    is_on_sale: cookie.is_on_sale || false,
+                    chewy_discount_rate: cookie.chewy_discount_rate || 0,
+                    crumble_discount_rate: cookie.crumble_discount_rate || 0,
+                    chewy_discount_amount: cookie.chewy_discount_amount || 0,
+                    crumble_discount_amount: cookie.crumble_discount_amount || 0,
+                    chewy_final_price: cookie.chewy_final_price || cookie.chewy_price,
+                    crumble_final_price: cookie.crumble_final_price || cookie.crumble_price
+                };
+            });
+        } else {
+            console.warn('No cookies data returned from Supabase');
+        }
 
         allCookiesData = transformedData;
-        console.log('Cookies data loaded with sale info:', Object.keys(allCookiesData));
+        console.log('Transformed cookies data:', allCookiesData);
+        console.log('Total cookies loaded:', Object.keys(allCookiesData).length);
+        
         return allCookiesData;
     } catch (error) {
         console.error('Error in fetchCookiesData:', error);
@@ -749,27 +760,27 @@ async function renderMysteryBox() {
             <div class="mystery-image">
                 <div class="image-loading-container">
                     <div class="image-loading"></div>
-                    <img src="${mysteryBoxData.image_url}" alt="${mysteryBoxData.name}" loading="lazy">
+                    <img src="${mysteryBoxData.image_url}" alt="Mystery Cookie Box" loading="lazy">
                 </div>
-                <div class="question-mark">?</div>
             </div>
 
             <!-- Right Details -->
             <div class="mystery-details">
-                <h3>🎁 ${mysteryBoxData.name}</h3>
-                <p>${mysteryBoxData.description}</p>
+                <h3>🎁 Care the Mystery Box</h3>
+                <p>At Sure's Crumble, we love surprises — and that's why we created the Mystery Box.</p>
+                
+                <p>Each box contains 6 cookies (Chewy, Crumble, or a mix). But here's the twist: hidden inside, you'll find 1–2 secret premium flavors that aren't on our regular menu.</p>
+                
                 <ul>
-                    ${mysteryBoxData.contents ? mysteryBoxData.contents.split(',').map(item => 
-                        `<li>${item.trim()}</li>`
-                    ).join('') : `
-                        <li>🍪 6 assorted cookies (bestsellers + seasonal specials)</li>
-                        <li>🌟 1 limited edition flavor not available elsewhere</li>
-                        <li>🎉 A surprise gift with every order</li>
-                    `}
+                    <li>🌟 <strong>Monthly Surprises:</strong> Every month, we bake something bold, new, and unexpected — flavors that keep you guessing and keep the experience exciting</li>
+                    <li>🎯 <strong>Guess & Win:</strong> If you guess the secret flavor correctly, you win 15% off your next order!</li>
+                    <li>🎁 <strong>More Than Cookies:</strong> It's more than just a cookie — it's a game, a challenge, and a sweet little adventure every time you order</li>
                 </ul>
+                
                 <div class="mystery-price">${mysteryBoxData.price} LE</div>
-                <p class="mystery-note">✨ Contents change daily based on what's fresh and delicious!</p>
-                <button class="btn mystery-btn">Order Mystery Box</button>
+                <p class="mystery-note">✨ So... are you brave enough to take the mystery bite?</p>
+                <button class="btn mystery-btn">Take the Mystery Bite!</button>
+                
             </div>
         `;
 
@@ -788,7 +799,7 @@ async function renderMysteryBox() {
                     return;
                 }
 
-                const name = mysteryBoxData.name;
+                const name = "Care the Mystery Box"; // Updated name
                 const unitPrice = mysteryBoxData.price;
                 const img = mysteryBoxData.image_url;
 
@@ -809,10 +820,10 @@ async function renderMysteryBox() {
                 updateCartUI();
                 showNotification(`${name} added to cart!`);
 
-                // Visual feedback
-                this.textContent = "🎉 Added to Cart!";
+                // Visual feedback - updated text
+                this.textContent = "🎉 Mystery Box Added!";
                 setTimeout(() => {
-                    this.textContent = "Order Mystery Box";
+                    this.textContent = "Take the Mystery Bite!";
                 }, 2000);
             });
         }
@@ -2494,30 +2505,39 @@ function showFlavorPopup(size, cookieCount, boxElement) {
 
 async function initializeApp() {
     try {
-        // Render all components
-        renderAllComponents();
-        // Initialize Supabase
-        //  initializeSupabaseWithTimeout();
-        initializeSupabase();
-        updateLoadingProgress(20);
+        console.log('Initializing app...');
         
-        // Fetch cookies data
-        fetchCookiesData();
+        // Initialize Supabase first
+        await initializeSupabase();
         updateLoadingProgress(20);
+        console.log('Supabase initialized');
+        
+        // Fetch cookies data and WAIT for it to complete
+        console.log('Fetching cookies data...');
+        await fetchCookiesData();
+        updateLoadingProgress(40);
+        console.log('Cookies data loaded:', Object.keys(allCookiesData).length, 'cookies');
         
         // Fetch boxes data
-        fetchBoxesData();
-        updateLoadingProgress(20);
+        await fetchBoxesData();
+        updateLoadingProgress(60);
+        console.log('Boxes data loaded');
         
         // Fetch mystery box data
-        fetchMysteryBoxData();
-        updateLoadingProgress(20);
+        await fetchMysteryBoxData();
+        updateLoadingProgress(80);
+        console.log('Mystery box data loaded');
         
         // Initialize prices
-        currentPrices = priceService.getCurrentPrices();
-        updateLoadingProgress(20);
+        currentPrices = await priceService.getCurrentPrices();
+        updateLoadingProgress(90);
+        console.log('Prices loaded');
         
+        // Now render all components AFTER data is loaded
+        await renderAllComponents();
+        updateLoadingProgress(100);
         
+        console.log('App initialization complete');
         
     } catch (error) {
         console.error('App initialization failed:', error);
@@ -2531,12 +2551,24 @@ async function initializeApp() {
 
 async function renderAllComponents() {
     try {
-        // Render all components in sequence
-        renderCookiesGrid();
-        renderBoxes();
-        renderMysteryBox();
-        renderCookieShowcase();
-        renderBoxShowcase();
+        console.log('Starting to render all components...');
+        console.log('Available cookies data:', Object.keys(allCookiesData));
+        
+        // Render components in sequence and wait for each to complete
+        await renderCookiesGrid();
+        console.log('Cookies grid rendered');
+        
+        await renderBoxes();
+        console.log('Boxes rendered');
+        
+        await renderMysteryBox();
+        console.log('Mystery box rendered');
+        
+        await renderCookieShowcase();
+        console.log('Cookie showcase rendered');
+        
+        await renderBoxShowcase();
+        console.log('Box showcase rendered');
         
         // Initialize interactive elements
         initializeVSBattle();
@@ -2547,11 +2579,35 @@ async function renderAllComponents() {
         // Update cart UI
         updateCartUI();
         
+        console.log('All components rendered successfully');
+        
     } catch (error) {
         console.error('Error rendering components:', error);
         throw error;
     }
 }
+// Add this function to debug the data flow
+function debugCookiesData() {
+    console.log('=== COOKIES DATA DEBUG ===');
+    console.log('allCookiesData:', allCookiesData);
+    console.log('Keys:', Object.keys(allCookiesData));
+    console.log('Type:', typeof allCookiesData);
+    console.log('Is empty:', Object.keys(allCookiesData).length === 0);
+    
+    // Check if we have fallback data
+    if (Object.keys(allCookiesData).length === 0) {
+        console.log('Using fallback data...');
+        allCookiesData = getFallbackCookiesData();
+        console.log('Fallback data keys:', Object.keys(allCookiesData));
+    }
+    
+    // Force render cookies grid for testing
+    renderCookiesGrid();
+}
+
+// Call this in your console if needed
+// debugCookiesData();
+
 // Enhanced image error handling to prevent flashing
 function setupImageErrorHandling() {
     // Handle image loading errors - prevent multiple triggers
