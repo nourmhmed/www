@@ -155,7 +155,7 @@
 
                         <div class="logo-tagline">
                             <h2>Chewy, Crumble, and Made with love.</h2>
-                            <p>Bake to seduce</p>
+                            <p>Baked to seduce</p>
                         </div>
                     </div>
                 </div>
@@ -177,7 +177,7 @@
                             through every warm, homemade cookie.
                         </p>
                         <p class="brand-signature">
-                            <strong>Chewy. Crumbly. Made with love.</strong>
+                            <strong>Chewy, Crumble, and Made with love.</strong>
                         </p>
                     </div>
 
@@ -234,18 +234,46 @@
             </section>
 
 
-            <!-- In your home tab - replace the static showcase cookies with this: -->
+            <!-- Replace your current cookie showcase section with this: -->
             <section class="cookie-showcase">
                 <div class="container">
-                    <h2 class="section-title">Our Signature Cookies</h2>
-                    <br>
-                    <div class="cookie-showcase-grid" id="cookie-showcase-grid">
-                        <!-- Dynamic content will be inserted here by JavaScript -->
+                    <div class="showcase-header">
+                        <h2 class="section-title">Our Signature Cookies</h2>
+                        <p class="section-subtitle">Handcrafted perfection in every bite</p>
                     </div>
 
-                    <button class="showcase-more-btn" id="showMoreCookiesBtn">
-                        Explore All Cookies <i class="fas fa-arrow-right"></i>
-                    </button>
+                    <div class="cookie-slider-container">
+
+                        <div class="cookie-slider-wrapper">
+                            <button class="slider-nav-btn prev-btn" id="prevBtn">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+
+                            <div class="cookie-slider-track">
+                                <div class="cookie-slider" id="cookie-slider">
+                                    <!-- Dynamic content will be inserted here by JavaScript -->
+                                </div>
+                            </div>
+
+                            <button class="slider-nav-btn next-btn" id="nextBtn">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+
+                        <div class="slider-controls">
+                            <div class="slider-dots" id="sliderDots"></div>
+                            <div class="slider-counter">
+                                <span id="currentSlide">1</span> / <span id="totalSlides">4</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="showcase-footer">
+                        <button class="showcase-more-btn" id="showMoreCookiesBtn">
+                            Explore All Cookies
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
                 </div>
             </section>
 
@@ -894,6 +922,8 @@
                     <div class="social-icons">
                         <a href="https://www.instagram.com/syrinescrumble/" aria-label="Instagram"><i
                                 class="fab fa-instagram"></i></a>
+                        <a href="https://www.facebook.com/profile.php?id=61581762460554" aria-label="Facebook"><i
+                                class="fab fa-facebook-f"></i></a>
                     </div>
                 </div>
 

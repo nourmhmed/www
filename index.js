@@ -74,6 +74,379 @@ function updateLoadingProgress(increment = 20) {
         }, 500);
     }
 }
+
+// Enhanced Cookie Slider Functionality
+let currentSlide = 0;
+let totalSlides = 0;
+let autoSlideInterval;
+let sliderTouchStartX = 0;
+let sliderTouchEndX = 0;
+
+// Initialize cookie slider
+function initCookieSlider() {
+    renderCookieSlider();
+    setupSliderControls();
+    startAutoSlide();
+}
+
+// Render cookie slider with dynamic data
+async function renderCookieSlider() {
+    const slider = document.getElementById('cookie-slider');
+    const dotsContainer = document.getElementById('sliderDots');
+    const totalSlidesElement = document.getElementById('totalSlides');
+    
+    if (!slider) return;
+    
+    // Show loading state
+    slider.innerHTML = `
+        <div class="slider-loading">
+            Loading our delicious cookies...
+        </div>
+    `;
+    
+    try {
+        // Ensure we have cookies data
+        if (Object.keys(allCookiesData).length === 0) {
+            await fetchCookiesData();
+        }
+        
+        const cookieSlugs = Object.keys(allCookiesData);
+        const shuffledSlugs = shuffleArray([...cookieSlugs]);
+        const featuredCookies = shuffledSlugs.slice(0, 4);
+        
+        slider.innerHTML = '';
+        dotsContainer.innerHTML = '';
+        
+        totalSlides = featuredCookies.length;
+        if (totalSlidesElement) {
+            totalSlidesElement.textContent = totalSlides;
+        }
+        
+        featuredCookies.forEach((slug, index) => {
+            const cookie = allCookiesData[slug];
+            
+            // Create slide element
+            const slide = document.createElement('div');
+            slide.className = 'cookie-slide';
+            slide.setAttribute('data-slide-index', index);
+            
+            // Get price information
+            const priceInfo = getCookieDisplayPrice(cookie, 'chewy');
+            
+            // Generate features based on cookie data
+            const featuresHTML = generateCookieFeatures(cookie);
+            
+            slide.innerHTML = `
+                <div class="cookie-slide-image">
+                    <div class="image-loading-container">
+                        <div class="image-loading"></div>
+                        <img src="${cookie.images.chewy}" alt="${cookie.title}" loading="lazy">
+                    </div>
+                    ${cookie.is_on_sale ? '<div class="cookie-slide-badge">On Sale</div>' : ''}
+                </div>
+                <div class="cookie-slide-content">
+                    <h3 class="cookie-slide-title">${cookie.title}</h3>
+                    <p class="cookie-slide-description">${cookie.description}</p>
+                    
+                    ${featuresHTML}
+                    
+                    <div class="cookie-slide-price">
+                        ${priceInfo.displayHTML}
+                    </div>
+                    
+                    <div class="cookie-slide-actions">
+                        <button class="slider-add-btn" data-cookie-slug="${slug}">
+                            <i class="fas fa-shopping-cart"></i> Add to Cart
+                        </button>
+                        <button class="slider-detail-btn" data-cookie-slug="${slug}">
+                            <i class="fas fa-info-circle"></i> View Details
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Setup image handlers
+            const img = slide.querySelector('img');
+            setupImageHandlers(img);
+            
+            slider.appendChild(slide);
+            
+            // Create dot for this slide
+            const dot = document.createElement('div');
+            dot.className = 'slider-dot';
+            dot.setAttribute('data-slide-index', index);
+            if (index === 0) dot.classList.add('active');
+            
+            dot.addEventListener('click', () => goToSlide(index));
+            dotsContainer.appendChild(dot);
+        });
+        
+        // Update slider position
+        updateSliderPosition();
+        
+        console.log('Enhanced cookie slider rendered successfully:', featuredCookies.length, 'slides');
+        
+    } catch (error) {
+        console.error('Error rendering cookie slider:', error);
+        slider.innerHTML = '<div class="error-message">😢 Failed to load cookies. Please try refreshing the page.</div>';
+    }
+}
+
+// Generate features HTML based on cookie data
+function generateCookieFeatures(cookie) {
+    const features = [];
+    
+    // Add specialty feature
+    if (cookie.specialty) {
+        features.push(`
+            <div class="cookie-feature">
+                <i class="fas fa-star"></i>
+                <span>${cookie.specialty}</span>
+            </div>
+        `);
+    }
+    
+    // Add perfect for feature
+    if (cookie.perfectFor) {
+        features.push(`
+            <div class="cookie-feature">
+                <i class="fas fa-heart"></i>
+                <span>${cookie.perfectFor}</span>
+            </div>
+        `);
+    }
+    
+    // Add tags as features
+    if (cookie.tags && cookie.tags.length > 0) {
+        cookie.tags.slice(0, 2).forEach(tag => {
+            features.push(`
+                <div class="cookie-feature">
+                    <i class="fas fa-tag"></i>
+                    <span>${tag.charAt(0).toUpperCase() + tag.slice(1)}</span>
+                </div>
+            `);
+        });
+    }
+    
+    return features.length > 0 ? `
+        <div class="cookie-slide-features">
+            ${features.join('')}
+        </div>
+    ` : '';
+}
+
+// Setup slider controls
+function setupSliderControls() {
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => navigateSlider(-1));
+    }
+    
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => navigateSlider(1));
+    }
+    
+    // Add event listeners for buttons in slider
+    document.addEventListener('click', function(e) {
+        // Add to cart button
+        if (e.target.classList.contains('slider-add-btn') || e.target.closest('.slider-add-btn')) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const button = e.target.classList.contains('slider-add-btn') ? 
+                e.target : e.target.closest('.slider-add-btn');
+            const slug = button.getAttribute('data-cookie-slug');
+            
+            if (slug) {
+                console.log('Slider add button clicked:', slug);
+                openPopup(slug);
+                
+                // Add visual feedback
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i> Added!';
+                button.style.background = 'linear-gradient(135deg, #2e8b57, #1f6e42)';
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.background = 'linear-gradient(135deg, #8b5a2b, #6d4520)';
+                }, 1500);
+            }
+        }
+        
+        // View details button
+        if (e.target.classList.contains('slider-detail-btn') || e.target.closest('.slider-detail-btn')) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const button = e.target.classList.contains('slider-detail-btn') ? 
+                e.target : e.target.closest('.slider-detail-btn');
+            const slug = button.getAttribute('data-cookie-slug');
+            
+            if (slug) {
+                console.log('Slider detail button clicked:', slug);
+                openPopup(slug);
+            }
+        }
+    });
+    
+    // Pause auto-slide on hover
+    const sliderContainer = document.querySelector('.cookie-slider-container');
+    if (sliderContainer) {
+        sliderContainer.addEventListener('mouseenter', pauseAutoSlide);
+        sliderContainer.addEventListener('mouseleave', startAutoSlide);
+    }
+    
+    // Enhanced touch support
+    setupEnhancedTouchSupport();
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') {
+            navigateSlider(-1);
+        } else if (e.key === 'ArrowRight') {
+            navigateSlider(1);
+        }
+    });
+}
+
+// Enhanced touch support with swipe detection
+function setupEnhancedTouchSupport() {
+    const sliderTrack = document.querySelector('.cookie-slider-track');
+    if (!sliderTrack) return;
+    
+    sliderTrack.addEventListener('touchstart', (e) => {
+        sliderTouchStartX = e.touches[0].clientX;
+        pauseAutoSlide();
+    }, { passive: true });
+    
+    sliderTrack.addEventListener('touchmove', (e) => {
+        sliderTouchEndX = e.touches[0].clientX;
+    }, { passive: true });
+    
+    sliderTrack.addEventListener('touchend', () => {
+        const diff = sliderTouchStartX - sliderTouchEndX;
+        const threshold = 50;
+        
+        if (Math.abs(diff) > threshold) {
+            if (diff > 0) {
+                // Swipe left - next slide
+                navigateSlider(1);
+            } else {
+                // Swipe right - previous slide
+                navigateSlider(-1);
+            }
+        }
+        
+        startAutoSlide();
+    }, { passive: true });
+}
+
+// Navigate slider
+function navigateSlider(direction) {
+    const newIndex = currentSlide + direction;
+    
+    if (newIndex >= 0 && newIndex < totalSlides) {
+        currentSlide = newIndex;
+        updateSliderPosition();
+    } else if (newIndex < 0) {
+        // Loop to last slide
+        currentSlide = totalSlides - 1;
+        updateSliderPosition();
+    } else if (newIndex >= totalSlides) {
+        // Loop to first slide
+        currentSlide = 0;
+        updateSliderPosition();
+    }
+}
+
+// Go to specific slide
+function goToSlide(index) {
+    if (index >= 0 && index < totalSlides) {
+        currentSlide = index;
+        updateSliderPosition();
+    }
+}
+
+// Update slider position and active states
+function updateSliderPosition() {
+    const slider = document.getElementById('cookie-slider');
+    const dots = document.querySelectorAll('.slider-dot');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const currentSlideElement = document.getElementById('currentSlide');
+    
+    if (slider) {
+        slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+    }
+    
+    // Update active dot
+    dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentSlide);
+    });
+    
+    // Update button states
+    if (prevBtn) {
+        prevBtn.disabled = currentSlide === 0;
+    }
+    
+    if (nextBtn) {
+        nextBtn.disabled = currentSlide === totalSlides - 1;
+    }
+    
+    // Update counter
+    if (currentSlideElement) {
+        currentSlideElement.textContent = currentSlide + 1;
+    }
+}
+
+// Auto-slide functionality
+function startAutoSlide() {
+    if (autoSlideInterval) clearInterval(autoSlideInterval);
+    
+    autoSlideInterval = setInterval(() => {
+        const nextSlide = (currentSlide + 1) % totalSlides;
+        goToSlide(nextSlide);
+    }, 5000); // Change slide every 5 seconds
+}
+
+function pauseAutoSlide() {
+    if (autoSlideInterval) {
+        clearInterval(autoSlideInterval);
+        autoSlideInterval = null;
+    }
+}
+
+// Update your existing initCookieShowcase function
+function initCookieShowcase() {
+    const showMoreBtn = document.getElementById('showMoreCookiesBtn');
+    
+    if (showMoreBtn) {
+        showMoreBtn.addEventListener('click', function() {
+            console.log('Explore All Cookies clicked - switching to cookies tab');
+            switchTab('cookies');
+        });
+    }
+    
+    // Initialize the enhanced slider
+    initCookieSlider();
+}
+
+// Helper function to shuffle array (Fisher-Yates algorithm)
+function shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
+// Call this function when your app initializes
+// Add this to your initializeApp function or DOMContentLoaded event
+// initCookieSlider();
+
 // Add this to your initializeSupabase function
 async function initializeSupabase() {
     try {
@@ -638,26 +1011,26 @@ async function fetchCookiesData() {
 }
 
 // Keep your fallback function as backup
-function getFallbackCookiesData() {
-    return {
-        'chocolate-chip': {
-            title: 'The Original Chocolate Chips',
-            description: 'Classic chocolate chip cookie with premium Belgian chocolate',
-            images: {
-                chewy: 'images/original_chewy_cookie.svg',
-                crumble: 'images/original_crumble_cookie.svg'
-            },
-            price: '80 LE',
-            ingredients: 'Flour, Belgian chocolate chunks, butter, brown sugar, eggs, vanilla extract, baking soda, salt',
-            specialty: 'Made with premium Belgian chocolate for a rich, authentic flavor',
-            perfectFor: 'Chocolate lovers, classic cookie enthusiasts, and family gatherings',
-            tags: ['popular'],
-            chewy_price: 80,
-            crumble_price: 80
-        },
-        // ... include all other cookies
-    };
-}
+// function getFallbackCookiesData() {
+//     return {
+//         'chocolate-chip': {
+//             title: 'The Original Chocolate Chips',
+//             description: 'Classic chocolate chip cookie with premium Belgian chocolate',
+//             images: {
+//                 chewy: 'images/original_chewy_cookie.svg',
+//                 crumble: 'images/original_crumble_cookie.svg'
+//             },
+//             price: '80 LE',
+//             ingredients: 'Flour, Belgian chocolate chunks, butter, brown sugar, eggs, vanilla extract, baking soda, salt',
+//             specialty: 'Made with premium Belgian chocolate for a rich, authentic flavor',
+//             perfectFor: 'Chocolate lovers, classic cookie enthusiasts, and family gatherings',
+//             tags: ['popular'],
+//             chewy_price: 80,
+//             crumble_price: 80
+//         },
+//         // ... include all other cookies
+//     };
+// }
 
 // Update the render functions to use a more robust image loading approach
 async function renderBoxes() {
@@ -736,6 +1109,8 @@ async function renderBoxes() {
         }
     }
 }
+
+
 
 
 async function renderMysteryBox() {
@@ -3200,6 +3575,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 // Start with 0% progress
     updateLoadingProgress(0);
     setupImageErrorHandling();
+    initCookieSlider()
     
     // Initialize Supabase and load data
     initializeApp();
