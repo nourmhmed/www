@@ -195,6 +195,7 @@ async function renderCookieSlider() {
 // Generate features HTML based on cookie data
 function generateCookieFeatures(cookie) {
     const features = [];
+    console.log('Generating features for cookie:', cookie);
     
     // Add specialty feature
     if (cookie.specialty) {
@@ -908,32 +909,37 @@ function getFallbackMysteryBoxData() {
 }
 
 
-// Add this helper function to format prices with discounts
-function formatPriceWithSale(originalPrice, finalPrice, isOnSale) {
-    if (!isOnSale || originalPrice === finalPrice) {
-        return `<div class="cookie-price">${originalPrice} LE</div>`;
+function formatPriceWithSale(originalTotal, finalTotal, isOnSale) {
+    if (!isOnSale || originalTotal === finalTotal) {
+        return `<div class="cookie-price">${originalTotal} LE</div>`;
     }
     
     return `
         <div class="cookie-price-sale">
-            <span class="original-price">${originalPrice} LE</span>
-            <span class="final-price">${finalPrice} LE</span>
-            <div class="sale-badge">SALE</div>
+            <span class="original-price">${originalTotal} LE</span>
+            <span class="final-price">${finalTotal} LE</span>
         </div>
     `;
 }
 
-// Function to get the appropriate price based on context
-function getCookieDisplayPrice(cookie, style = 'chewy') {
-    const isOnSale = cookie.is_on_sale;
+function getCookieDisplayPrice(cookie, style = 'chewy', quantity = 1) {
+    const isOnSale = cookie.is_on_sale && 
+        ((style === 'chewy' && cookie.chewy_discount_rate > 0) || 
+         (style === 'crumble' && cookie.crumble_discount_rate > 0));
+    
     const originalPrice = style === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
     const finalPrice = style === 'chewy' ? cookie.chewy_final_price : cookie.crumble_final_price;
+    
+    const totalOriginal = originalPrice * quantity;
+    const totalFinal = finalPrice * quantity;
     
     return {
         originalPrice,
         finalPrice,
         isOnSale,
-        displayHTML: formatPriceWithSale(originalPrice, finalPrice, isOnSale)
+        totalOriginal,
+        totalFinal,
+        displayHTML: formatPriceWithSale(totalOriginal, totalFinal, isOnSale)
     };
 }
 
@@ -1031,6 +1037,289 @@ async function fetchCookiesData() {
 //         // ... include all other cookies
 //     };
 // }
+
+// Global variables for desktop detail
+let desktopCurrentCookie = null;
+let desktopCurrentStyle = 'chewy';
+let desktopQuantity = 1;
+
+// Open desktop cookie detail
+function openDesktopCookieDetail(cookieType) {
+    if (window.innerWidth <= 768) {
+        // Use mobile version for mobile
+        openCookieDetail(cookieType);
+        return;
+    }
+    
+    console.log('Opening desktop detail for:', cookieType);
+    desktopCurrentCookie = cookieType;
+    desktopCurrentStyle = 'chewy';
+    desktopQuantity = 1;
+    
+    const cookie = allCookiesData[cookieType];
+    
+    if (!cookie) {
+        console.error('Cookie not found:', cookieType);
+        showNotification('Cookie information not available');
+        return;
+    }
+    
+    // Update desktop detail content
+    document.getElementById('desktop-detail-title').textContent = cookie.title;
+    document.getElementById('desktop-detail-description').textContent = cookie.description;
+    
+    // Update image
+    const imageElement = document.getElementById('desktop-detail-image');
+    const placeholder = document.getElementById('desktop-image-placeholder');
+    
+    if (cookie.images && cookie.images.chewy) {
+        imageElement.style.backgroundImage = `url(${cookie.images.chewy})`;
+        imageElement.style.display = 'block';
+        placeholder.style.display = 'none';
+    } else {
+        imageElement.style.display = 'none';
+        placeholder.style.display = 'flex';
+    }
+    
+    // Update specifications
+    document.getElementById('desktop-detail-ingredients').textContent = 
+        cookie.ingredients || 'Premium ingredients carefully selected for the best flavor';
+    document.getElementById('desktop-detail-specialty').textContent = 
+        cookie.specialty || 'Handcrafted with care for exceptional taste and texture';
+    document.getElementById('desktop-detail-perfect-for').textContent = 
+        cookie.perfectFor || 'Any occasion that calls for delicious homemade cookies';
+    
+    // Update price with sale information
+    updateDesktopPrice(cookie, 'chewy');
+    
+    // Reset and update UI
+    document.getElementById('desktop-quantity-value').textContent = desktopQuantity;
+    updateDesktopStyleButtons('chewy');
+    
+    // Show desktop detail
+    document.getElementById('desktop-cookie-detail').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+// Update desktop price display
+function updateDesktopPrice(cookie, style) {
+    const priceInfo = getCookieDisplayPrice(cookie, style);
+    const priceContainer = document.getElementById('desktop-price-container');
+    
+    // Clear existing content
+    priceContainer.innerHTML = '';
+    
+    if (priceInfo.isOnSale && priceInfo.originalPrice !== priceInfo.finalPrice) {
+        // Show sale price
+        priceContainer.innerHTML = `
+            <span class="desktop-original-price">${priceInfo.originalPrice} LE</span>
+            <span class="desktop-final-price">${priceInfo.finalPrice} LE</span>
+        `;
+    } else {
+        // Show regular price
+        priceContainer.innerHTML = `<div class="desktop-price">${priceInfo.finalPrice} LE</div>`;
+    }
+}
+
+// Update mobile popup quantity and price
+function updatePopupQuantityAndPrice() {
+    if (!currentCookie) return;
+    
+    const cookie = allCookiesData[currentCookie];
+    if (!cookie) return;
+    
+    // Check if this specific style is on sale
+    const isStyleOnSale = currentStyle === 'chewy' ? 
+        (cookie.is_on_sale && cookie.chewy_discount_rate > 0) :
+        (cookie.is_on_sale && cookie.crumble_discount_rate > 0);
+    
+    const unitPrice = currentStyle === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
+    const finalUnitPrice = currentStyle === 'chewy' ? cookie.chewy_final_price : cookie.crumble_final_price;
+    
+    const totalPrice = finalUnitPrice * quantity;
+    const originalTotalPrice = unitPrice * quantity;
+    
+    // Update price display
+    const priceContainer = document.getElementById('popupPrice');
+    
+    if (isStyleOnSale && unitPrice !== finalUnitPrice) {
+        priceContainer.innerHTML = `
+            <div class="cookie-price-sale">
+                <span class="original-price">${originalTotalPrice} LE</span>
+                <span class="final-price">${totalPrice} LE</span>
+            </div>
+        `;
+    } else {
+        priceContainer.innerHTML = `<div class="cookie-price">${totalPrice} LE</div>`;
+    }
+}
+
+// Update desktop style change
+function updateDesktopStyleButtons(style) {
+    document.querySelectorAll('.desktop-style-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    const activeBtn = document.getElementById(`desktop-style-${style}`);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+    }
+    
+    desktopCurrentStyle = style;
+    
+    // Update image if cookie is loaded
+    if (desktopCurrentCookie && allCookiesData[desktopCurrentCookie]) {
+        const cookie = allCookiesData[desktopCurrentCookie];
+        const imageElement = document.getElementById('desktop-detail-image');
+        
+        if (cookie.images && cookie.images[style]) {
+            imageElement.style.backgroundImage = `url(${cookie.images[style]})`;
+            imageElement.style.display = 'block';
+            document.getElementById('desktop-image-placeholder').style.display = 'none';
+        }
+        
+        // Update price with current quantity and check style-specific sale
+        updateDesktopQuantityAndPrice();
+    }
+}
+
+
+// Close desktop detail
+function closeDesktopCookieDetail() {
+    document.getElementById('desktop-cookie-detail').classList.remove('active');
+    document.body.style.overflow = 'auto';
+    desktopCurrentCookie = null;
+}
+
+// Add to cart from desktop detail
+async function addToCartFromDesktop() {
+    const totalPrice = unitPrice * desktopQuantity;
+    if (!desktopCurrentCookie) {
+        showNotification('Error: No cookie selected');
+        return;
+    }
+
+    const cookie = allCookiesData[desktopCurrentCookie];
+    if (!cookie) {
+        showNotification('Error: Cookie data not available');
+        return;
+    }
+
+    // Get price based on current style and sale status
+    let unitPrice;
+    if (cookie.is_on_sale) {
+        unitPrice = desktopCurrentStyle === 'chewy' ? cookie.chewy_final_price : cookie.crumble_final_price;
+    } else {
+        unitPrice = desktopCurrentStyle === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
+    }
+
+    const qty = desktopQuantity || 1;
+    const cookieName = cookie.title;
+    
+    const name = `${cookieName} (${desktopCurrentStyle.charAt(0).toUpperCase() + desktopCurrentStyle.slice(1)})`;
+
+    const cart = getCart();
+    cart.push({
+        id: Date.now(),
+        name: name,
+        unitPrice: unitPrice,
+        price: unitPrice * qty,
+        img: cookie.images[desktopCurrentStyle] || 'images/default_cookie.svg',
+        quantity: qty,
+        style: desktopCurrentStyle,
+        cookieType: desktopCurrentCookie,
+        isOnSale: cookie.is_on_sale
+    });
+
+    saveCart(cart);
+    updateCartUI();
+    showNotification(`${name} added to cart!`);
+
+    closeDesktopCookieDetail();
+    
+    // Reset quantity
+    desktopQuantity = 1;
+    document.getElementById('desktop-quantity-value').textContent = desktopQuantity;
+}
+
+// Update desktop quantity and price
+function updateDesktopQuantityAndPrice() {
+    if (!desktopCurrentCookie) return;
+    
+    const cookie = allCookiesData[desktopCurrentCookie];
+    if (!cookie) return;
+    
+    // Check if this specific style is on sale
+    const isStyleOnSale = desktopCurrentStyle === 'chewy' ? 
+        (cookie.is_on_sale && cookie.chewy_discount_rate > 0) :
+        (cookie.is_on_sale && cookie.crumble_discount_rate > 0);
+    
+    const unitPrice = desktopCurrentStyle === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
+    const finalUnitPrice = desktopCurrentStyle === 'chewy' ? cookie.chewy_final_price : cookie.crumble_final_price;
+    
+    const totalPrice = finalUnitPrice * desktopQuantity;
+    const originalTotalPrice = unitPrice * desktopQuantity;
+    
+    // Update price display
+    const priceContainer = document.getElementById('desktop-price-container');
+    
+    if (isStyleOnSale && unitPrice !== finalUnitPrice) {
+        priceContainer.innerHTML = `
+            <span class="desktop-original-price">${originalTotalPrice} LE</span>
+            <span class="desktop-final-price">${totalPrice} LE</span>
+        `;
+    } else {
+        priceContainer.innerHTML = `<div class="desktop-price">${totalPrice} LE</div>`;
+    }
+}
+
+// Event listeners for desktop detail
+function setupDesktopDetailEvents() {
+    // Close button
+    document.getElementById('desktop-close-btn').addEventListener('click', closeDesktopCookieDetail);
+    
+    // Style buttons
+    document.querySelectorAll('.desktop-style-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const style = this.getAttribute('data-style');
+            desktopCurrentStyle = style;
+            updateDesktopStyleButtons(style);
+        });
+    });
+
+    // Update desktop quantity buttons event listeners
+document.getElementById('desktop-increase-qty').addEventListener('click', function() {
+    desktopQuantity++;
+    document.getElementById('desktop-quantity-value').textContent = desktopQuantity;
+    updateDesktopQuantityAndPrice();
+});
+
+document.getElementById('desktop-decrease-qty').addEventListener('click', function() {
+    if (desktopQuantity > 1) {
+        desktopQuantity--;
+        document.getElementById('desktop-quantity-value').textContent = desktopQuantity;
+        updateDesktopQuantityAndPrice();
+    }
+});
+    
+    // Add to cart button
+    document.getElementById('desktop-add-to-cart').addEventListener('click', addToCartFromDesktop);
+    
+    // Close on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && document.getElementById('desktop-cookie-detail').classList.contains('active')) {
+            closeDesktopCookieDetail();
+        }
+    });
+    
+    // Close on overlay click (optional - if you want overlay clicking)
+    document.getElementById('desktop-cookie-detail').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDesktopCookieDetail();
+        }
+    });
+}
+
 
 // Update the render functions to use a more robust image loading approach
 async function renderBoxes() {
@@ -1213,11 +1502,10 @@ async function renderMysteryBox() {
     }
 }
 
-// Update renderCookiesGrid to show sale prices
+// Update the renderCookiesGrid function to create alternating layout
 async function renderCookiesGrid() {
-    console.log("GGGGGGGGGGGG")
+    console.log("Rendering cookies grid with alternating layout...");
     try {
-        console.log('Rendering cookies grid...');
         const cookiesGrid = document.querySelector('.cookies-grid');
         if (!cookiesGrid) {
             console.warn('Cookies grid not found');
@@ -1238,11 +1526,18 @@ async function renderCookiesGrid() {
             return;
         }
 
-        Object.keys(cookiesData).forEach(slug => {
-            const cookie = cookiesData[slug];
-            console.log('cookie', cookie)
+        // Convert object to array and add index for alternating
+        const cookiesArray = Object.keys(cookiesData).map((slug, index) => ({
+            slug,
+            cookie: cookiesData[slug],
+            index
+        }));
+
+        cookiesArray.forEach(({ slug, cookie, index }) => {
+            const isEven = index % 2 === 0; // Even index = left image, odd index = right image
+            
             const cookieCard = document.createElement('div');
-            cookieCard.className = 'cookie-card';
+            cookieCard.className = `cookie-alternating-card ${isEven ? 'image-left' : 'image-right'}`;
             cookieCard.onclick = () => openPopup(slug);
 
             let tagsHTML = '';
@@ -1255,32 +1550,82 @@ async function renderCookiesGrid() {
             // Get price display with sale information
             const priceInfo = getCookieDisplayPrice(cookie, 'chewy');
 
-            cookieCard.innerHTML = `
-                <div class="cookie-image">
-                    <div class="image-loading-container">
-                        <div class="image-loading"></div>
-                        <img src="${cookie.images.chewy}" alt="${cookie.title}" loading="lazy">
+            // Create alternating layout HTML
+            // Inside the cookieCard.innerHTML, update the button section:
+cookieCard.innerHTML = `
+    <div class="cookie-alternating-container">
+        ${isEven ? `
+            <!-- Image on LEFT, Content on RIGHT -->
+            <div class="cookie-alternating-image">
+                <div class="image-loading-container">
+                    <div class="image-loading"></div>
+                    <img src="${cookie.images.chewy}" alt="${cookie.title}" loading="lazy">
+                </div>
+                ${tagsHTML}
+                ${cookie.is_on_sale ? '<div class="sale-ribbon">SALE</div>' : ''}
+            </div>
+            <div class="cookie-alternating-content">
+                <h3>${cookie.title}</h3>
+                <p class="cookie-description">${cookie.description}</p>
+                <div class="cookie-features">
+                    <div class="cookie-feature">
+                        <i class="fas fa-leaf"></i>
+                        <span>${cookie.ingredients || 'Premium ingredients'}</span>
                     </div>
-                    ${tagsHTML}
-                    ${cookie.is_on_sale ? '<div class="sale-ribbon">SALE</div>' : ''}
-                    <button class="cookie-overlay-btn" onclick="event.stopPropagation(); openPopup('${slug}')">
-                        <i class="fas fa-plus"></i> Add to Cart
+                    <div class="cookie-feature">
+                        <i class="fas fa-award"></i>
+                        <span>${cookie.specialty || 'Handcrafted with care'}</span>
+                    </div>
+                </div>
+                <div class="cookie-alternating-footer">
+                    ${priceInfo.displayHTML}
+                    <button class="choose-style-btn" onclick="event.stopPropagation(); openPopup('${slug}')">
+                        <i class="fas fa-cookie-bite"></i> Choose Your Style
                     </button>
                 </div>
-                <div class="cookie-details">
-                    <h3>${cookie.title}</h3>
-                    ${priceInfo.displayHTML}
+            </div>
+        ` : `
+            <!-- Image on RIGHT, Content on LEFT -->
+            <div class="cookie-alternating-content">
+                <h3>${cookie.title}</h3>
+                <p class="cookie-description">${cookie.description}</p>
+                <div class="cookie-features">
+                    <div class="cookie-feature">
+                        <i class="fas fa-leaf"></i>
+                        <span>${cookie.ingredients || 'Premium ingredients'}</span>
+                    </div>
+                    <div class="cookie-feature">
+                        <i class="fas fa-award"></i>
+                        <span>${cookie.specialty || 'Handcrafted with care'}</span>
+                    </div>
                 </div>
-            `;
+                <div class="cookie-alternating-footer">
+                    ${priceInfo.displayHTML}
+                    <button class="choose-style-btn" onclick="event.stopPropagation(); openPopup('${slug}')">
+                        <i class="fas fa-cookie-bite"></i> Choose Your Style
+                    </button>
+                </div>
+            </div>
+            <div class="cookie-alternating-image">
+                <div class="image-loading-container">
+                    <div class="image-loading"></div>
+                    <img src="${cookie.images.chewy}" alt="${cookie.title}" loading="lazy">
+                </div>
+                ${tagsHTML}
+                ${cookie.is_on_sale ? '<div class="sale-ribbon">SALE</div>' : ''}
+            </div>
+        `}
+    </div>
+`;
 
             // Setup image handlers for this cookie
             const img = cookieCard.querySelector('img');
-            //setupImageHandlers(img);
+            setupImageHandlers(img);
 
             cookiesGrid.appendChild(cookieCard);
         });
 
-        console.log('Cookies grid rendered successfully:', Object.keys(cookiesData).length, 'cookies');
+        console.log('Alternating cookies grid rendered successfully:', Object.keys(cookiesData).length, 'cookies');
     } catch (error) {
         console.error('Error rendering cookies grid:', error);
         const cookiesGrid = document.querySelector('.cookies-grid');
@@ -1735,13 +2080,14 @@ function updateLoadingProgress(increment = 20) {
 
 
 
+// Update your existing openPopup function to use desktop detail
 function openPopup(cookieType) {
     if (window.innerWidth <= 768) {
-        // Use detail page for mobile
+        // Use mobile detail page for mobile
         openCookieDetail(cookieType);
     } else {
-        // Use popup for desktop
-        openDesktopPopup(cookieType);
+        // Use desktop detail for desktop
+        openDesktopCookieDetail(cookieType);
     }
 }
 
@@ -1793,7 +2139,7 @@ function closeCookieDetail() {
 }
 
 // Change style in mobile detail page
-// Update changeDetailStyle for mobile
+// Update mobile detail style change
 function changeDetailStyle(style) {
     currentDetailStyle = style;
     
@@ -1806,10 +2152,26 @@ function changeDetailStyle(style) {
         const cookie = allCookiesData[currentDetailCookie];
         document.getElementById('detail-image').style.backgroundImage = `url(${cookie.images[style]})`;
         
-        // Update price with sale information
-        const priceInfo = getCookieDisplayPrice(cookie, style);
+        // Update price with style-specific sale check
+        const isStyleOnSale = style === 'chewy' ? 
+            (cookie.is_on_sale && cookie.chewy_discount_rate > 0) :
+            (cookie.is_on_sale && cookie.crumble_discount_rate > 0);
+        
+        const unitPrice = style === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
+        const finalPrice = style === 'chewy' ? cookie.chewy_final_price : cookie.crumble_final_price;
+        
         const priceContainer = document.getElementById('detail-price');
-        priceContainer.innerHTML = priceInfo.displayHTML;
+        
+        if (isStyleOnSale && unitPrice !== finalPrice) {
+            priceContainer.innerHTML = `
+                <div class="cookie-price-sale">
+                    <span class="original-price">${unitPrice} LE</span>
+                    <span class="final-price">${finalPrice} LE</span>
+                </div>
+            `;
+        } else {
+            priceContainer.innerHTML = `<div class="cookie-price">${unitPrice} LE</div>`;
+        }
     }
 }
 
@@ -1914,6 +2276,39 @@ document.getElementById('popupOverlay').addEventListener('click', function(e) {
     }
 });
 
+// For mobile detail page (if you add quantity)
+function updateMobileDetailQuantityAndPrice() {
+    if (!currentDetailCookie) return;
+    
+    const cookie = allCookiesData[currentDetailCookie];
+    if (!cookie) return;
+    
+    // Get price based on current style and sale status
+    let unitPrice;
+    if (cookie.is_on_sale) {
+        unitPrice = currentDetailStyle === 'chewy' ? cookie.chewy_final_price : cookie.crumble_final_price;
+    } else {
+        unitPrice = currentDetailStyle === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
+    }
+    
+    const totalPrice = unitPrice * (mobileDetailQuantity || 1);
+    
+    // Update price display
+    const priceContainer = document.getElementById('detail-price');
+    
+    if (cookie.is_on_sale && cookie.chewy_price !== cookie.chewy_final_price) {
+        const originalTotal = (currentDetailStyle === 'chewy' ? cookie.chewy_price : cookie.crumble_price) * (mobileDetailQuantity || 1);
+        priceContainer.innerHTML = `
+            <div class="cookie-price-sale">
+                <span class="original-price">${originalTotal} LE</span>
+                <span class="final-price">${totalPrice} LE</span>
+            </div>
+        `;
+    } else {
+        priceContainer.innerHTML = `<div class="cookie-price">${totalPrice} LE</div>`;
+    }
+}
+
 function changeStyle(style) {
     currentStyle = style;
     
@@ -1923,33 +2318,34 @@ function changeStyle(style) {
     });
     document.querySelector(`.popup-style-option[data-style="${style}"]`).classList.add('active');
     
-    // Update image based on style - use allCookiesData
+    // Update image based on style
     if (currentCookie && allCookiesData[currentCookie]) {
         const cookie = allCookiesData[currentCookie];
         document.getElementById('popupImage').style.backgroundImage = `url(${cookie.images[style]})`;
         
-        // Update price with sale information
-        const priceInfo = getCookieDisplayPrice(cookie, style);
-        const priceContainer = document.getElementById('popupPrice');
-        priceContainer.innerHTML = priceInfo.displayHTML;
+        // Update price with current quantity and check style-specific sale
+        updatePopupQuantityAndPrice();
     }
 }
 
-// Quantity functionality
+// Update existing quantity functions for mobile popup
 function increaseQuantity() {
     quantity++;
     document.getElementById('quantityValue').textContent = quantity;
+    updatePopupQuantityAndPrice();
 }
 
 function decreaseQuantity() {
     if (quantity > 1) {
         quantity--;
         document.getElementById('quantityValue').textContent = quantity;
+        updatePopupQuantityAndPrice();
     }
 }
 
 // Update addToCartFromPopup to use final prices
 async function addToCartFromPopup() {
+    const totalPrice = unitPrice * quantity;
     if (!currentCookie) {
         showNotification('Error: No cookie selected');
         return;
@@ -2052,7 +2448,6 @@ function saveCart(cart) {
     console.log("cart", cart);
 }
 
-// Update cart UI with validation
 // Update cart UI with enhanced validation and sale support
 async function updateCartUI() {
     const cart = getCart();
@@ -2090,7 +2485,7 @@ async function updateCartUI() {
 
         if (validatedCart.length === 0) {
             cartItems.innerHTML = '<div class="empty-cart">Your cart is empty</div>';
-            if (cartTotal) cartTotal.textContent = 'LE 0.00 EGP';
+            if (cartTotal) cartTotal.textContent = 'LE 0.00';
             return;
         }
 
@@ -2121,12 +2516,28 @@ async function updateCartUI() {
                 (item.priceChangeType === 'sale_applied' ? '🎉' : 
                  item.priceChangeType === 'sale_ended' ? '📈' : '💰') : '';
 
+            // Check if this specific item should show sale badge
+            let saleBadgeHTML = '';
+            if (item.cookieType && allCookiesData[item.cookieType]) {
+                const cookie = allCookiesData[item.cookieType];
+                const isStyleOnSale = item.style === 'chewy' ? 
+                    (cookie.is_on_sale && cookie.chewy_discount_rate > 0) :
+                    (cookie.is_on_sale && cookie.crumble_discount_rate > 0);
+                
+                if (isStyleOnSale) {
+                    saleBadgeHTML = '<div class="cart-sale-badge">SALE</div>';
+                }
+            } else if (item.isOnSale) {
+                // For boxes or mystery boxes that have sale status
+                saleBadgeHTML = '<div class="cart-sale-badge">SALE</div>';
+            }
+
             const cartItem = document.createElement('div');
             cartItem.className = `cart-item ${priceChangeClass}`;
             cartItem.innerHTML = `
                 <div class="cart-item-image">
-                    <img src="${item.img}" alt="${item.name}">
-                    ${item.isOnSale ? '<div class="cart-sale-badge">SALE</div>' : ''}
+                    <img src="${item.img}" alt="${item.name}" onerror="this.src='images/fallback-cookie.svg'">
+                    ${saleBadgeHTML}
                 </div>
                 <div class="cart-item-details">
                     <div class="cart-item-name">
@@ -2134,9 +2545,9 @@ async function updateCartUI() {
                         ${hasPriceChange ? `<span class="price-change-indicator">${priceChangeIcon}</span>` : ''}
                     </div>
                     <div class="cart-item-price ${hasPriceChange ? 'price-updated' : ''}">
-                        EGP ${itemTotal}
+                        ${itemTotal} LE
                         ${hasPriceChange && item.originalPrice ? 
-                            `<span class="original-cart-price">was EGP ${item.originalPrice * item.quantity}</span>` : ''}
+                            `<span class="original-cart-price">was ${item.originalPrice * item.quantity} LE</span>` : ''}
                     </div>
                     
                     ${flavorHTML}
@@ -2156,14 +2567,24 @@ async function updateCartUI() {
 
         // Update total
         if (cartTotal) {
-            cartTotal.textContent = `EGP ${total}`;
+            cartTotal.textContent = `${total} LE`;
             
             // Show total savings if any items are on sale
-            const saleItems = validatedCart.filter(item => item.isOnSale);
+            const saleItems = validatedCart.filter(item => {
+                if (item.cookieType && allCookiesData[item.cookieType]) {
+                    const cookie = allCookiesData[item.cookieType];
+                    const isStyleOnSale = item.style === 'chewy' ? 
+                        (cookie.is_on_sale && cookie.chewy_discount_rate > 0) :
+                        (cookie.is_on_sale && cookie.crumble_discount_rate > 0);
+                    return isStyleOnSale;
+                }
+                return item.isOnSale;
+            });
+            
             if (saleItems.length > 0) {
                 const savings = saleItems.reduce((total, item) => {
-                    const cookie = allCookiesData[item.cookieType];
-                    if (cookie && cookie.is_on_sale) {
+                    if (item.cookieType && allCookiesData[item.cookieType]) {
+                        const cookie = allCookiesData[item.cookieType];
                         const originalPrice = item.style === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
                         const savingsPerItem = originalPrice - item.unitPrice;
                         return total + (savingsPerItem * item.quantity);
@@ -2171,12 +2592,24 @@ async function updateCartUI() {
                     return total;
                 }, 0);
                 
-                // if (savings > 0) {
-                //     const savingsElement = document.createElement('div');
-                //     savingsElement.className = 'cart-savings';
-                //     // savingsElement.textContent = `You save: EGP ${savings}`;
-                //     cartTotal.parentNode.appendChild(savingsElement);
-                // }
+                if (savings > 0) {
+                    // Remove existing savings element if any
+                    const existingSavings = document.querySelector('.cart-savings');
+                    if (existingSavings) {
+                        existingSavings.remove();
+                    }
+                    
+                    const savingsElement = document.createElement('div');
+                    savingsElement.className = 'cart-savings';
+                    savingsElement.textContent = `You saved: ${savings} LE`;
+                    cartTotal.parentNode.appendChild(savingsElement);
+                }
+            } else {
+                // Remove savings element if no sale items
+                const existingSavings = document.querySelector('.cart-savings');
+                if (existingSavings) {
+                    existingSavings.remove();
+                }
             }
         }
 
@@ -3566,6 +3999,23 @@ function setupMobileCart() {
         }
     }
 }
+// Add zoom functionality to cookie images
+function initImageZoom() {
+    const cookieImages = document.querySelectorAll('.cookie-image img, .cookie-slide-image img');
+    
+    cookieImages.forEach(img => {
+        img.addEventListener('click', function() {
+            this.classList.toggle('zoomed');
+            if (this.classList.contains('zoomed')) {
+                this.style.transform = 'scale(2)';
+                this.style.cursor = 'zoom-out';
+            } else {
+                this.style.transform = 'scale(1)';
+                this.style.cursor = 'zoom-in';
+            }
+        });
+    });
+}
 
 
 // Tab functionality
@@ -3576,6 +4026,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     updateLoadingProgress(0);
     setupImageErrorHandling();
     initCookieSlider()
+    initImageZoom();
+    setupDesktopDetailEvents();
     
     // Initialize Supabase and load data
     initializeApp();
