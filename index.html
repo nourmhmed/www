@@ -67,12 +67,6 @@
             <nav class="main-nav" id="main-nav">
                 <ul class="nav-list">
                     <li class="nav-item">
-                        <a href="#" class="nav-link active" data-tab="home">
-                            <i class="fas fa-home"></i>
-                            <span>Home</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a href="#" class="nav-link" data-tab="cookies">
                             <i class="fas fa-cookie"></i>
                             <span>Cookies</span>
@@ -81,7 +75,13 @@
                     <li class="nav-item">
                         <a href="#" class="nav-link" data-tab="boxes">
                             <i class="fas fa-gift"></i>
-                            <span>Boxes</span>
+                            <span>Build your own box</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-tab="home">
+                            <i class="fas fa-home"></i>
+                            <span>Home</span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -277,82 +277,75 @@
                 </div>
             </section>
 
-            <!-- Box Showcase Section -->
-            <section class="box-showcase">
+            <!-- Alternative version with text overlay -->
+            <section class="build-box-section">
                 <div class="container">
-                    <h2 class="section-title">Our Popular Boxes</h2>
-
-                    <br>
-                    <div class="box-showcase-grid" id="box-showcase-grid">
-                        <!-- Dynamic content will be inserted here by JavaScript -->
+                    <div class="build-box-hero">
+                        <div class="build-box-overlay">
+                            <h2>Build Your Own Box</h2>
+                            <p>Mix and match your favorite cookies to create the perfect custom box</p>
+                            <button class="btn build-box-btn" onclick="switchTab('boxes')">
+                                <i class="fas fa-gift"></i> Start Building
+                            </button>
+                        </div>
+                        <div class="build-box-background">
+                            <img src="images/build your own box.svg" alt="Build Your Own Cookie Box" loading="lazy">
+                        </div>
                     </div>
-
-                    <button class="showcase-more-btn" id="showMoreBoxesBtn">
-                        Explore All Boxes <i class="fas fa-arrow-right"></i>
-                    </button>
                 </div>
             </section>
+
+
         </div>
 
         <!-- Boxes Tab -->
         <div class="tab-content" id="boxes-tab">
             <section class="boxes">
                 <div class="container">
-                    <h2 class="section-title">Cookie Boxes</h2>
+                    <h2 class="section-title">Build Your Cookie Box</h2>
 
-                    <div class="box-options">
-                        <div class="box-option" data-size="duo" data-chewy="155" data-crumble="155" data-mix="165"
-                            data-img="images/duo.svg">
-                            <img src="images/duo.svg" alt="The Duo Box" class="box-img" loading="lazy">
-                            <h4>The Duo</h4>
-                            <p>2 cookies—perfect for a quick fix</p>
-                            <div class="box-prices">
-                                <span class="price-display">155 LE</span>
-                            </div>
-                        </div>
-
-                        <div class="box-option" data-size="trio" data-chewy="245" data-crumble="245" data-mix="255"
-                            data-img="images/trio.svg">
-                            <img src="images/trio.svg" alt="The Trio Box" class="box-img" loading="lazy">
-                            <h4>The Trio</h4>
-                            <p>3 cookies—one for now, one later, one to share...maybe</p>
-                            <div class="box-prices">
-                                <span class="price-display">245 LE</span>
-                            </div>
-                        </div>
-
-                        <div class="box-option" data-size="classic" data-chewy="320" data-crumble="320" data-mix="335"
-                            data-img="images/four.svg">
-                            <img src="images/four.svg" alt="The Classic Box" class="box-img" loading="lazy">
-                            <h4>The Classic</h4>
-                            <p>4 cookies—the sweet spot</p>
-                            <div class="box-prices">
-                                <span class="price-display">320 LE</span>
-                            </div>
-                        </div>
-
-                        <div class="box-option" data-size="craver" data-chewy="480" data-crumble="480" data-mix="505"
-                            data-img="images/six.svg">
-                            <img src="images/six.svg" alt="The Craver Box" class="box-img" loading="lazy">
-                            <h4>The Craver</h4>
-                            <p>6 cookies—when you can't get enough</p>
-                            <div class="box-prices">
-                                <span class="price-display">480 LE</span>
-                            </div>
-                        </div>
-
-                        <div class="box-option" data-size="feast" data-chewy="675" data-crumble="675" data-mix="700"
-                            data-img="images/nine.svg">
-                            <img src="images/nine.svg" alt="The Feast Box" class="box-img" loading="lazy">
-                            <h4>The Feast</h4>
-                            <p>9 cookies—for family, friends, or just you... no judgment!</p>
-                            <div class="box-prices">
-                                <span class="price-display">675 LE</span>
-                            </div>
-                        </div>
+                    <!-- Box Selection Dropdown -->
+                    <div class="box-selection-dropdown">
+                        <label for="box-select">Choose Your Box Size:</label>
+                        <select id="box-select" class="box-select">
+                            <!-- Options will be populated dynamically -->
+                        </select>
                     </div>
 
+                    <!-- Cookie Selection Interface -->
+                    <div class="cookie-selection-interface" id="cookie-selection-interface">
+                        <div class="selection-header">
+                            <h3 id="selection-title">Select Your Cookies</h3>
+                            <div class="selection-info">
+                                <span id="selected-count">0</span> / <span id="total-cookies">0</span> cookies selected
+                            </div>
+                        </div>
 
+                        <div class="style-selection">
+                            <button class="style-btn selected" data-style="chewy">
+                                <i class="fas fa-cookie"></i> Chewy
+                            </button>
+                            <button class="style-btn" data-style="crumble">
+                                <i class="fas fa-cookie-bite"></i> Crumble
+                            </button>
+                            <button class="style-btn" data-style="mix">
+                                <i class="fas fa-random"></i> Mix of Both
+                            </button>
+                        </div>
+
+                        <div class="cookies-selection-grid" id="cookies-selection-grid">
+                            <!-- Cookies will be populated here -->
+                        </div>
+
+                        <div class="selection-actions">
+                            <div class="selection-summary" id="selection-summary">
+                                No cookies selected yet
+                            </div>
+                            <button class="btn add-to-cart-box" id="add-box-to-cart" disabled>
+                                <i class="fas fa-shopping-cart"></i> Add Box to Cart
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>

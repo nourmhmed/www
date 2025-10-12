@@ -17,7 +17,7 @@ let loadingTimeout;
 let currentDetailCookie = null;
 let currentDetailStyle = 'chewy';
 
-
+let selectedCookies = {};
 // Add these with your other global variables
 let boxesData = [];
 let mysteryBoxData = null;
@@ -1193,7 +1193,7 @@ function closeDesktopCookieDetail() {
 
 // Add to cart from desktop detail
 async function addToCartFromDesktop() {
-    const totalPrice = unitPrice * desktopQuantity;
+    
     if (!desktopCurrentCookie) {
         showNotification('Error: No cookie selected');
         return;
@@ -1212,6 +1212,7 @@ async function addToCartFromDesktop() {
     } else {
         unitPrice = desktopCurrentStyle === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
     }
+    const totalPrice = unitPrice * desktopQuantity;
 
     const qty = desktopQuantity || 1;
     const cookieName = cookie.title;
@@ -1320,85 +1321,537 @@ document.getElementById('desktop-decrease-qty').addEventListener('click', functi
     });
 }
 
+// Initialize box selection dropdown
+function initBoxSelectionDropdown() {
+    const boxSelect = document.getElementById('box-select');
+    const cookieSelectionInterface = document.getElementById('cookie-selection-interface');
+    
+    if (boxSelect && boxesData && boxesData.length > 0) {
+        // Clear existing options
+        boxSelect.innerHTML = '';
+        
+        // Sort boxes by cookie count
+        const sortedBoxes = [...boxesData].sort((a, b) => a.cookie_count - b.cookie_count);
+        
+        // Populate dropdown
+        sortedBoxes.forEach((box, index) => {
+            const option = document.createElement('option');
+            option.value = box.size;
+            option.textContent = `${box.name} - ${box.cookie_count} cookies`;
+            option.setAttribute('data-size', box.size);
+            boxSelect.appendChild(option);
+            
+            // Set first item as default selection
+            if (index === 0) {
+                boxSelect.value = box.size;
+                // Trigger the cookie selection interface for the first item
+                setTimeout(() => {
+                    initCookieSelection(box);
+                }, 100);
+            }
+        });
+        
+        // Add change event - SHOW COOKIE SELECTION INTERFACE
+        boxSelect.addEventListener('change', function() {
+            const selectedSize = this.value;
+            
+            if (selectedSize) {
+                const selectedBox = boxesData.find(box => box.size === selectedSize);
+                if (selectedBox) {
+                    // Initialize cookie selection
+                    initCookieSelection(selectedBox);
+                }
+            } else {
+                // Hide cookie selection if no box selected
+                cookieSelectionInterface.style.display = 'none';
+            }
+        });
+    }
+}
 
-// Update the render functions to use a more robust image loading approach
+// Update initCookieSelection to be simpler
+function initCookieSelection(selectedBox) {
+    const totalCookies = document.getElementById('total-cookies');
+    const selectedCount = document.getElementById('selected-count');
+    const selectionSummary = document.getElementById('selection-summary');
+    const addToCartBtn = document.getElementById('add-box-to-cart');
+    const cookieSelectionInterface = document.getElementById('cookie-selection-interface');
+    
+    // Always show the cookie selection interface
+    cookieSelectionInterface.style.display = 'block';
+    
+    // Update interface with box info
+    totalCookies.textContent = selectedBox.cookie_count;
+    selectedCount.textContent = '0';
+    
+    // Get current selected style and rebuild grid
+    const currentStyle = document.querySelector('.style-btn.selected')?.getAttribute('data-style') || 'chewy';
+    updateCookieSelectionImages(currentStyle);
+    
+    // Setup style selection
+    setupStyleSelection();
+    
+    // Initialize add to cart button
+    addToCartBtn.disabled = true;
+    addToCartBtn.onclick = () => addBoxToCart(selectedBox);
+    
+    // Update selection summary
+    updateSelectionSummary(selectedBox.cookie_count);
+}
+
+function addBoxToCart(selectedBox) {
+    const totalSelected = getTotalSelectedCookies();
+    
+    if (totalSelected !== selectedBox.cookie_count) {
+        showNotification(`Please select exactly ${selectedBox.cookie_count} cookies.`);
+        return;
+    }
+    
+    // Get selected style
+    const selectedStyle = document.querySelector('.style-btn.selected').getAttribute('data-style');
+    
+    // Collect flavors
+    const flavors = [];
+    
+    Object.entries(selectedCookies).forEach(([key, cookie]) => {
+        if (cookie.quantity > 0) {
+            flavors.push({
+                flavor: cookie.name || allCookiesData[cookie.slug]?.title,
+                quantity: cookie.quantity,
+                type: cookie.style
+            });
+        }
+    });
+    
+    // Use box price
+    let unitPrice;
+    if (selectedStyle === 'mix') {
+        unitPrice = selectedBox.mix_price;
+    } else {
+        unitPrice = selectedBox[`${selectedStyle}_price`];
+    }
+    
+    const name = `${selectedBox.name} (${selectedStyle})`;
+    
+    const cart = getCart();
+    cart.push({
+        id: Date.now(),
+        name: name,
+        unitPrice: unitPrice,
+        price: unitPrice,
+        img: 'images/box.svg',
+        quantity: 1,
+        flavors: flavors,
+        size: selectedBox.size,
+        style: selectedStyle
+    });
+    
+    saveCart(cart);
+    updateCartUI();
+    showNotification(`${name} added to cart!`);
+    
+    // Reset selection
+    resetCookieSelection();
+}
+
+// Reset cookie selection
+function resetCookieSelection() {
+    const boxSelect = document.getElementById('box-select');
+    const cookieSelectionInterface = document.getElementById('cookie-selection-interface');
+    const boxOptions = document.getElementById('box-options');
+    const selectionSummary = document.getElementById('selection-summary');
+    
+    // Remove selected class from all cookie selection cards
+    const selectedCards = document.querySelectorAll('.cookie-selection-card.selected');
+    selectedCards.forEach(card => {
+        card.classList.remove('selected');
+    });
+    
+    // Reset quantity displays to 0
+    const quantityDisplays = document.querySelectorAll('.cookie-selection-quantity .quantity-value');
+    quantityDisplays.forEach(display => {
+        display.textContent = '0';
+    });
+    
+    // Clear the selected cookies grid
+    if (selectionSummary) {
+        selectionSummary.innerHTML = '';
+    }
+    
+    // boxSelect.value = '';
+    // cookieSelectionInterface.style.display = 'none';
+    boxOptions.style.display = 'grid';
+    selectedCookies = {};
+}
+
+
+function setupQuantityButtons(maxCookies) {
+    // Remove existing event listeners first
+    document.querySelectorAll('.quantity-btn').forEach(btn => {
+        btn.replaceWith(btn.cloneNode(true));
+    });
+    
+    // Add new event listeners
+    document.querySelectorAll('.quantity-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const uniqueId = this.getAttribute('data-unique-id');
+            const slug = this.getAttribute('data-slug');
+            const isIncrease = this.classList.contains('increase');
+            
+            let targetId;
+            let qtySpanId;
+            
+            // Determine the target ID based on whether we're in mix mode or single style
+            if (uniqueId) {
+                // Mix style - use unique ID
+                targetId = uniqueId;
+                qtySpanId = `qty-${uniqueId}`;
+            } else if (slug) {
+                // Single style - use slug
+                targetId = slug;
+                qtySpanId = `qty-${slug}`;
+            } else {
+                console.error('No identifier found for quantity button');
+                return;
+            }
+            
+            const currentQty = selectedCookies[targetId]?.quantity || 0;
+            const totalSelected = getTotalSelectedCookies();
+            
+            if (isIncrease) {
+                if (totalSelected < maxCookies) {
+                    if (!selectedCookies[targetId]) {
+                        console.error('Cookie data not found for:', targetId);
+                        return;
+                    }
+                    selectedCookies[targetId].quantity++;
+                } else {
+                    showNotification(`You can only select ${maxCookies} cookies for this box.`);
+                    return;
+                }
+            } else {
+                if (currentQty > 0) {
+                    selectedCookies[targetId].quantity--;
+                }
+            }
+            
+            // Update UI
+            const qtySpan = document.getElementById(qtySpanId);
+            if (qtySpan) {
+                qtySpan.textContent = selectedCookies[targetId].quantity;
+            }
+            
+            // Update card selection state
+            const card = this.closest('.cookie-selection-card');
+            if (selectedCookies[targetId].quantity > 0) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+            
+            // Update selection info
+            updateSelectionInfo(maxCookies);
+        });
+    });
+}
+
+function setupStyleSelection() {
+    document.querySelectorAll('.style-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Update active button
+            document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('selected'));
+            this.classList.add('selected');
+            
+            const selectedStyle = this.getAttribute('data-style');
+            
+            // Clear and rebuild the entire grid based on selected style
+            updateCookieSelectionImages(selectedStyle);
+            
+            updateSelectionSummary();
+        });
+    });
+}
+
+
+function updateCookieSelectionImages(style) {
+    const cookiesGrid = document.getElementById('cookies-selection-grid');
+    const selectedBox = boxesData.find(box => box.size === document.getElementById('box-select').value);
+    
+    if (!selectedBox) return;
+    
+    // Clear the grid and rebuild based on style
+    cookiesGrid.innerHTML = '';
+    selectedCookies = {};
+    
+    if (style === 'mix') {
+        rebuildMixSelectionGrid();
+    } else {
+        // For single styles (chewy/crumble), show only one version per cookie
+        rebuildSingleStyleGrid(style, selectedBox);
+    }
+    
+    // Re-setup quantity buttons
+    setupQuantityButtons(selectedBox.cookie_count);
+    
+    // Update selection info
+    updateSelectionInfo(selectedBox.cookie_count);
+}
+
+// New function to rebuild grid for single styles
+function rebuildSingleStyleGrid(style, selectedBox) {
+    const cookiesGrid = document.getElementById('cookies-selection-grid');
+    
+    Object.keys(allCookiesData).forEach(slug => {
+        const cookie = allCookiesData[slug];
+        const cookieCard = document.createElement('div');
+        cookieCard.className = 'cookie-selection-card';
+        cookieCard.setAttribute('data-slug', slug);
+        
+        const imageUrl = cookie.images[style] || cookie.images.chewy;
+        
+        cookieCard.innerHTML = `
+            <div class="cookie-selection-image">
+                <img src="${imageUrl}" alt="${cookie.title}" loading="lazy">
+            </div>
+            <div class="cookie-selection-details">
+                <h4>${cookie.title}</h4>
+                <p>${cookie.description}</p>
+                <div class="cookie-selection-quantity">
+                    <button class="quantity-btn decrease" data-slug="${slug}">-</button>
+                    <span class="quantity-value" id="qty-${slug}">0</span>
+                    <button class="quantity-btn increase" data-slug="${slug}">+</button>
+                </div>
+            </div>
+        `;
+        
+        cookiesGrid.appendChild(cookieCard);
+        
+        // Initialize quantity for this cookie
+        selectedCookies[slug] = {
+            quantity: 0,
+            style: style,
+            price: style === 'chewy' ? cookie.chewy_price : cookie.crumble_price,
+            slug: slug,
+            name: cookie.title
+        };
+    });
+}
+
+function rebuildMixSelectionGrid() {
+    const cookiesGrid = document.getElementById('cookies-selection-grid');
+    const selectedBox = boxesData.find(box => box.size === document.getElementById('box-select').value);
+    
+    if (!selectedBox) return;
+    
+    Object.keys(allCookiesData).forEach(slug => {
+        const cookie = allCookiesData[slug];
+        
+        // Create TWO cards for each cookie - one chewy, one crumble
+        ['chewy', 'crumble'].forEach(cookieStyle => {
+            const uniqueId = `${slug}-${cookieStyle}`;
+            const cookieCard = document.createElement('div');
+            cookieCard.className = 'cookie-selection-card';
+            cookieCard.setAttribute('data-slug', slug);
+            cookieCard.setAttribute('data-style', cookieStyle);
+            
+            const imageUrl = cookie.images[cookieStyle] || cookie.images.chewy;
+            const styleLabel = cookieStyle.charAt(0).toUpperCase() + cookieStyle.slice(1);
+            
+            cookieCard.innerHTML = `
+                <div class="cookie-selection-image">
+                    <img src="${imageUrl}" alt="${cookie.title} (${styleLabel})" loading="lazy">
+                    <div class="cookie-style-badge">${styleLabel}</div>
+                </div>
+                <div class="cookie-selection-details">
+                    <h4>${cookie.title}</h4>
+                    <p class="cookie-style-type">${styleLabel}</p>
+                    <p>${cookie.description}</p>
+                    <div class="cookie-selection-quantity">
+                        <button class="quantity-btn decrease" data-unique-id="${uniqueId}">-</button>
+                        <span class="quantity-value" id="qty-${uniqueId}">0</span>
+                        <button class="quantity-btn increase" data-unique-id="${uniqueId}">+</button>
+                    </div>
+                </div>
+            `;
+            
+            cookiesGrid.appendChild(cookieCard);
+            
+            // Initialize quantity for this cookie style
+            selectedCookies[uniqueId] = {
+                quantity: 0,
+                style: cookieStyle,
+                price: cookieStyle === 'chewy' ? cookie.chewy_price : cookie.crumble_price,
+                slug: slug,
+                name: cookie.title
+            };
+        });
+    });
+}
+
+// Update selection info
+function updateSelectionInfo(maxCookies) {
+    const totalSelected = getTotalSelectedCookies();
+    const selectedCount = document.getElementById('selected-count');
+    const addToCartBtn = document.getElementById('add-box-to-cart');
+    
+    selectedCount.textContent = totalSelected;
+    
+    // Enable/disable add to cart button
+    addToCartBtn.disabled = totalSelected !== maxCookies;
+    
+    updateSelectionSummary(maxCookies);
+}
+
+// Update the updateSelectionSummary function to include images
+function updateSelectionSummary(maxCookies) {
+    const selectionSummary = document.getElementById('selection-summary');
+    const totalSelected = getTotalSelectedCookies();
+    
+    if (totalSelected === 0) {
+        selectionSummary.innerHTML = '';
+    } else {
+        let summaryHTML = '<div class="selection-summary-header">Your Selection:</div>';
+        summaryHTML += '<div class="selected-cookies-grid">';
+        
+        Object.entries(selectedCookies)
+            .filter(([_, cookie]) => cookie.quantity > 0)
+            .forEach(([key, cookie]) => {
+                const cookieData = allCookiesData[cookie.slug];
+                const imageUrl = cookieData?.images?.[cookie.style] || cookieData?.images?.chewy || 'images/fallback-cookie.svg';
+                const styleLabel = cookie.style.charAt(0).toUpperCase() + cookie.style.slice(1);
+                
+                summaryHTML += `
+                    <div class="selected-cookie-item">
+                        <div class="selected-cookie-image">
+                            <img src="${imageUrl}" alt="${cookieData?.title || 'Cookie'}" loading="lazy">
+                            <span class="selected-cookie-quantity">${cookie.quantity}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        
+        summaryHTML += '</div>';
+        selectionSummary.innerHTML = summaryHTML;
+    }
+}
+
+// Update getTotalSelectedCookies for mix style
+function getTotalSelectedCookies() {
+    return Object.values(selectedCookies).reduce((total, cookie) => total + cookie.quantity, 0);
+}
+
+// Render dropdown and box options from database data
+function renderBoxesDropdownAndOptions(boxesData, boxSelect, boxOptionsContainer) {
+    // Clear existing options
+    boxSelect.innerHTML = '<option value="">Select a box...</option>';
+    boxOptionsContainer.innerHTML = '';
+    
+    // Sort boxes by cookie count for consistent ordering
+    const sortedBoxes = [...boxesData].sort((a, b) => a.cookie_count - b.cookie_count);
+    
+    // Populate dropdown and create box options
+    sortedBoxes.forEach(box => {
+        // Add option to dropdown
+        const option = document.createElement('option');
+        option.value = box.size;
+        option.textContent = `${box.name} - ${box.cookie_count} cookies`;
+        option.setAttribute('data-size', box.size);
+        boxSelect.appendChild(option);
+        
+        // Create box option element
+        const boxOption = document.createElement('div');
+        boxOption.className = 'box-option';
+        boxOption.setAttribute('data-size', box.size);
+        boxOption.setAttribute('data-chewy', box.chewy_price);
+        boxOption.setAttribute('data-crumble', box.crumble_price);
+        boxOption.setAttribute('data-mix', box.mix_price);
+        boxOption.setAttribute('data-img', box.image_url);
+        
+        // Determine price display
+        let priceDisplay = '';
+        if (box.chewy_price === box.crumble_price) {
+            priceDisplay = `${box.chewy_price} LE`;
+        } else {
+            const minPrice = Math.min(box.chewy_price, box.crumble_price);
+            const maxPrice = Math.max(box.chewy_price, box.crumble_price);
+            priceDisplay = `${minPrice} - ${maxPrice} LE`;
+        }
+        
+        boxOption.innerHTML = `
+            <div class="image-loading-container">
+                <div class="image-loading"></div>
+                <img src="${box.image_url}" alt="${box.name}" class="box-img" loading="lazy">
+            </div>
+            <h4>${box.name}</h4>
+            <p>${box.description}</p>
+            <div class="box-prices">
+                <span class="price-display">${priceDisplay}</span>
+            </div>
+        `;
+        
+        // Add click event
+        boxOption.addEventListener('click', function() {
+            selectedBox = this;
+            showFlavorPopup(box.size, box.cookie_count, this);
+            
+            // Update dropdown selection
+            boxSelect.value = box.size;
+        });
+        
+        // Setup image handlers
+        const img = boxOption.querySelector('img');
+        setupImageHandlers(img);
+        
+        boxOptionsContainer.appendChild(boxOption);
+    });
+    
+    // Setup dropdown change event
+    boxSelect.addEventListener('change', function() {
+        const selectedSize = this.value;
+        
+        if (selectedSize) {
+            // Find and click the corresponding box option
+            const targetBox = document.querySelector(`.box-option[data-size="${selectedSize}"]`);
+            if (targetBox) {
+                targetBox.click();
+            }
+        }
+    });
+    
+    // Add keyboard navigation for dropdown
+    boxSelect.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const selectedSize = this.value;
+            if (selectedSize) {
+                const targetBox = document.querySelector(`.box-option[data-size="${selectedSize}"]`);
+                if (targetBox) {
+                    targetBox.click();
+                }
+            }
+        }
+    });
+}
+
 async function renderBoxes() {
     try {
-        console.log('Rendering boxes...');
-        const boxOptions = document.querySelector('.box-options');
-        if (!boxOptions) {
-            console.warn('Box options container not found');
-            return;
-        }
-
-        // Show loading state
-        boxOptions.innerHTML = '<div class="loading-boxes">📦 Loading our amazing boxes...</div>';
+        console.log('Rendering boxes dropdown...');
 
         // Fetch boxes data
         boxesData = await fetchBoxesData();
 
-        // Clear loading state and render boxes
-        boxOptions.innerHTML = '';
-
         if (!boxesData || boxesData.length === 0) {
-            boxOptions.innerHTML = '<div class="error-message">😢 No boxes available at the moment.</div>';
+            console.error('No boxes data available');
             return;
         }
 
-        boxesData.forEach(box => {
-            const boxOption = document.createElement('div');
-            boxOption.className = 'box-option';
-            boxOption.setAttribute('data-size', box.size);
-            boxOption.setAttribute('data-chewy', box.chewy_price);
-            boxOption.setAttribute('data-crumble', box.crumble_price);
-            boxOption.setAttribute('data-mix', box.mix_price);
-            boxOption.setAttribute('data-img', box.image_url);
+        // Initialize the dropdown with first item as default
+        initBoxSelectionDropdown();
 
-            // Determine price display
-            let priceDisplay = '';
-            if (box.chewy_price === box.crumble_price) {
-                priceDisplay = `${box.chewy_price} LE`;
-            } else {
-                const minPrice = Math.min(box.chewy_price, box.crumble_price);
-                const maxPrice = Math.max(box.chewy_price, box.crumble_price);
-                priceDisplay = `${minPrice} - ${maxPrice} LE`;
-            }
-
-            boxOption.innerHTML = `
-                <div class="image-loading-container">
-                    <div class="image-loading"></div>
-                    <img src="${box.image_url}" alt="${box.name}" class="box-img" loading="lazy">
-                </div>
-                <h4>${box.name}</h4>
-                <p>${box.description}</p>
-                <div class="box-prices">
-                    <span class="price-display">${priceDisplay}</span>
-                </div>
-            `;
-
-            // Add individual image load/error handlers
-            const img = boxOption.querySelector('img');
-            //setupImageHandlers(img);
-
-            // Add click event
-            boxOption.addEventListener('click', function() {
-                selectedBox = this;
-                showFlavorPopup(box.size, box.cookie_count, this);
-            });
-
-            boxOptions.appendChild(boxOption);
-        });
-
-        console.log('Boxes rendered successfully:', boxesData.length, 'boxes');
+        console.log('Boxes dropdown rendered successfully:', boxesData.length, 'boxes');
     } catch (error) {
         console.error('Error rendering boxes:', error);
-        const boxOptions = document.querySelector('.box-options');
-        if (boxOptions) {
-            boxOptions.innerHTML = '<div class="error-message">😢 Failed to load boxes. Please try refreshing the page.</div>';
-        }
     }
 }
-
 
 
 
@@ -2176,6 +2629,8 @@ function changeDetailStyle(style) {
 }
 
 async function addToCartFromDetail() {
+    console.log('Adding to cart from detail:', currentDetailCookie);
+    
     if (!currentDetailCookie) {
         showNotification('Error: No cookie selected');
         return;
@@ -2187,15 +2642,15 @@ async function addToCartFromDetail() {
         return;
     }
 
-    const cookiePrice = await getCookiePrice(currentDetailCookie, currentDetailStyle);
-    if (!cookiePrice) {
-        showNotification('Error: Could not verify price. Please try again.');
-        return;
+    // Use final price if on sale, otherwise use original price
+    let unitPrice;
+    if (cookie.is_on_sale) {
+        unitPrice = currentDetailStyle === 'chewy' ? cookie.chewy_final_price : cookie.crumble_final_price;
+    } else {
+        unitPrice = currentDetailStyle === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
     }
 
-    const unitPrice = cookiePrice;
     const cookieName = cookie.title;
-    
     const name = `${cookieName} (${currentDetailStyle.charAt(0).toUpperCase() + currentDetailStyle.slice(1)})`;
 
     const cart = getCart();
@@ -2207,7 +2662,8 @@ async function addToCartFromDetail() {
         img: cookie.images[currentDetailStyle] || 'images/default_cookie.svg',
         quantity: 1,
         style: currentDetailStyle,
-        cookieType: currentDetailCookie
+        cookieType: currentDetailCookie,
+        isOnSale: cookie.is_on_sale
     });
 
     saveCart(cart);
@@ -2219,7 +2675,7 @@ async function addToCartFromDetail() {
 
 function openDesktopPopup(cookieType) {
     console.log('Opening desktop popup for:', cookieType);
-    currentCookie = cookieType;
+    currentCookie = cookieType; // Make sure this is set
     currentStyle = 'chewy';
     quantity = 1;
     
@@ -2343,9 +2799,9 @@ function decreaseQuantity() {
     }
 }
 
-// Update addToCartFromPopup to use final prices
 async function addToCartFromPopup() {
-    const totalPrice = unitPrice * quantity;
+    console.log('Adding to cart from popup:', currentCookie);
+    
     if (!currentCookie) {
         showNotification('Error: No cookie selected');
         return;
@@ -2355,19 +2811,17 @@ async function addToCartFromPopup() {
     if (!cookie) {
         showNotification('Error: Cookie data not available');
         console.error('Cookie not found:', currentCookie);
-        console.error('Available cookies:', Object.keys(allCookiesData));
         return;
     }
 
     // Use final price if on sale, otherwise use original price
-    let cookiePrice;
+    let unitPrice;
     if (cookie.is_on_sale) {
-        cookiePrice = currentStyle === 'chewy' ? cookie.chewy_final_price : cookie.crumble_final_price;
+        unitPrice = currentStyle === 'chewy' ? cookie.chewy_final_price : cookie.crumble_final_price;
     } else {
-        cookiePrice = currentStyle === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
+        unitPrice = currentStyle === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
     }
 
-    const unitPrice = cookiePrice;
     const qty = quantity || 1;
     const cookieName = cookie.title;
     
@@ -2378,12 +2832,12 @@ async function addToCartFromPopup() {
         id: Date.now(),
         name: name,
         unitPrice: unitPrice,
-        price: unitPrice * qty,
+        price: unitPrice * qty, // Now unitPrice is defined here
         img: cookie.images[currentStyle] || 'images/default_cookie.svg',
         quantity: qty,
         style: currentStyle,
         cookieType: currentCookie,
-        isOnSale: cookie.is_on_sale // Store sale status for reference
+        isOnSale: cookie.is_on_sale
     });
 
     saveCart(cart);
@@ -2531,6 +2985,8 @@ async function updateCartUI() {
                 // For boxes or mystery boxes that have sale status
                 saleBadgeHTML = '<div class="cart-sale-badge">SALE</div>';
             }
+
+            console.log("item", item);
 
             const cartItem = document.createElement('div');
             cartItem.className = `cart-item ${priceChangeClass}`;
@@ -2991,77 +3447,8 @@ document.querySelectorAll('.nav-link').forEach(link => {
         switchTab(tabId);
     });
 });
-// Function to render box showcase
-async function renderBoxShowcase() {
-    const showcaseGrid = document.getElementById('box-showcase-grid');
-    if (!showcaseGrid) return;
 
-    // Show loading state
-    showcaseGrid.innerHTML = '<div class="loading-boxes">📦 Loading our amazing boxes...</div>';
 
-    try {
-        // Ensure we have boxes data
-        if (boxesData.length === 0) {
-            boxesData = await fetchBoxesData();
-        }
-        
-        // Take first 4 boxes for showcase
-        const featuredBoxes = boxesData.slice(0, 4);
-        
-        showcaseGrid.innerHTML = '';
-        
-        featuredBoxes.forEach((box, index) => {
-            const boxCard = document.createElement('div');
-            boxCard.className = 'showcase-box-card';
-            boxCard.style.animationDelay = `${index * 0.2}s`;
-            
-            // Determine price display
-            let priceDisplay = '';
-            if (box.chewy_price === box.crumble_price) {
-                priceDisplay = `${box.chewy_price} LE`;
-            } else {
-                const minPrice = Math.min(box.chewy_price, box.crumble_price);
-                const maxPrice = Math.max(box.chewy_price, box.crumble_price);
-                priceDisplay = `${minPrice} - ${maxPrice} LE`;
-            }
-            
-            boxCard.innerHTML = `
-                <div class="showcase-box-image">
-                    <img src="${box.image_url}" alt="${box.name}" loading="lazy">
-                </div>
-                <div class="showcase-box-details">
-                    <h3>${box.name}</h3>
-                    <p>${box.description}</p>
-                    <div class="showcase-box-price">${priceDisplay}</div>
-                    <button class="showcase-box-btn" data-box-size="${box.size}">
-                        <i class="fas fa-gift"></i> Customize Box
-                    </button>
-                </div>
-            `;
-            
-            // Make entire card clickable
-            boxCard.addEventListener('click', function(e) {
-                // Don't trigger if the button was clicked (to avoid double events)
-                if (!e.target.closest('.showcase-box-btn')) {
-                    selectAndCustomizeBox(box.size);
-                }
-            });
-            
-            // Add button click event
-            const button = boxCard.querySelector('.showcase-box-btn');
-            button.addEventListener('click', function(e) {
-                e.stopPropagation(); // Prevent card click event
-                selectAndCustomizeBox(box.size);
-            });
-            
-            showcaseGrid.appendChild(boxCard);
-        });
-        
-    } catch (error) {
-        console.error('Error rendering box showcase:', error);
-        showcaseGrid.innerHTML = '<div class="error-message">😢 Unable to load our amazing boxes. Please try again later.</div>';
-    }
-}
 
 // Function to handle box selection and customization
 async function selectAndCustomizeBox(boxSize) {
@@ -3349,10 +3736,7 @@ async function initializeApp() {
         
     } catch (error) {
         console.error('App initialization failed:', error);
-        // Even if there's an error, hide the loading screen
         updateLoadingProgress(100);
-        
-        // Show error notification
         showNotification('Failed to load some content. Please refresh the page.');
     }
 }
@@ -3360,14 +3744,13 @@ async function initializeApp() {
 async function renderAllComponents() {
     try {
         console.log('Starting to render all components...');
-        console.log('Available cookies data:', Object.keys(allCookiesData));
         
         // Render components in sequence and wait for each to complete
         await renderCookiesGrid();
         console.log('Cookies grid rendered');
         
-        await renderBoxes();
-        console.log('Boxes rendered');
+        await renderBoxes(); // This now includes the dropdown
+        console.log('Boxes with dropdown rendered');
         
         await renderMysteryBox();
         console.log('Mystery box rendered');
@@ -3375,14 +3758,11 @@ async function renderAllComponents() {
         await renderCookieShowcase();
         console.log('Cookie showcase rendered');
         
-        await renderBoxShowcase();
-        console.log('Box showcase rendered');
-        
         // Initialize interactive elements
         initializeVSBattle();
         setupMobileMenu();
         initCookieShowcase();
-        initBoxShowcase();
+        initBoxSelectionDropdown(); // Ensure dropdown is initialized
         
         // Update cart UI
         updateCartUI();
@@ -3394,6 +3774,7 @@ async function renderAllComponents() {
         throw error;
     }
 }
+
 // Add this function to debug the data flow
 function debugCookiesData() {
     console.log('=== COOKIES DATA DEBUG ===');
