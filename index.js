@@ -156,10 +156,7 @@ async function renderCookieSlider() {
                     
                     <div class="cookie-slide-actions">
                         <button class="slider-add-btn" data-cookie-slug="${slug}">
-                            <i class="fas fa-shopping-cart"></i> Add to Cart
-                        </button>
-                        <button class="slider-detail-btn" data-cookie-slug="${slug}">
-                            <i class="fas fa-info-circle"></i> View Details
+                            Choose Your Style
                         </button>
                     </div>
                 </div>
@@ -1452,6 +1449,26 @@ function addBoxToCart(selectedBox) {
     
     // Reset selection
     resetCookieSelection();
+}
+
+// Update the initShowcaseTabs function
+function initShowcaseTabs() {
+    const tabBtns = document.querySelectorAll('.showcase-tab-btn');
+    const tabPanes = document.querySelectorAll('.showcase-tab-pane');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tabId = this.getAttribute('data-tab');
+            
+            // Update active tab button
+            tabBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Update active tab pane
+            tabPanes.forEach(pane => pane.classList.remove('active'));
+            document.getElementById(`${tabId}-tab-pane`).classList.add('active');
+        });
+    });
 }
 
 // Reset cookie selection
@@ -3721,6 +3738,7 @@ async function initializeApp() {
         // Fetch mystery box data
         await fetchMysteryBoxData();
         updateLoadingProgress(80);
+        initShowcaseTabs()
         console.log('Mystery box data loaded');
         
         // Initialize prices

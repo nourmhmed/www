@@ -234,16 +234,15 @@
             </section>
 
 
-            <!-- Replace your current cookie showcase section with this: -->
+            <!-- Standalone Signature Cookies Section -->
             <section class="cookie-showcase">
                 <div class="container">
                     <div class="showcase-header">
                         <h2 class="section-title">Our Signature Cookies</h2>
-                        <p class="section-subtitle">Handcrafted perfection in every bite</p>
+                        <p class="section-subtitle">Discover our handcrafted delights</p>
                     </div>
 
                     <div class="cookie-slider-container">
-
                         <div class="cookie-slider-wrapper">
                             <button class="slider-nav-btn prev-btn" id="prevBtn">
                                 <i class="fas fa-chevron-left"></i>
@@ -262,9 +261,6 @@
 
                         <div class="slider-controls">
                             <div class="slider-dots" id="sliderDots"></div>
-                            <div class="slider-counter">
-                                <span id="currentSlide">1</span> / <span id="totalSlides">4</span>
-                            </div>
                         </div>
                     </div>
 
@@ -277,19 +273,58 @@
                 </div>
             </section>
 
-            <!-- Alternative version with text overlay -->
+            <!-- Separate Mystery & Boxes Section -->
             <section class="build-box-section">
                 <div class="container">
-                    <div class="build-box-hero">
-                        <div class="build-box-overlay">
-                            <h2>Build Your Own Box</h2>
-                            <p>Mix and match your favorite cookies to create the perfect custom box</p>
-                            <button class="btn build-box-btn" onclick="switchTab('boxes')">
-                                <i class="fas fa-gift"></i> Start Building
-                            </button>
+                    <div class="showcase-header">
+                        <h2 class="section-title">More Delicious Options</h2>
+                        <p class="section-subtitle">Choose your cookie adventure</p>
+                    </div>
+
+                    <!-- Tabs Navigation -->
+                    <div class="showcase-tabs-nav">
+                        <button class="showcase-tab-btn active" data-tab="mystery">
+                            <i class="fas fa-question-circle"></i>
+                            <span>Mystery Box</span>
+                        </button>
+                        <button class="showcase-tab-btn" data-tab="boxes">
+                            <i class="fas fa-gift"></i>
+                            <span>Build Your Box</span>
+                        </button>
+                    </div>
+
+                    <!-- Tabs Content -->
+                    <div class="showcase-tabs-content">
+                        <!-- Mystery Tab -->
+                        <div class="showcase-tab-pane active" id="mystery-tab-pane">
+                            <div class="build-box-hero">
+                                <div class="build-box-overlay">
+                                    <h2>Discover the Mystery</h2>
+                                    <p>Unbox a delicious surprise with our exclusive mystery cookie box</p>
+                                    <button class="btn build-box-btn" onclick="switchTab('mystery')">
+                                        <i class="fas fa-gift"></i> Unbox Mystery
+                                    </button>
+                                </div>
+                                <div class="build-box-background">
+                                    <img src="images/build your own box.svg" alt="Mystery Cookie Box" loading="lazy">
+                                </div>
+                            </div>
                         </div>
-                        <div class="build-box-background">
-                            <img src="images/build your own box.svg" alt="Build Your Own Cookie Box" loading="lazy">
+
+                        <!-- Boxes Tab -->
+                        <div class="showcase-tab-pane" id="boxes-tab-pane">
+                            <div class="build-box-hero">
+                                <div class="build-box-overlay">
+                                    <h2>Build Your Perfect Box</h2>
+                                    <p>Mix and match your favorite cookies to create the perfect treat</p>
+                                    <button class="btn build-box-btn" onclick="switchTab('boxes')">
+                                        <i class="fas fa-gift"></i> Build Your Box
+                                    </button>
+                                </div>
+                                <div class="build-box-background">
+                                    <img src="images/boxes tab.jpg" alt="Build Your Own Box" loading="lazy">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -516,13 +551,13 @@
                         <!-- Our Story Sub-tab -->
                         <div class="story-tab-pane active" id="our-story-pane">
                             <div class="story-hero">
+                                <div class="story-hero-visual">
+                                    <img src="images/logo.svg" alt="Syrine's Crumble" class="animated-logo">
+                                </div>
                                 <div class="story-hero-content">
                                     <h1>Welcome to Syrine's Crumble</h1>
                                     <p class="hero-subtitle">A story of two cultures, countless late-night baking
                                         experiments, and a shared passion for creating indulgent moments</p>
-                                </div>
-                                <div class="story-hero-visual">
-                                    <img src="images/logo.svg" alt="Syrine's Crumble" class="animated-logo">
                                 </div>
                             </div>
 
