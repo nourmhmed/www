@@ -10889,6 +10889,7 @@ footer {
     flex-direction: column;
     align-items: center;
     text-align: center;
+    margin-top: 3%;
     /* padding: 1.2rem; Increased from 1rem */
     background: var(--accent);
     border-radius: 12px;
@@ -11446,5 +11447,534 @@ footer {
     .svg-container {
         transform: translateZ(0); /* Hardware acceleration */
         -webkit-transform: translateZ(0);
+    }
+}
+
+/* === COOKIE SHOWCASE SLIDER RESPONSIVE STYLES === */
+
+/* Default desktop styles */
+.cookie-showcase {
+    padding: 4rem 0;
+}
+
+.cookie-slider-container {
+    position: relative;
+    margin: 3rem 0;
+}
+
+.cookie-slider-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0 2rem;
+    gap: 20px;
+}
+
+.cookie-slider-track {
+    flex: 1;
+    overflow: hidden;
+    border-radius: 16px;
+}
+
+.cookie-slide {
+    display: flex;
+    min-width: 100%;
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    height: 450px;
+}
+
+/* === TABLET STYLES (768px - 1024px) === */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .cookie-showcase {
+        padding: 3rem 0;
+    }
+    
+    .cookie-slide {
+        height: 400px;
+    }
+    
+    .cookie-slider-wrapper {
+        padding: 0 1.5rem;
+        gap: 15px;
+    }
+    
+    .slider-nav-btn {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .cookie-slide-title {
+        font-size: 1.5rem;
+    }
+    
+    .cookie-slide-description {
+        font-size: 0.95rem;
+    }
+}
+
+/* === MOBILE STYLES (768px and below) === */
+@media (max-width: 768px) {
+    .cookie-showcase {
+        padding: 2.5rem 0;
+    }
+    
+    .cookie-slider-wrapper {
+        padding: 0 1rem;
+        gap: 10px;
+    }
+    
+    .cookie-slide {
+        flex-direction: column;
+        height: auto;
+        min-height: 500px;
+    }
+    
+    .cookie-slide-image {
+        flex: 0 0 200px;
+        min-height: 200px;
+    }
+    
+    .cookie-slide-content {
+        padding: 1.5rem;
+    }
+    
+    .cookie-slide-title {
+        font-size: 1.3rem;
+        margin-bottom: 0.8rem;
+    }
+    
+    .cookie-slide-description {
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+    .slider-nav-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 0.9rem;
+    }
+    
+    .cookie-slide-features {
+        gap: 8px;
+        margin-bottom: 1rem;
+    }
+    
+    .cookie-feature {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+    }
+    
+    .cookie-slide-price {
+        font-size: 1.3rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .slider-add-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+}
+
+/* === SMALL MOBILE STYLES (480px and below) === */
+@media (max-width: 480px) {
+    .cookie-showcase {
+        padding: 2rem 0;
+    }
+    
+    .cookie-slider-wrapper {
+        padding: 0 0.5rem;
+        gap: 8px;
+    }
+    
+    .cookie-slide {
+        min-height: 450px;
+    }
+    
+    .cookie-slide-image {
+        flex: 0 0 180px;
+        min-height: 180px;
+    }
+    
+    .cookie-slide-content {
+        padding: 1.2rem;
+    }
+    
+    .cookie-slide-title {
+        font-size: 1.2rem;
+    }
+    
+    .cookie-slide-description {
+        font-size: 0.85rem;
+    }
+    
+    .slider-nav-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 0.8rem;
+    }
+    
+    .cookie-slide-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .slider-add-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+    }
+    
+    .section-subtitle {
+        font-size: 1rem;
+    }
+}
+
+/* === LANDSCAPE ORIENTATION FOR MOBILE === */
+@media (max-width: 768px) and (orientation: landscape) {
+    .cookie-slide {
+        flex-direction: row;
+        min-height: 300px;
+    }
+    
+    .cookie-slide-image {
+        flex: 0 0 40%;
+        min-height: 100%;
+    }
+    
+    .cookie-slide-content {
+        padding: 1rem;
+    }
+}
+
+/* === SLIDER CONTROLS RESPONSIVE === */
+@media (max-width: 768px) {
+    .slider-controls {
+        margin-top: 1.5rem;
+    }
+    
+    .slider-dots {
+        gap: 8px;
+    }
+    
+    .slider-dot {
+        width: 10px;
+        height: 10px;
+    }
+    
+    .showcase-more-btn {
+        padding: 12px 24px;
+        font-size: 0.9rem;
+    }
+}
+
+/* === ENSURE SLIDER FUNCTIONALITY ON TOUCH DEVICES === */
+@media (max-width: 768px) {
+    .cookie-slider-track {
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+    }
+}
+
+/* === HIDE NAV BUTTONS ON VERY SMALL SCREENS IF NEEDED === */
+@media (max-width: 360px) {
+    .slider-nav-btn {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .cookie-slider-wrapper {
+        padding: 0 0.25rem;
+    }
+}
+
+/* === BOXES TAB RESPONSIVE STYLES === */
+
+/* Default desktop styles */
+.box-selection-dropdown {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1rem 2rem;
+    background: var(--secondary);
+    border-radius: 15px;
+    width: fit-content;
+    /* margin-left: auto; */
+    margin-right: auto;
+}
+
+.cookies-selection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.cookie-selection-card {
+    background: var(--accent);
+    border-radius: 15px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* === TABLET STYLES (768px - 1024px) === */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .cookies-selection-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.2rem;
+    }
+    
+    .cookie-selection-card {
+        padding: 1.2rem;
+    }
+    
+    .box-selection-dropdown {
+        padding: 0.9rem 1.5rem;
+    }
+    
+    .box-select {
+        max-width: 350px;
+    }
+}
+
+/* === MOBILE STYLES (768px and below) === */
+@media (max-width: 768px) {
+    .boxes {
+        padding: 1rem 0;
+    }
+    
+    .box-selection-dropdown {
+        width: 90%;
+        max-width: none;
+        padding: 0.8rem 1rem;
+        margin: 1rem 0px;
+    }
+    
+    .box-selection-dropdown label {
+        font-size: 1rem;
+        margin-bottom: 0.6rem;
+    }
+    
+    .box-select {
+        width: 100%;
+        max-width: none;
+        padding: 0.7rem 1rem;
+    }
+    
+    .cookies-selection-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin: 1.5rem 0;
+        padding: 0 0.5rem;
+    }
+    
+    .cookie-selection-card {
+        padding: 1rem;
+    }
+    
+    .cookie-selection-image {
+        width: 70px;
+        height: 70px;
+        margin-bottom: 0.8rem;
+    }
+    
+    .cookie-selection-details h4 {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .cookie-selection-details p {
+        font-size: 0.85rem;
+        margin-bottom: 0.8rem;
+    }
+    
+    .style-selection {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .style-btn {
+        width: 100%;
+        max-width: 200px;
+        justify-content: center;
+        padding: 0.8rem 1rem;
+    }
+    
+    .selection-header {
+        margin-bottom: 1.5rem;
+        padding: 0 0.5rem;
+    }
+    
+    .selection-header h3 {
+        font-size: 1.3rem;
+    }
+    
+    .selection-info {
+        font-size: 1rem;
+        padding: 0.4rem 0.8rem;
+    }
+}
+
+/* === SMALL MOBILE STYLES (480px and below) === */
+@media (max-width: 480px) {
+    .cookies-selection-grid {
+        grid-template-columns: 1fr;
+        gap: 0.8rem;
+        padding: 0 0.25rem;
+    }
+    
+    .cookie-selection-card {
+        padding: 0.8rem;
+        flex-direction: row;
+        text-align: left;
+        gap: 1rem;
+    }
+    
+    .cookie-selection-image {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+    
+    .cookie-selection-details {
+        flex: 1;
+        text-align: left;
+    }
+    
+    .cookie-selection-quantity {
+        justify-content: flex-start;
+        margin-top: 0.5rem;
+    }
+    
+    .box-selection-dropdown {
+        width: 95%;
+        padding: 0.7rem 0.8rem;
+    }
+    
+    .selection-actions {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 0 0.5rem;
+    }
+    
+    .selection-summary {
+        text-align: center;
+    }
+    
+    .add-to-cart-box {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+}
+
+/* === LANDSCAPE ORIENTATION FOR MOBILE === */
+@media (max-width: 768px) and (orientation: landscape) {
+    .cookies-selection-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.8rem;
+    }
+    
+    .cookie-selection-card {
+        padding: 0.8rem;
+        min-height: 120px;
+    }
+    
+    .cookie-selection-image {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+/* === SELECTION SUMMARY RESPONSIVE === */
+@media (max-width: 768px) {
+    .selected-cookies-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.8rem;
+    }
+    
+    .selected-cookie-image {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .selected-cookie-quantity {
+        width: 28px;
+        height: 28px;
+        font-size: 0.9rem;
+    }
+    
+    .selected-cookie-name {
+        font-size: 0.9rem;
+    }
+}
+
+/* === VERY SMALL SCREENS (360px and below) === */
+@media (max-width: 360px) {
+    .cookies-selection-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .cookie-selection-card {
+        padding: 0.7rem;
+        gap: 0.8rem;
+    }
+    
+    .cookie-selection-image {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .cookie-selection-details h4 {
+        font-size: 0.9rem;
+    }
+    
+    .cookie-selection-details p {
+        font-size: 0.8rem;
+    }
+    
+    .quantity-btn {
+        width: 25px;
+        height: 25px;
+        font-size: 0.8rem;
+    }
+    
+    .quantity-value {
+        min-width: 25px;
+        font-size: 0.9rem;
+    }
+}
+
+/* === TOUCH OPTIMIZATIONS === */
+@media (max-width: 768px) {
+    .cookie-selection-card {
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+    
+    .cookie-selection-card:active {
+        transform: scale(0.98);
+    }
+    
+    .quantity-btn {
+        min-width: 32px;
+        min-height: 32px;
+    }
+    
+    .style-btn {
+        min-height: 44px; /* Minimum touch target */
     }
 }
