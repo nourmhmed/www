@@ -43,6 +43,8 @@ function clearLoadingTimeout() {
     }
 }
 
+sessionStorage.redirect = location.pathname;
+location.replace('/www/'); // Change to your base path
 
 class Router {
     constructor() {
@@ -55,7 +57,29 @@ class Router {
         };
         
         this.isNavigating = false;
+        this.basePath = this.getBasePath(); // Dynamic base path
         this.init();
+    }
+    
+    getBasePath() {
+        // Get the current directory path dynamically
+        const path = window.location.pathname;
+        
+        // If we're at the root (like domain.com/), return empty
+        if (path === '/' || path === '/index.html') {
+            return '';
+        }
+        
+        // If we're in a subdirectory, get the directory path
+        // Example: /www/index.html -> /www
+        // Example: /projects/my-site/ -> /projects/my-site
+        const pathParts = path.split('/');
+        pathParts.pop(); // Remove the filename or trailing slash
+        
+        // Handle cases where we might have empty parts
+        const basePath = pathParts.filter(part => part !== '').join('/');
+        
+        return basePath ? `/${basePath}` : '';
     }
     
     init() {
@@ -71,15 +95,11 @@ class Router {
         
         // Intercept ALL internal link clicks
         document.addEventListener('click', (e) => {
-            const link = e.target.closest('a[href^="#"]');
+            const link = e.target.closest('a[href^="/"]');
             if (link) {
                 e.preventDefault();
-                const hash = link.getAttribute('href').substring(1);
-                
-                // ONLY navigate for valid tabs, ignore dropdown toggles
-                if (hash && hash !== 'about-us' && hash !== 'null') {
-                    this.navigateTo(hash);
-                }
+                const path = link.getAttribute('href');
+                this.navigateToPath(path);
             }
         });
     }
@@ -90,8 +110,12 @@ class Router {
         console.log('Router navigating to:', tabId);
         this.isNavigating = true;
         
-        // Use hash routing for file protocol compatibility
-        window.history.pushState({ tab: tabId }, '', `#${tabId}`);
+        // Build the full path dynamically
+        const fullPath = tabId === 'home' 
+            ? `${this.basePath}/` 
+            : `${this.basePath}/${tabId}`;
+        
+        window.history.pushState({ tab: tabId }, '', fullPath);
         
         this.handleRouteChange(tabId);
         
@@ -100,15 +124,27 @@ class Router {
         }, 100);
     }
     
+    navigateToPath(path) {
+        // Remove base path to extract the tab ID
+        const pathWithoutBase = path.replace(this.basePath, '');
+        const tabId = pathWithoutBase === '/' ? 'home' : pathWithoutBase.substring(1);
+        this.navigateTo(tabId);
+    }
+    
     handleRoute() {
-        const hash = window.location.hash.substring(1) || 'home';
-        this.handleRouteChange(hash);
+        const path = window.location.pathname;
+        
+        // Remove base path to get the tab ID
+        const pathWithoutBase = path.replace(this.basePath, '');
+        const tabId = pathWithoutBase === '/' || pathWithoutBase === '' ? 'home' : pathWithoutBase.substring(1);
+        
+        this.handleRouteChange(tabId);
     }
     
     handleRouteChange(tabId) {
-        console.log('Router handling route change:', tabId);
+        console.log('Router handling route change:', tabId, 'Base path:', this.basePath);
         
-        // Map URL fragments to actual tab IDs
+        // Map URL paths to actual tab IDs
         const tabMapping = {
             'home': 'home',
             'cookies': 'cookies',
