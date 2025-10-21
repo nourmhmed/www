@@ -91,7 +91,7 @@ class Router {
         this.isNavigating = true;
         
         // Use hash routing for file protocol compatibility
-        window.history.pushState({ tab: tabId }, '', `/${tabId}`);
+        window.history.pushState({ tab: tabId }, '', `#${tabId}`);
         
         this.handleRouteChange(tabId);
         
