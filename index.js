@@ -22,6 +22,7 @@ let selectedCookies = {};
 let boxesData = [];
 let mysteryBoxData = null;
 
+let selectedGuessCookies = [];
 
 
 // Variables to store Supabase credentials
@@ -41,6 +42,121 @@ function clearLoadingTimeout() {
         clearTimeout(loadingTimeout);
     }
 }
+
+
+class Router {
+    constructor() {
+        this.routes = {
+            'home': 'home-tab',
+            'cookies': 'cookies-tab', 
+            'boxes': 'boxes-tab',
+            'mystery': 'mystery-tab',
+            'our-story': 'our-story-tab'
+        };
+        
+        this.isNavigating = false;
+        this.init();
+    }
+    
+    init() {
+        // Handle initial load
+        window.addEventListener('load', () => {
+            this.handleRoute();
+        });
+        
+        // Handle back/forward buttons
+        window.addEventListener('popstate', () => {
+            this.handleRoute();
+        });
+        
+        // Intercept ALL internal link clicks
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('a[href^="#"]');
+            if (link) {
+                e.preventDefault();
+                const hash = link.getAttribute('href').substring(1);
+                
+                // ONLY navigate for valid tabs, ignore dropdown toggles
+                if (hash && hash !== 'about-us' && hash !== 'null') {
+                    this.navigateTo(hash);
+                }
+            }
+        });
+    }
+    
+    navigateTo(tabId) {
+        if (this.isNavigating || !tabId || tabId === 'about-us' || tabId === 'null') return;
+        
+        console.log('Router navigating to:', tabId);
+        this.isNavigating = true;
+        
+        // Use hash routing for file protocol compatibility
+        window.history.pushState({ tab: tabId }, '', `#${tabId}`);
+        
+        this.handleRouteChange(tabId);
+        
+        setTimeout(() => {
+            this.isNavigating = false;
+        }, 100);
+    }
+    
+    handleRoute() {
+        const hash = window.location.hash.substring(1) || 'home';
+        this.handleRouteChange(hash);
+    }
+    
+    handleRouteChange(tabId) {
+        console.log('Router handling route change:', tabId);
+        
+        // Map URL fragments to actual tab IDs
+        const tabMapping = {
+            'home': 'home',
+            'cookies': 'cookies',
+            'boxes': 'boxes', 
+            'mystery': 'mystery',
+            'our-story': 'our-story',
+            'vision': 'our-story',
+            'mission': 'our-story'
+        };
+        
+        const actualTabId = tabMapping[tabId] || 'home';
+        
+        switchTab(actualTabId, false);
+        
+        if (tabId === 'vision' || tabId === 'mission') {
+            setTimeout(() => {
+                switchStoryTab(tabId);
+            }, 100);
+        }
+        
+        this.updateActiveNavStates(actualTabId);
+    }
+    
+    updateActiveNavStates(activeTab) {
+        // Update main navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        
+        const activeNavLink = document.querySelector(`.nav-link[data-tab="${activeTab}"]`);
+        if (activeNavLink) {
+            activeNavLink.classList.add('active');
+        }
+        
+        // Update mobile navigation
+        document.querySelectorAll('.mobile-nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        
+        const activeMobileLink = document.querySelector(`.mobile-nav-link[data-tab="${activeTab}"]`);
+        if (activeMobileLink) {
+            activeMobileLink.classList.add('active');
+        }
+    }
+}
+
+// Initialize router
+const router = new Router();
 
 // Ensure mobile menu setup runs once after DOM is ready
 // document.addEventListener('DOMContentLoaded', function() {
@@ -835,6 +951,281 @@ async function fetchBoxesData() {
     }
 }
 
+function renderMysteryTabCookies() {
+    const mysteryTab = document.getElementById('mystery-tab');
+    if (!mysteryTab) return;
+    
+    // Reset selections when rendering
+    selectedGuessCookies = [];
+    
+    // Create a container for the cookie display
+    let cookieDisplayContainer = document.getElementById('mystery-cookie-display');
+    
+    // If container doesn't exist, create it
+    if (!cookieDisplayContainer) {
+        cookieDisplayContainer = document.createElement('div');
+        cookieDisplayContainer.id = 'mystery-cookie-display';
+        cookieDisplayContainer.className = 'mystery-cookie-display';
+        
+        // Find the mystery price element to insert before it
+        const mysteryPrice = document.querySelector('.mystery-price');
+        if (mysteryPrice) {
+            mysteryPrice.parentNode.insertBefore(cookieDisplayContainer, mysteryPrice);
+        } else {
+            // Fallback: insert before mystery features
+            const mysteryFeatures = document.querySelector('.mystery-features');
+            if (mysteryFeatures) {
+                mysteryFeatures.parentNode.insertBefore(cookieDisplayContainer, mysteryFeatures);
+            }
+        }
+    }
+    
+    // Clear existing content
+    cookieDisplayContainer.innerHTML = '';
+    
+    // Create header
+    const header = document.createElement('div');
+    header.className = 'mystery-cookie-header';
+    header.innerHTML = `
+        <h3>Guess the Mystery Cookies!</h3>
+        <p>Select up to 3 cookies you think might be in your mystery box. Guess correctly and win 15% off your next order!</p>
+        
+        <div class="scroll-hint">
+            <i class="fas fa-arrow-left"></i>
+            <span>Scroll to see all cookies</span>
+            <i class="fas fa-arrow-right"></i>
+        </div>
+    `;
+    cookieDisplayContainer.appendChild(header);
+    
+    // Create horizontal scroll container
+    const scrollContainer = document.createElement('div');
+    scrollContainer.className = 'mystery-cookie-scroll-container';
+    
+    // Create horizontal grid
+    const cookieGrid = document.createElement('div');
+    cookieGrid.className = 'mystery-cookie-horizontal-grid';
+    
+    // Add all cookies with both styles to the grid
+    Object.keys(allCookiesData).forEach(slug => {
+        const cookie = allCookiesData[slug];
+        
+        // Create container for both styles of this cookie
+        const cookiePair = document.createElement('div');
+        cookiePair.className = 'cookie-pair-container';
+        // cookiePair.setAttribute('data-cookie-name', cookie.title);
+        
+        // Chewy version
+        const chewyCard = createCookieCard(cookie, slug, 'chewy');
+        // Crumble version
+        const crumbleCard = createCookieCard(cookie, slug, 'crumble');
+        
+        cookiePair.appendChild(chewyCard);
+        cookiePair.appendChild(crumbleCard);
+        cookieGrid.appendChild(cookiePair);
+    });
+    
+    scrollContainer.appendChild(cookieGrid);
+    cookieDisplayContainer.appendChild(scrollContainer);
+    
+    // Add navigation buttons for horizontal scroll
+    // addHorizontalScrollNavigation(scrollContainer, cookieGrid);
+    
+    // Add selection summary and submit button
+    // addSelectionInterface(cookieDisplayContainer);
+    
+    console.log('Mystery tab cookies rendered successfully');
+}
+
+// Helper function to create individual cookie cards
+function createCookieCard(cookie, slug, style) {
+    const card = document.createElement('div');
+    card.className = `mystery-cookie-card ${style}-card`;
+    card.setAttribute('data-slug', slug);
+    card.setAttribute('data-style', style);
+    card.setAttribute('data-cookie-name', cookie.title);
+    
+    // Get price information for this specific style
+    const priceInfo = getCookieDisplayPrice(cookie, style);
+    
+    card.innerHTML = `
+        <div class="mystery-cookie-image">
+            <img src="${cookie.images[style]}" alt="${cookie.title} (${style})" loading="lazy">
+            <div class="cookie-style-badge ${style}-badge">
+                ${style.charAt(0).toUpperCase() + style.slice(1)}
+            </div>
+        </div>
+        <div class="mystery-cookie-details">
+            <h4>${cookie.title}</h4>
+        </div>
+    `;
+    
+    // Add click event for selection
+    card.addEventListener('click', () => toggleCookieSelection(card, slug, style, cookie.title));
+    
+    return card;
+}
+
+// Toggle cookie selection
+function toggleCookieSelection(card, slug, style, cookieName) {
+    const selectionId = `${slug}-${style}`;
+    const isSelected = card.classList.contains('selected');
+    
+    if (isSelected) {
+        // Deselect
+        card.classList.remove('selected');
+        selectedGuessCookies = selectedGuessCookies.filter(cookie => cookie.id !== selectionId);
+    } else {
+        // Check if maximum reached
+        if (selectedGuessCookies.length >= 3) {
+            showNotification('You can only select up to 3 cookies for your guess!', 3000);
+            return;
+        }
+        
+        // Select
+        card.classList.add('selected');
+        selectedGuessCookies.push({
+            id: selectionId,
+            slug: slug,
+            style: style,
+            name: cookieName,
+            fullName: `${cookieName} (${style.charAt(0).toUpperCase() + style.slice(1)})`
+        });
+    }
+    
+    // Update selection counter and interface
+    // updateSelectionInterface();
+}
+
+// // Update selection interface
+// function updateSelectionInterface() {
+//     const selectedCount = document.querySelector('.selected-count');
+//     const submitButton = document.querySelector('.submit-guess-btn');
+//     const selectionSummary = document.querySelector('.selection-summary');
+    
+//     if (selectedCount) {
+//         selectedCount.textContent = selectedGuessCookies.length;
+//         selectedCount.className = `selected-count ${selectedGuessCookies.length === 3 ? 'max-selected' : ''}`;
+//     }
+    
+//     if (submitButton) {
+//         submitButton.disabled = selectedGuessCookies.length === 0;
+//         submitButton.classList.toggle('enabled', selectedGuessCookies.length > 0);
+//     }
+    
+//     if (selectionSummary) {
+//         if (selectedGuessCookies.length === 0) {
+//             selectionSummary.innerHTML = '<p class="no-selection">No cookies selected yet</p>';
+//         } else {
+//             selectionSummary.innerHTML = `
+//                 <h4>Your Guesses:</h4>
+//                 <div class="selected-cookies-list">
+//                     ${selectedGuessCookies.map(cookie => `
+//                         <div class="selected-cookie-item" data-id="${cookie.id}">
+//                             <span class="cookie-name">${cookie.fullName}</span>
+//                             <button class="remove-guess" onclick="removeGuess('${cookie.id}')">
+//                                 <i class="fas fa-times"></i>
+//                             </button>
+//                         </div>
+//                     `).join('')}
+//                 </div>
+//             `;
+//         }
+//     }
+// }
+
+// // Remove a guess
+// function removeGuess(cookieId) {
+//     // Remove from array
+//     selectedGuessCookies = selectedGuessCookies.filter(cookie => cookie.id !== cookieId);
+    
+//     // Remove visual selection
+//     const card = document.querySelector(`.mystery-cookie-card[data-slug="${cookieId.split('-')[0]}"][data-style="${cookieId.split('-')[1]}"]`);
+//     if (card) {
+//         card.classList.remove('selected');
+//     }
+    
+//     // Update interface
+//     updateSelectionInterface();
+// }
+
+// Add selection interface (summary and submit button)
+// function addSelectionInterface(container) {
+//     const selectionInterface = document.createElement('div');
+//     selectionInterface.className = 'selection-interface';
+//     selectionInterface.innerHTML = `
+//         <div class="selection-summary">
+//             <p class="no-selection">No cookies selected yet</p>
+//         </div>
+//     `;
+    
+//     container.appendChild(selectionInterface);
+    
+//     // Add event listeners
+//     const submitButton = selectionInterface.querySelector('.submit-guess-btn');
+//     const clearButton = selectionInterface.querySelector('.clear-guess-btn');
+    
+//     submitButton.addEventListener('click', submitGuess);
+//     clearButton.addEventListener('click', clearAllGuesses);
+// }
+
+// Submit guess function
+// function submitGuess() {
+//     if (selectedGuessCookies.length === 0) {
+//         showNotification('Please select at least one cookie to submit your guess!');
+//         return;
+//     }
+    
+//     // Store the guess in localStorage
+//     const guessData = {
+//         cookies: selectedGuessCookies,
+//         timestamp: new Date().toISOString(),
+//         guessId: 'guess_' + Date.now()
+//     };
+    
+//     localStorage.setItem('mystery_guess', JSON.stringify(guessData));
+    
+//     // Show success message
+//     showNotification(`🎉 Great! You've guessed ${selectedGuessCookies.length} cookie(s)! We'll reveal if you're right when you receive your mystery box!`, 5000);
+    
+//     // Visual feedback
+//     const submitButton = document.querySelector('.submit-guess-btn');
+//     const originalText = submitButton.innerHTML;
+//     submitButton.innerHTML = '<i class="fas fa-check"></i> Guess Submitted!';
+//     submitButton.style.background = 'linear-gradient(135deg, #2e8b57, #1f6e42)';
+    
+//     setTimeout(() => {
+//         submitButton.innerHTML = originalText;
+//         submitButton.style.background = '';
+//     }, 3000);
+    
+//     console.log('Guess submitted:', selectedGuessCookies);
+// }
+
+// Clear all guesses
+// function clearAllGuesses() {
+//     if (selectedGuessCookies.length === 0) {
+//         showNotification('No guesses to clear!');
+//         return;
+//     }
+    
+//     // Remove all visual selections
+//     document.querySelectorAll('.mystery-cookie-card.selected').forEach(card => {
+//         card.classList.remove('selected');
+//     });
+    
+//     // Clear array
+//     selectedGuessCookies = [];
+    
+//     // Update interface
+//     updateSelectionInterface();
+    
+//     showNotification('All guesses cleared!');
+// }
+
+
+
+
 // Function to fetch mystery box data
 async function fetchMysteryBoxData() {
     try {
@@ -879,17 +1270,22 @@ function getFallbackBoxesData() {
     ];
 }
 
+// Footer navigation - SIMPLIFIED
 document.querySelectorAll('.footer-column a[data-tab]').forEach(link => {
     link.addEventListener('click', function(e) {
         e.preventDefault();
         const tabId = this.getAttribute('data-tab');
-        switchTab(tabId);
-        
-        // Scroll to top when navigating
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
+        console.log('Footer nav clicked:', tabId);
+        switchTab(tabId); // This will call router.navigateTo()
+    });
+});
+
+document.querySelectorAll('.dropdown-link[data-story-tab]').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const storyTab = this.getAttribute('data-story-tab');
+        console.log('Story link clicked:', storyTab);
+        router.navigateTo(storyTab); // Direct router call for story tabs
     });
 });
 
@@ -1870,7 +2266,32 @@ async function renderBoxes() {
     }
 }
 
+// Function to update mystery button text based on cart contents
+function updateMysteryButtonText() {
+    const mysteryBtn = document.querySelector('.mystery-btn');
+    if (!mysteryBtn) return;
+    
+    const cart = getCart();
+    const hasMysteryBox = cart.some(item => item.size === 'mystery');
+    
+    if (hasMysteryBox) {
+        mysteryBtn.innerHTML = 'Add Another Mystery Box';
+        mysteryBtn.classList.add('has-mystery-box');
+    } else {
+        mysteryBtn.innerHTML = 'Take the Mystery Bite!';
+        mysteryBtn.classList.remove('has-mystery-box');
+    }
+}
 
+// Add this function to close cart sidebar
+function closeCartSidebar() {
+    const cartSidebar = document.getElementById('cart-sidebar');
+    const cartOverlay = document.getElementById('cart-overlay');
+    
+    if (cartSidebar) cartSidebar.classList.remove('active');
+    if (cartOverlay) cartOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+}
 
 async function renderMysteryBox() {
     try {
@@ -1889,40 +2310,38 @@ async function renderMysteryBox() {
             return;
         }
 
+        var cart = getCart();
+        var hasMysteryBox = cart.some(item => item.size === 'mystery');
+        var msg;
+        if (hasMysteryBox) {
+            msg = 'Add Another Mystery Box';
+        } else {
+            msg = 'Take the Mystery Bite!';
+        }
+        
         mysterySection.innerHTML = `
-            <!-- Left Image -->
-            <div class="mystery-image">
-                <div class="image-loading-container">
-                    <div class="image-loading"></div>
-                    <img src="${mysteryBoxData.image_url}" alt="Mystery Cookie Box" loading="lazy">
-                </div>
-            </div>
-
-            <!-- Right Details -->
             <div class="mystery-details">
-                <h3>🎁 Care the Mystery Box</h3>
-                <p>At Sure's Crumble, we love surprises — and that's why we created the Mystery Box.</p>
+                <h3>🎁 Mystery Box</h3>
+                <p>At Syrine's Crumble, we love surprises — and that's why we created the Mystery Box.</p>
                 
                 <p>Each box contains 6 cookies (Chewy, Crumble, or a mix). But here's the twist: hidden inside, you'll find 1–2 secret premium flavors that aren't on our regular menu.</p>
                 
                 <ul>
-                    <li>🌟 <strong>Monthly Surprises:</strong> Every month, we bake something bold, new, and unexpected — flavors that keep you guessing and keep the experience exciting</li>
-                    <li>🎯 <strong>Guess & Win:</strong> If you guess the secret flavor correctly, you win 15% off your next order!</li>
-                    <li>🎁 <strong>More Than Cookies:</strong> It's more than just a cookie — it's a game, a challenge, and a sweet little adventure every time you order</li>
+                    <li>🌟 <strong>Monthly Surprises: </strong> Every month, we bake something bold, new, and unexpected — flavors that keep you guessing and keep the experience exciting</li>
+                    <li>🎯 <strong>Guess and Win: </strong> Select up to 3 cookies you think might be in your box. Guess correctly and win 15% off your next order!</li>
+                    <li>🎁 <strong>More Than Cookies: </strong> It's more than just a cookie — it's a game, a challenge, and a sweet little adventure every time you order</li>
                 </ul>
+                
+                <!-- Cookie display will be inserted here by JavaScript -->
                 
                 <div class="mystery-price">${mysteryBoxData.price} LE</div>
                 <p class="mystery-note">✨ So... are you brave enough to take the mystery bite?</p>
-                <button class="btn mystery-btn">Take the Mystery Bite!</button>
-                
+                <button class="btn mystery-btn">${msg}</button>
             </div>
         `;
 
-        // Setup image handlers for mystery box
-        const mysteryImg = mysterySection.querySelector('.mystery-image img');
-        if (mysteryImg) {
-            setupImageHandlers(mysteryImg);
-        }
+        // Render the cookie display
+        renderMysteryTabCookies();
 
         // Add event listener to the mystery button
         const mysteryBtn = mysterySection.querySelector('.mystery-btn');
@@ -1933,10 +2352,11 @@ async function renderMysteryBox() {
                     return;
                 }
 
-                const name = "Care the Mystery Box"; // Updated name
+                const name = "Mystery Box";
                 const unitPrice = mysteryBoxData.price;
-                const img = mysteryBoxData.image_url;
+                const img = 'images/box.svg';
 
+                console.log("selectedGuessCookiesselectedGuessCookies", selectedGuessCookies)
                 const cart = getCart();
                 cart.push({
                     id: Date.now(),
@@ -1947,17 +2367,28 @@ async function renderMysteryBox() {
                     quantity: 1,
                     flavors: [],
                     size: "mystery",
-                    style: "surprise"
+                    style: "surprise",
+                    guess: selectedGuessCookies.length > 0 ? selectedGuessCookies : null
                 });
 
                 saveCart(cart);
                 updateCartUI();
+                updateMysteryButtonText();
                 showNotification(`${name} added to cart!`);
+                console.log("cartcartcart", cart)
+                // var cart = getCart();
+                var hasMysteryBox = getCart().some(item => item.size === 'mystery');
+                var msg;
+                if (hasMysteryBox) {
+                    msg = 'Add Another Mystery Box';
+                } else {
+                    msg = 'Take the Mystery Bite!';
+                }
 
-                // Visual feedback - updated text
+                // Visual feedback
                 this.textContent = "🎉 Mystery Box Added!";
                 setTimeout(() => {
-                    this.textContent = "Take the Mystery Bite!";
+                    this.textContent = msg;
                 }, 2000);
             });
         }
@@ -2138,7 +2569,7 @@ function setupImageHandlers(img) {
         img.setAttribute('data-error-handled', 'true');
 
         // Set appropriate fallback image
-        if (img.classList.contains('box-img') || img.closest('.box-image') || img.closest('.mystery-image')) {
+        if (img.classList.contains('box-img') || img.closest('.box-image')) {
             img.src = 'images/fallback-box.svg';
         } else {
             img.src = 'images/fallback-cookie.svg';
@@ -2950,10 +3381,11 @@ async function updateCartUI() {
     const totalItems = validatedCart.reduce((total, item) => total + item.quantity, 0);
     if (cartCount) cartCount.textContent = totalItems;
 
+    updateMysteryButtonText();
     // Update cart items if cart sidebar exists
     if (cartItems) {
         cartItems.innerHTML = '';
-
+        console.log("validatedCart", validatedCart);
         if (validatedCart.length === 0) {
             cartItems.innerHTML = '<div class="empty-cart">Your cart is empty</div>';
             if (cartTotal) cartTotal.textContent = 'LE 0.00';
@@ -3406,25 +3838,19 @@ function testHomePopup() {
     }
 }
 
-// عدل الـ switchTab function عشان متفتحش أي تاب لـ Explore Us
-function switchTab(tabId) {
-    // إذا التاب مش موجود، ما تعملش أي حاجة
-    const activeTab = document.getElementById(`${tabId}-tab`);
-    if (!activeTab) return;
+function switchTab(tabId, updateHistory = true) {
+    console.log('switchTab called:', tabId, 'updateHistory:', updateHistory);
     
-    // كمل الكود العادي...
-    enableBodyScroll();
-    
-    // Remove active class from all nav links
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.remove('active');
-    });
-    
-    // Add active class to clicked button
-    const activeNavLink = document.querySelector(`.nav-link[data-tab="${tabId}"]`);
-    if (activeNavLink) {
-        activeNavLink.classList.add('active');
+    // If this is called from user click, update URL via router
+    if (updateHistory) {
+        router.navigateTo(tabId);
+        return; // Router will handle the actual tab switch
     }
+    
+    // If updateHistory is false, this is called from router - proceed with tab switch
+    console.log('Actually switching tab to:', tabId);
+    
+    enableBodyScroll();
     
     // Remove active class from all tab contents
     document.querySelectorAll('.tab-content').forEach(content => {
@@ -3432,6 +3858,7 @@ function switchTab(tabId) {
     });
     
     // Show corresponding content
+    const activeTab = document.getElementById(`${tabId}-tab`);
     if (activeTab) {
         activeTab.classList.add('active');
     }
@@ -3448,20 +3875,27 @@ function switchTab(tabId) {
         if (mainNav && mainNav.classList.contains('active')) {
             mainNav.classList.remove('active');
         }
-    }
-}
-
-// في الـ event listeners بتاعت الـ navigation
-document.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', function(e) {
-        // تأكد إن الـ link ده مش الـ Explore Us
-        if (this.classList.contains('dropdown-toggle')) {
-            e.preventDefault();
-            return;
+        
+        const mobileNav = document.getElementById('mobile-nav');
+        if (mobileNav && mobileNav.classList.contains('active')) {
+            mobileNav.classList.remove('active');
+            document.getElementById('mobile-nav-overlay').classList.remove('active');
         }
         
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        if (mobileMenuBtn) {
+            mobileMenuBtn.classList.remove('active');
+        }
+    }
+    
+    console.log('Tab switched to:', tabId);
+}
+document.querySelectorAll('.nav-link[data-tab]').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
         const tabId = this.getAttribute('data-tab');
-        switchTab(tabId);
+        console.log('Desktop nav clicked:', tabId);
+        switchTab(tabId); // This will call router.navigateTo()
     });
 });
 
@@ -3829,7 +4263,7 @@ function setupImageErrorHandling() {
                 // Set fallback image based on context
                 if (img.src.includes('cookie') || img.closest('.cookie-image')) {
                     img.src = 'images/fallback-cookie.svg';
-                } else if (img.src.includes('box') || img.closest('.box-image') || img.closest('.mystery-image')) {
+                } else if (img.src.includes('box') || img.closest('.box-image')) {
                     img.src = 'images/fallback-box.svg';
                 } else {
                     img.src = 'images/fallback-image.svg';
@@ -4010,21 +4444,16 @@ function setupDropdown() {
         }
         
         // Handle dropdown link clicks
+        // OLD - REMOVE THIS (in setupDropdown function):
+        // NEW - REPLACE WITH:
         const dropdownLinks = menu.querySelectorAll('.dropdown-link');
         dropdownLinks.forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
                 const storyTab = this.getAttribute('data-story-tab');
                 
-                console.log('Switching to story tab:', storyTab);
-                
-                // Switch to our-story tab first
-                switchTab('our-story');
-                
-                // Then switch the story sub-tab
-                setTimeout(() => {
-                    switchStoryTab(storyTab);
-                }, 100);
+                // Navigate to the story tab
+                router.navigateTo(storyTab);
                 
                 // Close dropdown and reset arrow
                 if (window.innerWidth <= 768) {
@@ -4132,6 +4561,19 @@ function switchStoryTab(tabId) {
     }
 }
 
+// ADD THIS CODE - Fix for About Us dropdown navigation
+document.querySelectorAll('.nav-item.dropdown .dropdown-toggle[href]').forEach(toggle => {
+    toggle.removeAttribute('href');
+});
+
+// Prevent dropdown toggle from causing navigation
+document.querySelectorAll('.nav-item.dropdown .dropdown-toggle').forEach(toggle => {
+    toggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        // Don't call router.navigateTo() for dropdown toggle
+    });
+});
 
 // Enhanced mobile dropdown functionality
 function setupMobileDropdown() {
@@ -4308,25 +4750,24 @@ function setupMobileNavigation() {
             }
         });
         
-        // Handle story tab links in mobile dropdown
         document.querySelectorAll('.mobile-dropdown-link[data-story-tab]').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const storyTab = this.getAttribute('data-story-tab');
-                
-                // Close mobile menu
-                mobileNav.classList.remove('active');
-                mobileNavOverlay.classList.remove('active');
-                mobileMenuBtn.classList.remove('active');
-                document.body.style.overflow = '';
-                
-                // Switch to our-story tab and then to the specific story tab
-                switchTab('our-story');
-                setTimeout(() => {
-                    switchStoryTab(storyTab);
-                }, 100);
-            });
-        });
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const storyTab = this.getAttribute('data-story-tab');
+        console.log('Mobile story link clicked:', storyTab);
+        router.navigateTo(storyTab); // Direct router call for story tabs
+    });
+});
+
+        // Mobile navigation - SIMPLIFIED  
+document.querySelectorAll('.mobile-nav-link[data-tab]').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const tabId = this.getAttribute('data-tab');
+        console.log('Mobile nav clicked:', tabId);
+        switchTab(tabId); // This will call router.navigateTo()
+    });
+});
         
         // Close menu on escape key
         document.addEventListener('keydown', function(e) {
