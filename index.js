@@ -586,155 +586,155 @@ async function initializeSupabase() {
 }
 
 
-function initializeVSBattle() {
-    const vsBattle = document.getElementById('vs-battle');
-    const vsCircle = document.getElementById('vs-circle');
-    const svgContainer = document.querySelector('.svg-container');
-    const vsSubtitle = document.querySelector('.vs-subtitle');
+// function initializeVSBattle() {
+//     const vsBattle = document.getElementById('vs-battle');
+//     const vsCircle = document.getElementById('vs-circle');
+//     const svgContainer = document.querySelector('.svg-container');
+//     const vsSubtitle = document.querySelector('.vs-subtitle');
 
-    // Debug: Check if elements exist
-    console.log('VS Battle Elements:', {
-        vsBattle: !!vsBattle,
-        vsCircle: !!vsCircle,
-        svgContainer: !!svgContainer,
-        vsSubtitle: !!vsSubtitle
-    });
+//     // Debug: Check if elements exist
+//     console.log('VS Battle Elements:', {
+//         vsBattle: !!vsBattle,
+//         vsCircle: !!vsCircle,
+//         svgContainer: !!svgContainer,
+//         vsSubtitle: !!vsSubtitle
+//     });
 
-    if (!vsBattle || !svgContainer) {
-        console.error('VS Battle: Required elements not found');
-        return;
-    }
+//     if (!vsBattle || !svgContainer) {
+//         console.error('VS Battle: Required elements not found');
+//         return;
+//     }
 
-    // Find team containers - more flexible approach
-    const teamContainers = document.querySelectorAll('.team-container');
-    let crumbleContainer, chewyContainer;
+//     // Find team containers - more flexible approach
+//     const teamContainers = document.querySelectorAll('.team-container');
+//     let crumbleContainer, chewyContainer;
 
-    teamContainers.forEach(container => {
-        const img = container.querySelector('img');
-        if (img) {
-            if (img.classList.contains('crumble-img')) {
-                crumbleContainer = container;
-                container.classList.add('crumble');
-            } else if (img.classList.contains('chewy-img')) {
-                chewyContainer = container;
-                container.classList.add('chewy');
-            }
-        }
-    });
+//     teamContainers.forEach(container => {
+//         const img = container.querySelector('img');
+//         if (img) {
+//             if (img.classList.contains('crumble-img')) {
+//                 crumbleContainer = container;
+//                 container.classList.add('crumble');
+//             } else if (img.classList.contains('chewy-img')) {
+//                 chewyContainer = container;
+//                 container.classList.add('chewy');
+//             }
+//         }
+//     });
 
-    // Alternative: Find by team label
-    if (!crumbleContainer || !chewyContainer) {
-        teamContainers.forEach(container => {
-            const label = container.querySelector('.team-label');
-            if (label) {
-                if (label.textContent.toLowerCase().includes('crumble')) {
-                    crumbleContainer = container;
-                    container.classList.add('crumble');
-                } else if (label.textContent.toLowerCase().includes('chewy')) {
-                    chewyContainer = container;
-                    container.classList.add('chewy');
-                }
-            }
-        });
-    }
+//     // Alternative: Find by team label
+//     if (!crumbleContainer || !chewyContainer) {
+//         teamContainers.forEach(container => {
+//             const label = container.querySelector('.team-label');
+//             if (label) {
+//                 if (label.textContent.toLowerCase().includes('crumble')) {
+//                     crumbleContainer = container;
+//                     container.classList.add('crumble');
+//                 } else if (label.textContent.toLowerCase().includes('chewy')) {
+//                     chewyContainer = container;
+//                     container.classList.add('chewy');
+//                 }
+//             }
+//         });
+//     }
 
-    // Debug: Check if team containers were found
-    console.log('Team Containers:', {
-        crumbleContainer: !!crumbleContainer,
-        chewyContainer: !!chewyContainer,
-        totalContainers: teamContainers.length
-    });
+//     // Debug: Check if team containers were found
+//     console.log('Team Containers:', {
+//         crumbleContainer: !!crumbleContainer,
+//         chewyContainer: !!chewyContainer,
+//         totalContainers: teamContainers.length
+//     });
 
-    if (!crumbleContainer || !chewyContainer) {
-        console.error('VS Battle: Could not find both team containers');
-        return;
-    }
+//     if (!crumbleContainer || !chewyContainer) {
+//         console.error('VS Battle: Could not find both team containers');
+//         return;
+//     }
 
-    vsBattle.addEventListener('click', async function() {
-        if (isFighting) return;
+//     vsBattle.addEventListener('click', async function() {
+//         if (isFighting) return;
         
-        isFighting = true;
+//         isFighting = true;
         
-        // Update subtitle
-        if (vsSubtitle) {
-            vsSubtitle.textContent = 'Fighting!';
-        }
+//         // Update subtitle
+//         if (vsSubtitle) {
+//             vsSubtitle.textContent = 'Fighting!';
+//         }
 
-        // VS button animation
-        vsCircle.classList.add('battle-active');
+//         // VS button animation
+//         vsCircle.classList.add('battle-active');
 
-        try {
-            // Phase 1: Charge towards each other
-            crumbleContainer.classList.add('fighting-crumble');
-            chewyContainer.classList.add('fighting-chewy');
+//         try {
+//             // Phase 1: Charge towards each other
+//             crumbleContainer.classList.add('fighting-crumble');
+//             chewyContainer.classList.add('fighting-chewy');
 
-            // Wait for charge animation to complete
-            await new Promise(resolve => setTimeout(resolve, 600));
+//             // Wait for charge animation to complete
+//             await new Promise(resolve => setTimeout(resolve, 600));
 
-            // Phase 2: Impact effects
-            createImpactEffects();
+//             // Phase 2: Impact effects
+//             createImpactEffects();
             
-            // Add impact animation to cookies
-            const cookies = document.querySelectorAll('.cookie-img');
-            cookies.forEach(cookie => {
-                cookie.classList.add('cookie-impact');
-            });
+//             // Add impact animation to cookies
+//             const cookies = document.querySelectorAll('.cookie-img');
+//             cookies.forEach(cookie => {
+//                 cookie.classList.add('cookie-impact');
+//             });
 
-            // Swap speech bubbles during impact
-            swapSpeechBubbles();
+//             // Swap speech bubbles during impact
+//             swapSpeechBubbles();
 
-            // Play impact sound
-            playImpactSound();
+//             // Play impact sound
+//             playImpactSound();
 
-            // Wait for impact effects
-            await new Promise(resolve => setTimeout(resolve, 400));
+//             // Wait for impact effects
+//             await new Promise(resolve => setTimeout(resolve, 400));
 
-            // Phase 3: Return to original positions
-            crumbleContainer.classList.remove('fighting-crumble');
-            chewyContainer.classList.remove('fighting-chewy');
-            crumbleContainer.classList.add('return-crumble');
-            chewyContainer.classList.add('return-chewy');
+//             // Phase 3: Return to original positions
+//             crumbleContainer.classList.remove('fighting-crumble');
+//             chewyContainer.classList.remove('fighting-chewy');
+//             crumbleContainer.classList.add('return-crumble');
+//             chewyContainer.classList.add('return-chewy');
 
-            // Remove impact animation
-            cookies.forEach(cookie => {
-                cookie.classList.remove('cookie-impact');
-            });
+//             // Remove impact animation
+//             cookies.forEach(cookie => {
+//                 cookie.classList.remove('cookie-impact');
+//             });
 
-            // Wait for return animation
-            await new Promise(resolve => setTimeout(resolve, 800));
+//             // Wait for return animation
+//             await new Promise(resolve => setTimeout(resolve, 800));
 
-        } catch (error) {
-            console.error('VS Battle animation error:', error);
-        } finally {
-            // Clean up - always run this
-            crumbleContainer.classList.remove('return-crumble', 'fighting-crumble');
-            chewyContainer.classList.remove('return-chewy', 'fighting-chewy');
-            vsCircle.classList.remove('battle-active');
+//         } catch (error) {
+//             console.error('VS Battle animation error:', error);
+//         } finally {
+//             // Clean up - always run this
+//             crumbleContainer.classList.remove('return-crumble', 'fighting-crumble');
+//             chewyContainer.classList.remove('return-chewy', 'fighting-chewy');
+//             vsCircle.classList.remove('battle-active');
 
-            // Update subtitle
-            if (vsSubtitle) {
-                vsSubtitle.textContent = 'Click to Battle!';
-            }
+//             // Update subtitle
+//             if (vsSubtitle) {
+//                 vsSubtitle.textContent = 'Click to Battle!';
+//             }
 
-            isFighting = false;
-        }
-    });
+//             isFighting = false;
+//         }
+//     });
 
-    // Add hover effects
-    vsBattle.addEventListener('mouseenter', function() {
-        if (vsSubtitle && !isFighting) {
-            vsSubtitle.style.animationPlayState = 'paused';
-            vsSubtitle.style.opacity = '1';
-            vsSubtitle.style.transform = 'translateY(-3px)';
-        }
-    });
+//     // Add hover effects
+//     vsBattle.addEventListener('mouseenter', function() {
+//         if (vsSubtitle && !isFighting) {
+//             vsSubtitle.style.animationPlayState = 'paused';
+//             vsSubtitle.style.opacity = '1';
+//             vsSubtitle.style.transform = 'translateY(-3px)';
+//         }
+//     });
 
-    vsBattle.addEventListener('mouseleave', function() {
-        if (vsSubtitle && !isFighting) {
-            vsSubtitle.style.animationPlayState = 'running';
-        }
-    });
-}
+//     vsBattle.addEventListener('mouseleave', function() {
+//         if (vsSubtitle && !isFighting) {
+//             vsSubtitle.style.animationPlayState = 'running';
+//         }
+//     });
+// }
 
 // Update the initCookieShowcase function
 function initCookieShowcase() {
@@ -1304,13 +1304,13 @@ function getFallbackMysteryBoxData() {
 
 function formatPriceWithSale(originalTotal, finalTotal, isOnSale) {
     if (!isOnSale || originalTotal === finalTotal) {
-        return `<div class="cookie-price">${originalTotal} LE</div>`;
+        return `<div class="cookie-price">${originalTotal} EGP</div>`;
     }
     
     return `
         <div class="cookie-price-sale">
-            <span class="original-price">${originalTotal} LE</span>
-            <span class="final-price">${finalTotal} LE</span>
+            <span class="original-price">${originalTotal} EGP</span>
+            <span class="final-price">${finalTotal} EGP</span>
         </div>
     `;
 }
@@ -1376,7 +1376,7 @@ async function fetchCookiesData() {
                         chewy: cookie.image_url_chewy || 'images/fallback-cookie.svg',
                         crumble: cookie.image_url_crumble || 'images/fallback-cookie.svg'
                     },
-                    price: `${cookie.chewy_price} LE`,
+                    price: `${cookie.chewy_price} EGP`,
                     ingredients: cookie.ingredients || 'Premium ingredients carefully selected for the best flavor',
                     specialty: cookie.specialty || 'Handcrafted with care for exceptional taste and texture',
                     perfectFor: cookie.perfect_for || 'Any occasion that calls for delicious homemade cookies',
@@ -1505,12 +1505,12 @@ function updateDesktopPrice(cookie, style) {
     if (priceInfo.isOnSale && priceInfo.originalPrice !== priceInfo.finalPrice) {
         // Show sale price
         priceContainer.innerHTML = `
-            <span class="desktop-original-price">${priceInfo.originalPrice} LE</span>
-            <span class="desktop-final-price">${priceInfo.finalPrice} LE</span>
+            <span class="desktop-original-price">${priceInfo.originalPrice} EGP</span>
+            <span class="desktop-final-price">${priceInfo.finalPrice} EGP</span>
         `;
     } else {
         // Show regular price
-        priceContainer.innerHTML = `<div class="desktop-price">${priceInfo.finalPrice} LE</div>`;
+        priceContainer.innerHTML = `<div class="desktop-price">${priceInfo.finalPrice} EGP</div>`;
     }
 }
 
@@ -1538,12 +1538,12 @@ function updatePopupQuantityAndPrice() {
     if (isStyleOnSale && unitPrice !== finalUnitPrice) {
         priceContainer.innerHTML = `
             <div class="cookie-price-sale">
-                <span class="original-price">${originalTotalPrice} LE</span>
-                <span class="final-price">${totalPrice} LE</span>
+                <span class="original-price">${originalTotalPrice} EGP</span>
+                <span class="final-price">${totalPrice} EGP</span>
             </div>
         `;
     } else {
-        priceContainer.innerHTML = `<div class="cookie-price">${totalPrice} LE</div>`;
+        priceContainer.innerHTML = `<div class="cookie-price">${totalPrice} EGP</div>`;
     }
 }
 
@@ -1659,11 +1659,11 @@ function updateDesktopQuantityAndPrice() {
     
     if (isStyleOnSale && unitPrice !== finalUnitPrice) {
         priceContainer.innerHTML = `
-            <span class="desktop-original-price">${originalTotalPrice} LE</span>
-            <span class="desktop-final-price">${totalPrice} LE</span>
+            <span class="desktop-original-price">${originalTotalPrice} EGP</span>
+            <span class="desktop-final-price">${totalPrice} EGP</span>
         `;
     } else {
-        priceContainer.innerHTML = `<div class="desktop-price">${totalPrice} LE</div>`;
+        priceContainer.innerHTML = `<div class="desktop-price">${totalPrice} EGP</div>`;
     }
 }
 
@@ -2183,11 +2183,11 @@ function renderBoxesDropdownAndOptions(boxesData, boxSelect, boxOptionsContainer
         // Determine price display
         let priceDisplay = '';
         if (box.chewy_price === box.crumble_price) {
-            priceDisplay = `${box.chewy_price} LE`;
+            priceDisplay = `${box.chewy_price} EGP`;
         } else {
             const minPrice = Math.min(box.chewy_price, box.crumble_price);
             const maxPrice = Math.max(box.chewy_price, box.crumble_price);
-            priceDisplay = `${minPrice} - ${maxPrice} LE`;
+            priceDisplay = `${minPrice} - ${maxPrice} EGP`;
         }
         
         boxOption.innerHTML = `
@@ -2324,21 +2324,22 @@ async function renderMysteryBox() {
                 <h3>🎁 Mystery Box</h3>
                 <p>At Syrine's Crumble, we love surprises — and that's why we created the Mystery Box.</p>
                 
-                <p>Each box contains 6 cookies (Chewy, Crumble, or a mix). But here's the twist: hidden inside, you'll find 1–2 secret premium flavors that aren't on our regular menu.</p>
+                <p>Each box contains six cookies (Chewy, Crumble, or a mix). But here's the twist: hidden inside, you'll find one to two secret premium flavors that aren't on our regular menu.</p>
                 
                 <ul>
-                    <li>🌟 <strong>Monthly Surprises: </strong> Every month, we bake something bold, new, and unexpected — flavors that keep you guessing and keep the experience exciting</li>
-                    <li>🎯 <strong>Guess and Win: </strong> Select up to 3 cookies you think might be in your box. Guess correctly and win 15% off your next order!</li>
-                    <li>🎁 <strong>More Than Cookies: </strong> It's more than just a cookie — it's a game, a challenge, and a sweet little adventure every time you order</li>
+                    <li>🌟 <strong>Monthly Surprises:</strong> Every month, we bake something bold, new, and unexpected — flavors that keep you guessing and make every box exciting.</li>
+                    <li>🎯 <strong>Guess and Win:</strong> Pick up to three cookies you think might be in your box. Guess correctly and win <strong>15% off</strong> your next order!</li>
+                    <li>🎁 <strong>More Than Cookies:</strong> It’s more than just a cookie — it’s a game, a challenge, and a sweet little adventure every time you order.</li>
                 </ul>
                 
                 <!-- Cookie display will be inserted here by JavaScript -->
                 
-                <div class="mystery-price">${mysteryBoxData.price} LE</div>
+                <div class="mystery-price">${mysteryBoxData.price} EGP</div>
                 <p class="mystery-note">✨ So... are you brave enough to take the mystery bite?</p>
                 <button class="btn mystery-btn">${msg}</button>
             </div>
         `;
+
 
         // Render the cookie display
         renderMysteryTabCookies();
@@ -3066,12 +3067,12 @@ function changeDetailStyle(style) {
         if (isStyleOnSale && unitPrice !== finalPrice) {
             priceContainer.innerHTML = `
                 <div class="cookie-price-sale">
-                    <span class="original-price">${unitPrice} LE</span>
-                    <span class="final-price">${finalPrice} LE</span>
+                    <span class="original-price">${unitPrice} EGP</span>
+                    <span class="final-price">${finalPrice} EGP</span>
                 </div>
             `;
         } else {
-            priceContainer.innerHTML = `<div class="cookie-price">${unitPrice} LE</div>`;
+            priceContainer.innerHTML = `<div class="cookie-price">${unitPrice} EGP</div>`;
         }
     }
 }
@@ -3204,12 +3205,12 @@ function updateMobileDetailQuantityAndPrice() {
         const originalTotal = (currentDetailStyle === 'chewy' ? cookie.chewy_price : cookie.crumble_price) * (mobileDetailQuantity || 1);
         priceContainer.innerHTML = `
             <div class="cookie-price-sale">
-                <span class="original-price">${originalTotal} LE</span>
-                <span class="final-price">${totalPrice} LE</span>
+                <span class="original-price">${originalTotal} EGP</span>
+                <span class="final-price">${totalPrice} EGP</span>
             </div>
         `;
     } else {
-        priceContainer.innerHTML = `<div class="cookie-price">${totalPrice} LE</div>`;
+        priceContainer.innerHTML = `<div class="cookie-price">${totalPrice} EGP</div>`;
     }
 }
 
@@ -3350,112 +3351,64 @@ function saveCart(cart) {
     console.log("cart", cart);
 }
 
-// Update cart UI with enhanced validation and sale support
-async function updateCartUI() {
-    const cart = getCart();
-    
-    // Validate cart against current prices with sale support
-    const validation = await priceService.validateCart(cart);
-    
-    if (validation.hasChanges) {
-        saveCart(validation.validItems);
-        
-        // Show detailed notification about price changes
-        if (validation.priceUpdates && validation.priceUpdates.length > 0) {
-            const message = priceService.generatePriceUpdateMessage(validation.priceUpdates);
-            if (message) {
-                showNotification(message, 4000); // Show for longer duration
-            }
-        } else {
-            showNotification('Cart updated with current prices');
-        }
-    }
+// Add debouncing to prevent rapid successive calls
+let cartUpdateTimeout;
+function debouncedUpdateCartUI() {
+    clearTimeout(cartUpdateTimeout);
+    cartUpdateTimeout = setTimeout(() => {
+        updateCartUI();
+    }, 300); // Delay of 300ms
+}
 
-    const validatedCart = validation.validItems;
+// Update your cart modification functions to use the debounced version
+function updateCartUI() {
+    const cart = getCart();
     const cartCount = document.getElementById('cart-count');
     const cartItems = document.getElementById('cart-items');
     const cartTotal = document.getElementById('cart-total');
     let total = 0;
 
-    // Update cart count
-    const totalItems = validatedCart.reduce((total, item) => total + item.quantity, 0);
+    // Update cart count immediately (no validation needed)
+    const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
     if (cartCount) cartCount.textContent = totalItems;
 
-    updateMysteryButtonText();
-    // Update cart items if cart sidebar exists
+    // Update cart items immediately without validation
     if (cartItems) {
         cartItems.innerHTML = '';
-        console.log("validatedCart", validatedCart);
-        if (validatedCart.length === 0) {
+        
+        if (cart.length === 0) {
             cartItems.innerHTML = '<div class="empty-cart">Your cart is empty</div>';
             if (cartTotal) cartTotal.textContent = 'LE 0.00';
             return;
         }
 
-        validatedCart.forEach((item, index) => {
+        cart.forEach((item, index) => {
             const itemTotal = item.unitPrice * item.quantity;
             total += itemTotal;
 
-            // Build flavor details HTML
-            let flavorHTML = "";
-            if (item.flavors && Array.isArray(item.flavors)) {
-                flavorHTML = `
-                    <div class="cart-item-flavors">
-                        ${item.flavors.map(f => `
-                            <div class="cart-item-flavor">
-                                <span class="flavor-details">
-                                <span style="font-weight:bold; font-size:1.2em;"> - </span>  ${f.flavor.trim()} x${f.quantity} - ${f.type}
-                                </span>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
-
-            // Check if this item had a price change
-            const hasPriceChange = item.priceChangeType;
-            const priceChangeClass = hasPriceChange ? 'price-updated' : '';
-            const priceChangeIcon = hasPriceChange ? 
-                (item.priceChangeType === 'sale_applied' ? '🎉' : 
-                 item.priceChangeType === 'sale_ended' ? '📈' : '💰') : '';
-
-            // Check if this specific item should show sale badge
-            let saleBadgeHTML = '';
-            if (item.cookieType && allCookiesData[item.cookieType]) {
-                const cookie = allCookiesData[item.cookieType];
-                const isStyleOnSale = item.style === 'chewy' ? 
-                    (cookie.is_on_sale && cookie.chewy_discount_rate > 0) :
-                    (cookie.is_on_sale && cookie.crumble_discount_rate > 0);
-                
-                if (isStyleOnSale) {
-                    saleBadgeHTML = '<div class="cart-sale-badge">SALE</div>';
-                }
-            } else if (item.isOnSale) {
-                // For boxes or mystery boxes that have sale status
-                saleBadgeHTML = '<div class="cart-sale-badge">SALE</div>';
-            }
-
-            console.log("item", item);
-
+            // Build the cart item HTML immediately
             const cartItem = document.createElement('div');
-            cartItem.className = `cart-item ${priceChangeClass}`;
+            cartItem.className = 'cart-item';
             cartItem.innerHTML = `
                 <div class="cart-item-image">
                     <img src="${item.img}" alt="${item.name}" onerror="this.src='images/fallback-cookie.svg'">
-                    ${saleBadgeHTML}
+                    ${item.isOnSale ? '<div class="cart-sale-badge">SALE</div>' : ''}
                 </div>
                 <div class="cart-item-details">
-                    <div class="cart-item-name">
-                        ${item.name}
-                        ${hasPriceChange ? `<span class="price-change-indicator">${priceChangeIcon}</span>` : ''}
-                    </div>
-                    <div class="cart-item-price ${hasPriceChange ? 'price-updated' : ''}">
-                        ${itemTotal} LE
-                        ${hasPriceChange && item.originalPrice ? 
-                            `<span class="original-cart-price">was ${item.originalPrice * item.quantity} LE</span>` : ''}
-                    </div>
+                    <div class="cart-item-name">${item.name}</div>
+                    <div class="cart-item-price">${itemTotal} EGP</div>
                     
-                    ${flavorHTML}
+                    ${item.flavors && item.flavors.length > 0 ? `
+                        <div class="cart-item-flavors">
+                            ${item.flavors.map(f => `
+                                <div class="cart-item-flavor">
+                                    <span class="flavor-details">
+                                    <span style="font-weight:bold; font-size:1.2em;"> - </span>  ${f.flavor.trim()} x${f.quantity} - ${f.type}
+                                    </span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
                     
                     <div class="cart-item-quantity">
                         <button class="decrease-quantity" data-index="${index}">-</button>
@@ -3470,104 +3423,124 @@ async function updateCartUI() {
             cartItems.appendChild(cartItem);
         });
 
-        // Update total
         if (cartTotal) {
-            cartTotal.textContent = `${total} LE`;
+            cartTotal.textContent = `${total} EGP`;
+        }
+
+        // Add event listeners
+        setupCartItemEvents();
+    }
+
+    // Run price validation in background and update if needed
+    validateCartPricesInBackground();
+}
+
+// Background price validation that doesn't block UI
+async function validateCartPricesInBackground() {
+    try {
+        const cart = getCart();
+        const validation = await priceService.validateCart(cart);
+        
+        if (validation.hasChanges) {
+            saveCart(validation.validItems);
             
-            // Show total savings if any items are on sale
-            const saleItems = validatedCart.filter(item => {
-                if (item.cookieType && allCookiesData[item.cookieType]) {
-                    const cookie = allCookiesData[item.cookieType];
-                    const isStyleOnSale = item.style === 'chewy' ? 
-                        (cookie.is_on_sale && cookie.chewy_discount_rate > 0) :
-                        (cookie.is_on_sale && cookie.crumble_discount_rate > 0);
-                    return isStyleOnSale;
-                }
-                return item.isOnSale;
-            });
-            
-            if (saleItems.length > 0) {
-                const savings = saleItems.reduce((total, item) => {
-                    if (item.cookieType && allCookiesData[item.cookieType]) {
-                        const cookie = allCookiesData[item.cookieType];
-                        const originalPrice = item.style === 'chewy' ? cookie.chewy_price : cookie.crumble_price;
-                        const savingsPerItem = originalPrice - item.unitPrice;
-                        return total + (savingsPerItem * item.quantity);
-                    }
-                    return total;
-                }, 0);
+            // Update UI with new prices
+            updateCartPrices(validation.validItems);
+        }
+    } catch (error) {
+        console.error('Background price validation failed:', error);
+    }
+}
+
+// Fast update for just prices
+function updateCartPrices(validatedItems) {
+    const cartItems = document.getElementById('cart-items');
+    if (!cartItems) return;
+
+    validatedItems.forEach((item, index) => {
+        const itemElement = cartItems.querySelector(`.cart-item:nth-child(${index + 1})`);
+        if (itemElement) {
+            const itemTotal = item.unitPrice * item.quantity;
+            const priceElement = itemElement.querySelector('.cart-item-price');
+            if (priceElement) {
+                priceElement.textContent = `${itemTotal} EGP`;
                 
-                if (savings > 0) {
-                    // Remove existing savings element if any
-                    const existingSavings = document.querySelector('.cart-savings');
-                    if (existingSavings) {
-                        existingSavings.remove();
-                    }
-                    
-                    const savingsElement = document.createElement('div');
-                    savingsElement.className = 'cart-savings';
-                    savingsElement.textContent = `You saved: ${savings} LE`;
-                    cartTotal.parentNode.appendChild(savingsElement);
-                }
-            } else {
-                // Remove savings element if no sale items
-                const existingSavings = document.querySelector('.cart-savings');
-                if (existingSavings) {
-                    existingSavings.remove();
+                // Add visual feedback for price changes
+                if (item.priceChangeType) {
+                    priceElement.classList.add('price-updated');
+                    setTimeout(() => {
+                        priceElement.classList.remove('price-updated');
+                    }, 2000);
                 }
             }
         }
+    });
 
-        // Add event listeners to cart items
-        document.querySelectorAll('.increase-quantity').forEach(button => {
-            button.addEventListener('click', async function () {
-                const index = parseInt(this.getAttribute('data-index'));
-                const cart = getCart();
-                cart[index].quantity++;
-                
-                // Revalidate price with sale support
-                const validation = await priceService.validateCart([cart[index]]);
-                if (validation.validItems.length > 0) {
-                    // Update the item with validated price
-                    Object.assign(cart[index], validation.validItems[0]);
-                }
-                
-                saveCart(cart);
-                updateCartUI();
-            });
-        });
-
-        document.querySelectorAll('.decrease-quantity').forEach(button => {
-            button.addEventListener('click', async function () {
-                const index = parseInt(this.getAttribute('data-index'));
-                const cart = getCart();
-                if (cart[index].quantity > 1) {
-                    cart[index].quantity--;
-                    
-                    // Revalidate price with sale support
-                    const validation = await priceService.validateCart([cart[index]]);
-                    if (validation.validItems.length > 0) {
-                        // Update the item with validated price
-                        Object.assign(cart[index], validation.validItems[0]);
-                    }
-                } else {
-                    cart.splice(index, 1);
-                }
-                saveCart(cart);
-                updateCartUI();
-            });
-        });
-
-        document.querySelectorAll('.remove-item').forEach(button => {
-            button.addEventListener('click', function () {
-                const index = parseInt(this.getAttribute('data-index'));
-                const cart = getCart();
-                cart.splice(index, 1);
-                saveCart(cart);
-                updateCartUI();
-            });
-        });
+    // Update total
+    const total = validatedItems.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
+    const cartTotal = document.getElementById('cart-total');
+    if (cartTotal) {
+        cartTotal.textContent = `${total} EGP`;
     }
+}
+
+// Setup cart item events separately
+function setupCartItemEvents() {
+    // Increase quantity
+    document.querySelectorAll('.increase-quantity').forEach(button => {
+        button.addEventListener('click', function () {
+            const index = parseInt(this.getAttribute('data-index'));
+            const cart = getCart();
+            cart[index].quantity++;
+            saveCart(cart);
+            debouncedUpdateCartUI(); // Use debounced version
+        });
+    });
+
+    // Decrease quantity
+    document.querySelectorAll('.decrease-quantity').forEach(button => {
+        button.addEventListener('click', function () {
+            const index = parseInt(this.getAttribute('data-index'));
+            const cart = getCart();
+            if (cart[index].quantity > 1) {
+                cart[index].quantity--;
+            } else {
+                cart.splice(index, 1);
+            }
+            saveCart(cart);
+            debouncedUpdateCartUI(); // Use debounced version
+        });
+    });
+
+    // Remove item
+    document.querySelectorAll('.remove-item').forEach(button => {
+        button.addEventListener('click', function () {
+            const index = parseInt(this.getAttribute('data-index'));
+            const cart = getCart();
+            cart.splice(index, 1);
+            saveCart(cart);
+            debouncedUpdateCartUI(); // Use debounced version
+        });
+    });
+}
+
+// Subtle background notification
+function showBackgroundNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'background-notification';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
 }
 
 
@@ -3981,7 +3954,7 @@ function showFlavorPopup(size, cookieCount, boxElement) {
     popupTitle.textContent = `Customize Your ${sizeName}`;
     popupBoxName.textContent = sizeName;
     popupBoxDesc.textContent = description;
-    popupBoxPrice.textContent = `${price} LE`;
+    popupBoxPrice.textContent = `${price} EGP`;
     finalPrice.textContent = price;
     flavorCount.textContent = cookieCount;
     maxCount.textContent = cookieCount;
@@ -4211,7 +4184,7 @@ async function renderAllComponents() {
         console.log('Cookie showcase rendered');
         
         // Initialize interactive elements
-        initializeVSBattle();
+        // initializeVSBattle();
         setupMobileMenu();
         initCookieShowcase();
         initBoxSelectionDropdown(); // Ensure dropdown is initialized
@@ -4976,15 +4949,15 @@ styleBtns.forEach(btn => {
                 
                 if (selectedStyle === 'mix') {
                     // For mix, show the mix price
-                    priceDisplay.textContent = `${box.mix_price} LE`;
+                    priceDisplay.textContent = `${box.mix_price} EGP`;
                 } else {
                     // For chewy/crumble, show range if prices are different
                     if (box.chewy_price === box.crumble_price) {
-                        priceDisplay.textContent = `${box[`${selectedStyle}_price`]} LE`;
+                        priceDisplay.textContent = `${box[`${selectedStyle}_price`]} EGP`;
                     } else {
                         const minPrice = Math.min(box.chewy_price, box.crumble_price);
                         const maxPrice = Math.max(box.chewy_price, box.crumble_price);
-                        priceDisplay.textContent = `${minPrice} - ${maxPrice} LE`;
+                        priceDisplay.textContent = `${minPrice} - ${maxPrice} EGP`;
                     }
                 }
             }
@@ -5013,7 +4986,7 @@ popupStyleBtns.forEach(btn => {
                     price = box[`${selectedStyle}_price`];
                 }
                 
-                document.getElementById('popup-box-price').textContent = `${price} LE`;
+                document.getElementById('popup-box-price').textContent = `${price} EGP`;
                 document.getElementById('final-price').textContent = price;
 
                 // Refresh flavor grid based on newly selected style

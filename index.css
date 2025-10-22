@@ -5086,7 +5086,7 @@ footer {
     z-index: 5;
     position: relative;
     margin: 0 2rem;
-    cursor: pointer;
+    /* cursor: pointer; */
     transition: transform 0.3s ease;
 }
 
@@ -5107,7 +5107,7 @@ footer {
     border: 4px solid white;
     position: relative;
     animation: vsPulse 2s ease-in-out infinite;
-    cursor: pointer;
+    /* cursor: pointer; */
     transition: all 0.3s ease;
 }
 
@@ -9515,7 +9515,7 @@ footer {
 
 .original-price {
     text-decoration: line-through;
-    color: #a78b6d;
+    color: #97544d;
     font-size: 1.2rem;
     font-weight: 500;
 }
@@ -10866,7 +10866,7 @@ footer {
 }
 
 .selected-cookies-grid {
-    display: flex;
+    display: ruby;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* Increased from 140px */
     gap: 1rem;
     margin-top: 1rem;
@@ -12244,7 +12244,7 @@ footer {
 
 .selection-summary {
     min-height: 60px;
-    margin-bottom: 1.5rem;
+    /* margin-bottom: 1.5rem; */
 }
 
 .no-selection {
